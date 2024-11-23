@@ -3,12 +3,12 @@
 }
 
 .searchCountry {
+  width: 50%; /* Adjust the width as needed */
+  padding: 10px;
+  margin-bottom: 20px;
   border: 1px solid grey;
   border-radius: 5px;
-  height: 20px;
-  width: 50%;
-  padding: 2px 23px 2px 30px;
-  outline: 0;
+  outline: none;
   background-color: #f5f5f5;
 }
 
@@ -16,4 +16,40 @@
 .search:focus {
   border: 1.5px solid #009688;
   background-color: white;
+}
+
+.countryContainer {
+  padding: 20px;
+}
+
+.countriesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.seeMoreButton {
+  padding: 10px 20px;
+  margin: 20px 0;
+  background-color: #009688;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.seeMoreButton:hover {
+  background-color: #00796b;
+}
+
+/* Media query for small screens */
+@media (max-width: 600px) {
+  .countriesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .searchCountry {
+    width: 100%;
+  }
 }
