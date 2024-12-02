@@ -52,7 +52,7 @@ const Countries = () => {
       <div className="countryContainer">
         <div>
           <h3>{countries[0].region}</h3>
-          <img src={region1} alt="" className="img1" />
+          <img src={region1} alt="Europe" className="img1" />
         </div>
         <div>
           <input type="text" placeholder="search country" className="searchCountry" onChange={(e) => setSearch(e.target.value)} />
