@@ -1,6 +1,6 @@
 ![](https://img.shields.io/badge/Microverse-blueviolet)
 
-# React capstone project - Metrics webapp
+# React capstone project - Global-Air-Quality-Tracker
 
 In this React capstone project, I built a mobile web application to check a list of metrics (numeric values) that I created making use of React and Redux.
 
