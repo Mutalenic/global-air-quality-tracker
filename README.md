@@ -58,7 +58,7 @@ Run the live server by the following command:
 
 To deploy this project run the following command:
 
-`npm build`
+`npm run build`
 
 and copy the content of the `build` directory to the root folder of your production environment.
 
