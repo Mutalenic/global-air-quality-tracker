@@ -10,17 +10,19 @@ const Pollutions = () => {
   return (
     <div>
       <Header id="/countries" />
-      <Pollution
-        key={pollutions.id}
-        id={pollutions.id}
-        lat={pollutions.lat}
-        lng={pollutions.lng}
-        co={pollutions.co}
-        no={pollutions.no}
-        no2={pollutions.no2}
-        flag={pollutions.flag}
-        name={pollutions.name}
-      />
+      {pollutions.map((pollution) => (
+        <Pollution
+          key={pollution.id} // Ensure unique keys by using a unique identifier
+          id={pollution.id}
+          lat={pollution.lat}
+          lng={pollution.lng}
+          co={pollution.co}
+          no={pollution.no}
+          no2={pollution.no2}
+          flag={pollution.flag}
+          name={pollution.city}
+        />
+      ))}
     </div>
   );
 };

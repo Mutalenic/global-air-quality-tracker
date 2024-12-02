@@ -1,6 +1,6 @@
 ![](https://img.shields.io/badge/Microverse-blueviolet)
 
-# React capstone project - Metrics webapp
+# React capstone project - Global-Air-Quality-Tracker
 
 In this React capstone project, I built a mobile web application to check a list of metrics (numeric values) that I created making use of React and Redux.
 
@@ -17,7 +17,7 @@ I selected an API that provides numeric data about Air Pollution across the glob
 
 ## Live Demo
 
-[This is the link](https://deploy-preview-2--stately-kashata-1db13f.netlify.app/) to the deployed web application.
+[Global Air Tracker](https://globalairqualitytracker.netlify.app/) to the deployed web application.
 
 ## Video 
 [Video Presentation](https://www.loom.com/share/b17aad1fdccf432692c0ad2576c8ffbd)
@@ -58,7 +58,7 @@ Run the live server by the following command:
 
 To deploy this project run the following command:
 
-`npm build`
+`npm run build`
 
 and copy the content of the `build` directory to the root folder of your production environment.
 
@@ -83,7 +83,7 @@ Give a ⭐️ if you like this project!
 ## Acknowledgments
 
 - Linters configurations are made by Microverse
-- Design is inspired by a design made by [Nelson Sakwa](https://www.behance.net/sakwadesignstudio)
+- Design is inspired by [Nelson Sakwa](https://www.behance.net/sakwadesignstudio)
 
 ## LICENSE
 This project is MIT licensed.

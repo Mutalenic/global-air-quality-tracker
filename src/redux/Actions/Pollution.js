@@ -7,19 +7,29 @@ export const addPollution = (payload) => ({
   payload,
 });
 
-export const getPollutionData = (lat1, lng1, flag, name) => async (dispatch) => {
-  const pollutions = await getPollutionInfor(lat1, lng1);
-  dispatch({
-    type: ADD_POLLUTION,
-    payload: {
-      lat: pollutions.coord.lat,
-      lng: pollutions.coord.lon,
-      co: pollutions.list[0].components.co,
-      no: pollutions.list[0].components.no,
-      no2: pollutions.list[0].components.no2,
-      id: pollutions.list[0].main.aqi,
-      flag,
-      name,
-    },
-  });
+export const getPollutionData = (lat, lng, flag, name) => async (dispatch) => {
+  try {
+    const pollutions = await getPollutionInfor(lat, lng);
+    dispatch({
+      type: ADD_POLLUTION,
+      payload: {
+        id: `${lat}-${lng}`,
+        lat,
+        lng,
+        flag, // Include the flag URL in the payload
+        name,
+        city: name,
+        aqi: pollutions.list[0].main.aqi,
+        pm25: pollutions.list[0].components.pm2_5,
+        pm10: pollutions.list[0].components.pm10,
+        o3: pollutions.list[0].components.o3,
+        no2: pollutions.list[0].components.no2,
+        so2: pollutions.list[0].components.so2,
+        co: pollutions.list[0].components.co,
+      },
+    });
+  } catch (error) {
+    // Handle the error appropriately
+    // For example, you can dispatch an error action or simply ignore it
+  }
 };

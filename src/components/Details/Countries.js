@@ -16,8 +16,15 @@ import './Countries.css';
 const Countries = () => {
   const countries = useSelector((state) => state.countriesReducer);
   const [search, setSearch] = useState('');
-  /* eslint-disable */
+  const [showMore, setShowMore] = useState(false);
+
+  const handleSeeMore = () => {
+    setShowMore(true);
+  };
+
+  // eslint-disable-next-line max-len
   const searchedValue = countries.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase()));
+  const displayedCountries = showMore ? searchedValue : searchedValue.slice(0, 6);
 
   if (!countries.length) {
     return (
@@ -30,6 +37,7 @@ const Countries = () => {
       </div>
     );
   }
+
   let region1 = countries[0].region;
   if (region1 === 'Africa') region1 = Africa;
   else if (region1 === 'Asia') region1 = Asia;
@@ -37,33 +45,42 @@ const Countries = () => {
   else if (region1 === 'Oceania') region1 = Oceania;
   else if (region1 === 'America') region1 = America;
   else region1 = Antarctic;
+
   return (
     <div>
       <Navbar id="/" />
-      <div className="countryCountainer">
+      <div className="countryContainer">
         <div>
           <h3>{countries[0].region}</h3>
-          <img src={region1} alt="" className="img1" />
+          <img src={region1} alt="Europe" className="img1" />
         </div>
         <div>
           <input type="text" placeholder="search country" className="searchCountry" onChange={(e) => setSearch(e.target.value)} />
         </div>
-        {
-          searchedValue.map((country) => (
-            <Country
-              key={country.code}
-              id={country.code}
-              name={country.name.common}
-              lat={country.latlng[0]}
-              lng={country.latlng[1]}
-              population={country.population}
-              region={country.region}
-              flag={country.flag}
-            />
-          ))
-        }
+        <div className="countriesGrid">
+          {
+            displayedCountries.map((country) => (
+              <Country
+                key={country.code}
+                id={country.code}
+                name={country.name.common}
+                lat={country.latlng[0]}
+                lng={country.latlng[1]}
+                population={country.population}
+                region={country.region}
+                flag={country.flag}
+              />
+            ))
+          }
+        </div>
+        {!showMore && (
+          <button type="button" className="seeMoreButton" onClick={handleSeeMore}>
+            See More
+          </button>
+        )}
       </div>
     </div>
   );
 };
+
 export default Countries;
