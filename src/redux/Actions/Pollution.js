@@ -29,6 +29,6 @@ export const getPollutionData = (lat, lng, flag, name) => async (dispatch) => {
       },
     });
   } catch (error) {
-    console.error('Failed to fetch pollution data:', error);
+    console.error('Error fetching pollution data:', error);
   }
 };
