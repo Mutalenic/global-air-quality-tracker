@@ -83,7 +83,7 @@ Give a ⭐️ if you like this project!
 ## Acknowledgments
 
 - Linters configurations are made by Microverse
-- Design is inspired by a design made by [Nelson Sakwa](https://www.behance.net/sakwadesignstudio)
+- Design is inspired by [Nelson Sakwa](https://www.behance.net/sakwadesignstudio)
 
 ## LICENSE
 This project is MIT licensed.
