@@ -39,7 +39,7 @@ const Pollution = ({
   }, [dispatch, lat, lng, flag, name]);
 
   useEffect(() => {
-    console.log('Flag URL:', flag); // Log the flag URL to verify
+    // Removed console log statement
   }, [flag]);
 
   if (loading) {
