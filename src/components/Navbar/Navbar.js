@@ -1,35 +1,41 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import './Navbar.css';
-import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faRefresh } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
-const Navbar = (props) => {
-  const { id } = props;
+const Navbar = () => {
+  const location = useLocation();
+  const isPollutionPage = location.pathname.includes('pollution');
+
   return (
     <div className="shadow-lg">
       <nav>
         <div className="navBarContainer">
+          {isPollutionPage && (
+            <button
+              type="button"
+              className="btn backButton"
+            >
+              <NavLink to="/countries" className="link text-light">
+                <FontAwesomeIcon icon={faArrowLeft} className="icon smallIcon" />
+              </NavLink>
+            </button>
+          )}
           <button
             type="button"
             className="btn"
           >
-            <NavLink to={id} className="link text-light">
+            <NavLink to="/" className="link text-light">
+              {/* Updated to redirect to home */}
               <FontAwesomeIcon icon={faHome} className="icon" />
             </NavLink>
           </button>
           <h1 className="header">Air Quality</h1>
-          <NavLink to="/" className="link text-light">
-            <FontAwesomeIcon icon={faRefresh} className="icon" text="reload" />
-          </NavLink>
         </div>
       </nav>
     </div>
   );
-};
-Navbar.propTypes = {
-  id: PropTypes.string.isRequired,
 };
 
 export default Navbar;

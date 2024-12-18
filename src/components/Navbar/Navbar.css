@@ -1,3 +1,9 @@
+@keyframes cycleBackIcon {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .navbarContainer {
   padding: 10px;
   font-weight: bold;
@@ -6,6 +12,25 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.backButton {
+  position: absolute;
+  left: 10px;
+  border-radius: 50%; /* Added border radius */
+  transform: scale(0.5); /* Reduce size by half */
+}
+
+.smallIcon {
+  font-size: 0.8em;
+  border-radius: 50%; /* Added border radius */
+  background-color: #f0f0f0; /* Added background color */
+  padding: 5px; /* Added padding */
+  transition: background-color 0.3s; /* Added transition for hover effect */
+}
+
+.smallIcon:hover {
+  background-color: #d0d0d0; /* Change background color on hover */
 }
 
 .LeftIcon {
