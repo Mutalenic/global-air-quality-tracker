@@ -18,7 +18,6 @@
   position: absolute;
   left: 10px;
   border-radius: 50%; /* Added border radius */
-  transform: scale(0.5); /* Reduce size by half */
 }
 
 .smallIcon {
