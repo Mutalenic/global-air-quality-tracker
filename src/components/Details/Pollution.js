@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import { getPollutionData } from '../../redux/Actions/Pollution';
+import Weather from '../Weather/Weather';
+import PollutionChart from './PollutionChart';
 import './Pollution.css';
 
 const getAqiClass = (aqi) => {
@@ -23,6 +25,8 @@ const Pollution = ({
   const pollutions = useSelector((state) => state.pollutionReducer);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showWeather, setShowWeather] = useState(false);
+  const [showChart, setShowChart] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,6 +71,32 @@ const Pollution = ({
           <div className="pollutionFlagCard">
             <img src={flag} alt={`${pollution.city} flag`} className="pollutionFlag" />
           </div>
+
+          <div className="toggleButtons">
+            <button
+              type="button"
+              onClick={() => setShowWeather(!showWeather)}
+              className="weatherToggleButton"
+            >
+              {showWeather ? 'Hide Weather' : 'Show Weather'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowChart(!showChart)}
+              className="chartToggleButton"
+            >
+              {showChart ? 'Hide Chart' : 'Show Chart'}
+            </button>
+          </div>
+
+          {showWeather && (
+            <Weather lat={lat} lng={lng} city={pollution.city} />
+          )}
+
+          {showChart && (
+            <PollutionChart pollutionData={pollution} />
+          )}
+
           <div className="pollutionDataCard aqiCard">
             <p>Air Quality Index:</p>
             <span className={`aqi ${getAqiClass(pollution.aqi)}`}>

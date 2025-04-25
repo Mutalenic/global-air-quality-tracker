@@ -1,0 +1,468 @@
+import React, { useState, useMemo } from 'react';
+import PropTypes from 'prop-types';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  LineChart, Line, Area, AreaChart, ComposedChart, Brush,
+} from 'recharts';
+import { format, subDays } from 'date-fns';
+import Select from 'react-select';
+import './PollutionChart.css';
+
+// Color scheme based on air quality levels (good to dangerous)
+const COLORS = {
+  good: '#4caf50',
+  moderate: '#ffeb3b',
+  unhealthySensitive: '#ff9800',
+  unhealthy: '#f44336',
+  veryUnhealthy: '#9c27b0',
+  hazardous: '#880e4f',
+};
+
+// Get color based on pollution value and pollutant type
+const getPollutantColor = (value, pollutant) => {
+  // Thresholds based on standard AQI classifications (simplified)
+  const thresholds = {
+    pm25: [12, 35.4, 55.4, 150.4, 250.4],
+    pm10: [54, 154, 254, 354, 424],
+    o3: [54, 70, 85, 105, 200],
+    no2: [53, 100, 360, 649, 1249],
+    so2: [35, 75, 185, 304, 604],
+    co: [4400, 9400, 12400, 15400, 30400],
+  };
+
+  const threshold = thresholds[pollutant] || thresholds.pm25;
+
+  if (value <= threshold[0]) return COLORS.good;
+  if (value <= threshold[1]) return COLORS.moderate;
+  if (value <= threshold[2]) return COLORS.unhealthySensitive;
+  if (value <= threshold[3]) return COLORS.unhealthy;
+  if (value <= threshold[4]) return COLORS.veryUnhealthy;
+  return COLORS.hazardous;
+};
+
+const PollutionChart = ({ pollutionData }) => {
+  const [chartType, setChartType] = useState('bar');
+  const [timeRange, setTimeRange] = useState('day');
+  const [selectedPollutants, setSelectedPollutants] = useState(['pm25', 'pm10', 'o3', 'no2', 'so2', 'co']);
+
+  // Chart type options
+  const chartOptions = [
+    { value: 'bar', label: 'Bar Chart' },
+    { value: 'line', label: 'Line Chart' },
+    { value: 'area', label: 'Area Chart' },
+    { value: 'composed', label: 'Composed Chart' },
+  ];
+
+  // Time range options
+  const timeOptions = [
+    { value: 'day', label: 'Today' },
+    { value: 'week', label: 'Last Week' },
+    { value: 'month', label: 'Last Month' },
+  ];
+
+  // Pollutant options for selection
+  const pollutantOptions = [
+    { value: 'pm25', label: 'PM2.5' },
+    { value: 'pm10', label: 'PM10' },
+    { value: 'o3', label: 'O3 (Ozone)' },
+    { value: 'no2', label: 'NO2 (Nitrogen Dioxide)' },
+    { value: 'so2', label: 'SO2 (Sulfur Dioxide)' },
+    { value: 'co', label: 'CO (Carbon Monoxide)' },
+  ];
+
+  // Generate mock historical data for time series
+  const generateHistoricalData = useMemo(() => {
+    const data = [];
+    const days = timeRange === 'day' ? 1 : (timeRange === 'week' ? 7 : 30);
+
+    for (let i = days; i >= 0; i -= 1) {
+      const date = subDays(new Date(), i);
+      const formattedDate = format(date, 'MMM dd');
+
+      // Base values from current data with small random variations for historical simulation
+      const baseValues = { ...pollutionData };
+
+      const entry = {
+        date: formattedDate,
+        // Add slight variations to simulate historical data
+        pm25: Math.max(1, baseValues.pm25 * (0.8 + Math.random() * 0.4)),
+        pm10: Math.max(1, baseValues.pm10 * (0.8 + Math.random() * 0.4)),
+        o3: Math.max(1, baseValues.o3 * (0.8 + Math.random() * 0.4)),
+        no2: Math.max(1, baseValues.no2 * (0.8 + Math.random() * 0.4)),
+        so2: Math.max(1, baseValues.so2 * (0.8 + Math.random() * 0.4)),
+        co: Math.max(10, baseValues.co * (0.8 + Math.random() * 0.4)),
+      };
+
+      data.push(entry);
+    }
+
+    return data;
+  }, [pollutionData, timeRange]);
+
+  // Transform current pollution data for single-point chart
+  const currentChartData = useMemo(() => [
+    { name: 'PM2.5', value: pollutionData.pm25, fill: getPollutantColor(pollutionData.pm25, 'pm25') },
+    { name: 'PM10', value: pollutionData.pm10, fill: getPollutantColor(pollutionData.pm10, 'pm10') },
+    { name: 'O3', value: pollutionData.o3, fill: getPollutantColor(pollutionData.o3, 'o3') },
+    { name: 'NO2', value: pollutionData.no2, fill: getPollutantColor(pollutionData.no2, 'no2') },
+    { name: 'SO2', value: pollutionData.so2, fill: getPollutantColor(pollutionData.so2, 'so2') },
+    { name: 'CO', value: pollutionData.co / 100, fill: getPollutantColor(pollutionData.co, 'co') },
+  ].filter((item) => selectedPollutants.includes(item.name.toLowerCase())), [pollutionData, selectedPollutants]);
+
+  // Custom tooltip component with health information
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0];
+      const pollutantName = data.name || label;
+      const pollutantKey = pollutantName.toLowerCase();
+      const { value } = data;
+      const unit = 'µg/m³';
+      let healthEffect = '';
+      let displayValue = value;
+
+      // Adjust CO value for display and set health effects
+      if (pollutantKey === 'co') {
+        displayValue *= 100;
+
+        if (displayValue < 4400) healthEffect = 'Good: Little to no health risk.';
+        else if (displayValue < 9400) healthEffect = 'Moderate: Few sensitive individuals may experience respiratory symptoms.';
+        else if (displayValue < 12400) healthEffect = 'Unhealthy for Sensitive Groups: Heart patients may experience symptoms.';
+        else healthEffect = 'Unhealthy: Increased risk for everyone, especially sensitive groups.';
+      } else if (pollutantKey === 'pm25') {
+        if (displayValue < 12) healthEffect = 'Good: Little to no health risk.';
+        else if (displayValue < 35.4) healthEffect = 'Moderate: Unusually sensitive people should consider reducing prolonged outdoor exertion.';
+        else if (displayValue < 55.4) healthEffect = 'Unhealthy for Sensitive Groups: People with respiratory or heart disease should limit outdoor exertion.';
+        else healthEffect = 'Unhealthy: Everyone may begin to experience health effects.';
+      } else if (pollutantKey === 'pm10') {
+        if (displayValue < 54) healthEffect = 'Good: Little to no health risk.';
+        else if (displayValue < 154) healthEffect = 'Moderate: Unusually sensitive people should consider reducing prolonged outdoor exertion.';
+        else if (displayValue < 254) healthEffect = 'Unhealthy for Sensitive Groups: People with respiratory disease should limit outdoor exertion.';
+        else healthEffect = 'Unhealthy: Everyone may begin to experience health effects.';
+      }
+
+      return (
+        <div className="custom-tooltip">
+          <p className="tooltip-label">{`${pollutantName}: ${displayValue.toFixed(2)} ${unit}`}</p>
+          <p className="tooltip-health-effect">{healthEffect}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Define prop types for CustomTooltip
+  CustomTooltip.propTypes = {
+    active: PropTypes.bool,
+    payload: PropTypes.arrayOf(PropTypes.shape({
+      name: PropTypes.string,
+      value: PropTypes.number,
+    })),
+    label: PropTypes.string,
+  };
+
+  // Default props for CustomTooltip
+  CustomTooltip.defaultProps = {
+    active: false,
+    payload: [],
+    label: '',
+  };
+
+  // Function to render appropriate chart based on selected type
+  const renderChart = () => {
+    const commonProps = {
+      data: timeRange === 'current' ? currentChartData : generateHistoricalData,
+      margin: {
+        top: 10, right: 30, left: 20, bottom: 40,
+      },
+    };
+
+    // Set the key based on selected pollutants for time series charts
+    const dataKey = timeRange === 'current' ? 'value' : null;
+
+    switch (chartType) {
+      case 'line':
+        return (
+          <LineChart data={commonProps.data} margin={commonProps.margin}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey={timeRange === 'current' ? 'name' : 'date'}
+              angle={-45}
+              textAnchor="end"
+            />
+            <YAxis />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            {timeRange === 'current' ? (
+              <Line
+                type="monotone"
+                dataKey={dataKey}
+                stroke="#8884d8"
+                strokeWidth={2}
+                activeDot={{ r: 8 }}
+              />
+            ) : (
+              selectedPollutants.map((pollutant, index) => (
+                <Line
+                  key={pollutant}
+                  type="monotone"
+                  dataKey={pollutant}
+                  name={pollutantOptions.find((opt) => opt.value === pollutant)?.label}
+                  stroke={Object.values(COLORS)[index % Object.values(COLORS).length]}
+                  strokeWidth={2}
+                  activeDot={{ r: 8 }}
+                />
+              ))
+            )}
+            {timeRange !== 'current' && (
+              <Brush
+                dataKey="date"
+                height={30}
+                stroke="#8884d8"
+                startIndex={Math.max(0, generateHistoricalData.length - 7)}
+              />
+            )}
+          </LineChart>
+        );
+
+      case 'area':
+        return (
+          <AreaChart data={commonProps.data} margin={commonProps.margin}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey={timeRange === 'current' ? 'name' : 'date'}
+              angle={-45}
+              textAnchor="end"
+            />
+            <YAxis />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            {timeRange === 'current' ? (
+              <Area
+                type="monotone"
+                dataKey={dataKey}
+                fill="#8884d8"
+                stroke="#8884d8"
+                fillOpacity={0.6}
+              />
+            ) : (
+              selectedPollutants.map((pollutant, index) => (
+                <Area
+                  key={pollutant}
+                  type="monotone"
+                  dataKey={pollutant}
+                  name={pollutantOptions.find((opt) => opt.value === pollutant)?.label}
+                  fill={Object.values(COLORS)[index % Object.values(COLORS).length]}
+                  stroke={Object.values(COLORS)[index % Object.values(COLORS).length]}
+                  fillOpacity={0.6}
+                />
+              ))
+            )}
+            {timeRange !== 'current' && (
+              <Brush
+                dataKey="date"
+                height={30}
+                stroke="#8884d8"
+              />
+            )}
+          </AreaChart>
+        );
+
+      case 'composed':
+        return (
+          <ComposedChart data={commonProps.data} margin={commonProps.margin}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey={timeRange === 'current' ? 'name' : 'date'}
+              angle={-45}
+              textAnchor="end"
+            />
+            <YAxis />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            {timeRange === 'current' ? (
+              <>
+                <Bar dataKey={dataKey} fill="#8884d8" />
+                <Line type="monotone" dataKey={dataKey} stroke="#ff7300" />
+              </>
+            ) : (
+              selectedPollutants.map((pollutant, index) => (
+                <React.Fragment key={pollutant}>
+                  <Bar
+                    dataKey={pollutant}
+                    name={`${pollutantOptions.find((opt) => opt.value === pollutant)?.label} (Bar)`}
+                    fill={Object.values(COLORS)[index % Object.values(COLORS).length]}
+                    fillOpacity={0.6}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey={pollutant}
+                    name={`${pollutantOptions.find((opt) => opt.value === pollutant)?.label} (Line)`}
+                    stroke={Object.values(COLORS)[index % Object.values(COLORS).length]}
+                    strokeWidth={2}
+                  />
+                </React.Fragment>
+              ))
+            )}
+            {timeRange !== 'current' && (
+              <Brush
+                dataKey="date"
+                height={30}
+                stroke="#8884d8"
+              />
+            )}
+          </ComposedChart>
+        );
+
+      default: // Bar chart
+        return (
+          <BarChart data={commonProps.data} margin={commonProps.margin}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey={timeRange === 'current' ? 'name' : 'date'}
+              angle={-45}
+              textAnchor="end"
+            />
+            <YAxis />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            {timeRange === 'current' ? (
+              <Bar
+                dataKey={dataKey}
+                name="Value (µg/m³)"
+                // Use fill from the data point
+                fillGradient={{
+                  x1: 0,
+                  y1: 0,
+                  x2: 0,
+                  y2: 1,
+                  stops: [
+                    { offset: 0, stopColor: '#8884d8', stopOpacity: 0.8 },
+                    { offset: 1, stopColor: '#8884d8', stopOpacity: 0.4 },
+                  ],
+                }}
+              />
+            ) : (
+              selectedPollutants.map((pollutant, index) => (
+                <Bar
+                  key={pollutant}
+                  dataKey={pollutant}
+                  name={pollutantOptions.find((opt) => opt.value === pollutant)?.label}
+                  fill={Object.values(COLORS)[index % Object.values(COLORS).length]}
+                />
+              ))
+            )}
+            {timeRange !== 'current' && (
+              <Brush
+                dataKey="date"
+                height={30}
+                stroke="#8884d8"
+              />
+            )}
+          </BarChart>
+        );
+    }
+  };
+
+  return (
+    <div className="pollution-chart-container">
+      <h3 className="chart-title">Air Pollution Analysis</h3>
+
+      <div className="chart-controls">
+        <div className="control-group">
+          <label htmlFor="chart-type-select">Chart Type:</label>
+          <Select
+            id="chart-type-select"
+            options={chartOptions}
+            value={chartOptions.find((option) => option.value === chartType)}
+            onChange={(option) => setChartType(option.value)}
+            className="select-control"
+            classNamePrefix="select"
+          />
+        </div>
+
+        <div className="control-group">
+          <label htmlFor="time-range-select">Time Range:</label>
+          <Select
+            id="time-range-select"
+            options={timeOptions}
+            value={timeOptions.find((option) => option.value === timeRange)}
+            onChange={(option) => setTimeRange(option.value)}
+            className="select-control"
+            classNamePrefix="select"
+          />
+        </div>
+
+        <div className="control-group pollutant-select">
+          <label htmlFor="pollutants-select">Pollutants:</label>
+          <Select
+            id="pollutants-select"
+            options={pollutantOptions}
+            value={pollutantOptions.filter((option) => selectedPollutants.includes(option.value))}
+            onChange={(options) => setSelectedPollutants(options.map((option) => option.value))}
+            isMulti
+            className="select-control"
+            classNamePrefix="select"
+          />
+        </div>
+      </div>
+
+      <div className="chart-legend">
+        <div className="legend-item">
+          <span className="legend-color" style={{ backgroundColor: COLORS.good }} />
+          <span>Good</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color" style={{ backgroundColor: COLORS.moderate }} />
+          <span>Moderate</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color" style={{ backgroundColor: COLORS.unhealthySensitive }} />
+          <span>Unhealthy for Sensitive Groups</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color" style={{ backgroundColor: COLORS.unhealthy }} />
+          <span>Unhealthy</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color" style={{ backgroundColor: COLORS.veryUnhealthy }} />
+          <span>Very Unhealthy</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color" style={{ backgroundColor: COLORS.hazardous }} />
+          <span>Hazardous</span>
+        </div>
+      </div>
+
+      <div className="chart-wrapper">
+        <ResponsiveContainer width="100%" height={350}>
+          {renderChart()}
+        </ResponsiveContainer>
+      </div>
+
+      <div className="chart-info">
+        <p>
+          This chart displays air pollution data for the selected pollutants.
+          The colors indicate the pollution level severity according to standard air quality indices.
+        </p>
+        <p className="chart-note">
+          <strong>Note:</strong>
+          {' '}
+          CO values are scaled by a factor of 100 for better visualization.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+PollutionChart.propTypes = {
+  pollutionData: PropTypes.shape({
+    pm25: PropTypes.number.isRequired,
+    pm10: PropTypes.number.isRequired,
+    o3: PropTypes.number.isRequired,
+    no2: PropTypes.number.isRequired,
+    so2: PropTypes.number.isRequired,
+    co: PropTypes.number.isRequired,
+  }).isRequired,
+};
+
+export default PollutionChart;

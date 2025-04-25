@@ -3,18 +3,30 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { legacy_createStore as createStore, combineReducers, applyMiddleware } from 'redux';
-import logger from 'redux-logger';
 import { Provider } from 'react-redux';
 import pollutionReducer from '../redux/Reducers/Pollution';
 import countriesReducer from '../redux/Reducers/Countries';
 import Countries from '../components/Details/Countries';
 
+// Mock the web worker
+jest.mock('../../workers/countriesWorker.js', () => {
+  class MockWorker {
+    constructor() {
+      this.onmessage = jest.fn();
+    }
+    postMessage = jest.fn();
+    terminate = jest.fn();
+  }
+  return MockWorker;
+});
+
 const rootReducer = combineReducers({
   countriesReducer,
   pollutionReducer,
-
 });
-const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk, logger)));
+
+// Don't include logger in tests to avoid console noise
+const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk)));
 
 afterEach(cleanup);
 

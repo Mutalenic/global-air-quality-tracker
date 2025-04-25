@@ -32,6 +32,51 @@
   border-radius: 5px;
 }
 
+/* Toggle buttons styles */
+.toggleButtons {
+  margin: 15px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.weatherToggleButton,
+.chartToggleButton {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  flex: 1;
+}
+
+.weatherToggleButton:hover,
+.chartToggleButton:hover {
+  background-color: #0d8bf2;
+}
+
+.weatherToggleButton:active,
+.chartToggleButton:active {
+  background-color: #0b7ad1;
+}
+
+/* These selectors need to come before their hover and active states */
+.chartToggleButton {
+  background-color: #4caf50;
+}
+
+.chartToggleButton:hover {
+  background-color: #3d8b40;
+}
+
+.chartToggleButton:active {
+  background-color: #2e7031;
+}
+
+/* Existing pollution data cards */
 .pollutionDataCard {
   background-color: #e0f7fa;
   border-radius: 10px;
@@ -96,4 +141,20 @@
 
 .aqi.hazardous {
   color: #b71c1c;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .pollutionContainer {
+    justify-content: center;
+  }
+
+  .pollutionCard {
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .toggleButtons {
+    flex-direction: column;
+  }
 }
