@@ -1,0 +1,126 @@
+/* Interactive World Map Styles */
+.interactive-map-container {
+  position: relative;
+  width: 100%;
+  height: 450px;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  background-color: #f0f8ff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.world-map-svg {
+  width: 100%;
+  height: 100%;
+  background-color: #f0f8ff;
+}
+
+/* Map Tooltip */
+.map-tooltip {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 1000;
+  max-width: 200px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Air Quality Legend */
+.map-legend {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+  max-width: 280px;
+  z-index: 500;
+}
+
+.map-legend h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  color: #555;
+}
+
+.legend-color {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* City markers */
+.city-marker {
+  cursor: pointer;
+  transition: all 200ms;
+}
+
+.city-marker:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Annotation text */
+.annotation-text {
+  font-weight: 500;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.7);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .interactive-map-container {
+    height: 350px;
+  }
+  
+  .map-legend {
+    bottom: 10px;
+    right: 10px;
+    max-width: 200px;
+    padding: 8px;
+  }
+  
+  .legend-item {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .interactive-map-container {
+    height: 300px;
+  }
+  
+  .map-legend {
+    bottom: 5px;
+    right: 5px;
+    max-width: 150px;
+  }
+  
+  .legend-items {
+    gap: 4px;
+  }
+}

@@ -10,8 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Header from '../Navbar/Navbar';
 import Region from '../Details/Region';
-import World from '../Maps/img/worldmap.jpg';
-import OptimizedImage from '../utils/OptimizedImage';
+import InteractiveWorldMap from '../Maps/InteractiveMap/InteractiveWorldMap';
 import './Region.css';
 
 const Regions = () => {
@@ -34,23 +33,50 @@ const Regions = () => {
       navigate(`/countries?search=${encodeURIComponent(searchTerm.trim())}&region=${selectedRegion || 'all'}`);
     }
   };
+  
+  const handleRegionClick = (regionName) => {
+    // Map the clicked region to our application's region structure
+    const regionMap = {
+      'United States of America': 'Americas',
+      'Canada': 'Americas',
+      'Brazil': 'Americas',
+      'Mexico': 'Americas',
+      'United Kingdom': 'Europe',
+      'France': 'Europe',
+      'Germany': 'Europe',
+      'Italy': 'Europe',
+      'Russia': 'Europe',
+      'China': 'Asia',
+      'India': 'Asia',
+      'Japan': 'Asia',
+      'Australia': 'Oceania',
+      'New Zealand': 'Oceania',
+      'South Africa': 'Africa',
+      'Egypt': 'Africa',
+      'Nigeria': 'Africa',
+      'Kenya': 'Africa',
+      'Antarctica': 'Antarctic',
+    };
+    
+    const mappedRegion = regionMap[regionName] || '';
+    if (mappedRegion) {
+      navigate(`/countries?region=${mappedRegion}`);
+    }
+  };
 
   return (
     <div className="home-container">
       <Header id="/" />
 
-      {/* Hero Section with World Map */}
+      {/* Hero Section with Interactive World Map */}
       <div className="hero-section">
+        <div className="map-header-container">
+          <h1 className="hero-title">Global Air Quality Tracker</h1>
+          <p className="hero-subtitle">Monitor air pollution data worldwide in real-time</p>
+        </div>
+        
         <div className="world-container">
-          <OptimizedImage
-            src={World}
-            alt="world map"
-            className="world-map"
-          />
-          <div className="centered">
-            <h1 className="hero-title">Global Air Quality Tracker</h1>
-            <p className="hero-subtitle">Monitor air pollution data worldwide in real-time</p>
-          </div>
+          <InteractiveWorldMap onRegionClick={handleRegionClick} />
         </div>
 
         {/* App Introduction */}
