@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux';
 import { fetchCombinedWeatherAndAirQuality } from '../../../redux/Actions/Weather';
 import './InteractiveWorldMap.css';
 
-const geoUrl = 'https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json';
+const geoUrl = '/world-countries.json';
 
 // Define major cities with coordinates for air quality and weather data
 const majorCities = [
@@ -78,7 +78,6 @@ const getAqiLevel = (aqi) => {
 
 const InteractiveWorldMap = ({ onRegionClick }) => {
   const dispatch = useDispatch();
-  const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
   const [tooltipContent, setTooltipContent] = useState('');
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
@@ -242,27 +241,30 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
         className="world-map-svg"
       >
         <ZoomableGroup
-          zoom={position.zoom}
-          center={position.coordinates}
+          zoom={1}
+          center={[0, 0]}
           onMoveEnd={handleMoveEnd}
-          maxZoom={5}
+          maxZoom={1}
+          minZoom={1}
+          disableZoom
+          disablePanning
         >
           <Geographies geography={geoUrl}>
             {({ geographies }) => geographies.map((geo) => (
               <Geography
                 key={geo.rsmKey}
                 geography={geo}
-                fill="#EAEAEC"
-                stroke="#D6D6DA"
+                fill="#B0BEC5" // Changed from #EAEAEC to a more visible blue-gray
+                stroke="#607D8B" // Changed from #D6D6DA to a more visible dark gray-blue
                 onClick={() => handleRegionClick(geo)}
                 onMouseEnter={() => handleMouseEnter(geo)}
                 onMouseLeave={handleMouseLeave}
                 style={{
                   default: {
-                    fill: '#EAEAEC',
+                    fill: '#B0BEC5',
                     outline: 'none',
-                    stroke: '#D6D6DA',
-                    strokeWidth: 0.5,
+                    stroke: '#607D8B',
+                    strokeWidth: 0.7,
                   },
                   hover: {
                     fill: '#009688',
@@ -290,11 +292,11 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
                 {(displayMode === 'airQuality' || displayMode === 'combined') && (
                   <Marker coordinates={city.coordinates} onClick={() => handleCityClick(city)}>
                     <circle
-                      r={aqi / 15 + 5}
-                      fill={colorScale(aqi)}
+                      r={Math.max(aqi / 15 + 5, 8)} // Ensure minimum radius of 8
+                      fill={colorScale(aqi) || '#1976d2'}
                       stroke="#FFFFFF"
                       strokeWidth={1}
-                      opacity={0.8}
+                      opacity={0.9}
                       className="city-marker"
                     />
                   </Marker>

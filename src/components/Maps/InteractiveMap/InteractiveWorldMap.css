@@ -201,10 +201,30 @@
   .map-legend {
     bottom: 5px;
     right: 5px;
-    max-width: 150px;
+    max-width: 120px;
+    max-height: 120px;
+    font-size: 10px;
+    padding: 4px;
+    overflow-y: auto;
   }
-  
+  .map-legend h4 {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+  .legend-item {
+    font-size: 9px;
+    gap: 2px;
+  }
+  .legend-color {
+    width: 10px;
+    height: 10px;
+    margin-right: 4px;
+  }
   .legend-items {
-    gap: 4px;
+    gap: 2px;
+  }
+  .weather-icon {
+    font-size: 12px;
+    margin-right: 4px;
   }
 }

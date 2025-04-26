@@ -4,6 +4,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 20px;
   margin: 20px 0;
+  margin-top: 64px; /* Adjust this value to match your navbar height */
 }
 
 .pollution-chart-container h4 {
