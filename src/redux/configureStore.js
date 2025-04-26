@@ -3,6 +3,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import thunk from 'redux-thunk';
 import countriesReducer from './Reducers/Countries';
 import pollutionReducer from './Reducers/Pollution';
+import weatherReducer from './Reducers/Weather';
 
 // Remove logger in production to improve performance
 const middleware = [thunk];
@@ -17,6 +18,7 @@ if (process.env.NODE_ENV === 'development') {
 const rootReducer = combineReducers({
   countriesReducer,
   pollutionReducer,
+  weatherReducer,
 });
 
 // Configure store with state persistence
@@ -53,6 +55,7 @@ store.subscribe(() => {
   saveState({
     countriesReducer: store.getState().countriesReducer,
     // Don't persist pollution data - it's fetched on demand
+    // Don't persist weather data - it's also fetched on demand and frequently changes
   });
 });
 
