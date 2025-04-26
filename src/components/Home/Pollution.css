@@ -1,3 +1,75 @@
 .text-warning {
   padding: 4px;
 }
+
+/* Enhanced Pollution Page Styles */
+.pollution-page {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #3c63aa, #2a4a8a);
+  color: white;
+}
+
+.pollution-page-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 20px 40px;
+}
+
+.pollution-header-section {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.pollution-header-section h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.pollution-subheading {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-bottom: 30px;
+}
+
+.pollution-weather-container {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-bottom: 30px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.pollution-weather-container:hover {
+  transform: translateY(-5px);
+}
+
+.weather-impact-box {
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.weather-impact-box h3 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #ffffff;
+  font-size: 1.3rem;
+}
+
+.weather-data-box {
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pollution-header-section h1 {
+    font-size: 2rem;
+  }
+  
+  .pollution-weather-container {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}
