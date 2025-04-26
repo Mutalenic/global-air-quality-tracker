@@ -9,7 +9,7 @@ import {
 } from 'react-simple-maps';
 import { scaleLinear } from 'd3-scale';
 import PropTypes from 'prop-types';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { fetchCombinedWeatherAndAirQuality } from '../../../redux/Actions/Weather';
 import './InteractiveWorldMap.css';
 
@@ -66,6 +66,16 @@ const getWeatherType = (code) => {
   return 'clear'; // default
 };
 
+// Helper function to get AQI level description
+const getAqiLevel = (aqi) => {
+  if (aqi <= 50) return 'Good';
+  if (aqi <= 100) return 'Moderate';
+  if (aqi <= 150) return 'Unhealthy for Sensitive Groups';
+  if (aqi <= 200) return 'Unhealthy';
+  if (aqi <= 300) return 'Very Unhealthy';
+  return 'Hazardous';
+};
+
 const InteractiveWorldMap = ({ onRegionClick }) => {
   const dispatch = useDispatch();
   const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
@@ -76,10 +86,6 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
   const [cityWeatherData, setCityWeatherData] = useState({});
   const [displayMode, setDisplayMode] = useState('airQuality'); // 'airQuality', 'weather', 'combined'
 
-  // Get weather data from Redux store
-  const weatherData = useSelector((state) => state.weatherReducer?.weatherData);
-  const airQualityData = useSelector((state) => state.weatherReducer?.airQualityForecast);
-
   useEffect(() => {
     const handleResize = () => {
       setPosition({ coordinates: [0, 0], zoom: window.innerWidth < 768 ? 0.8 : 1 });
@@ -89,15 +95,21 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
     handleResize();
 
     // Fetch weather data for all major cities
-    majorCities.forEach(city => {
+    majorCities.forEach((city) => {
       dispatch(fetchCombinedWeatherAndAirQuality(city.coordinates[1], city.coordinates[0]))
-        .then(data => {
-          setCityWeatherData(prevData => ({
+        .then((data) => {
+          setCityWeatherData((prevData) => ({
             ...prevData,
-            [city.name]: data
+            [city.name]: data,
           }));
         })
-        .catch(error => console.error(`Error fetching data for ${city.name}:`, error));
+        .catch((error) => {
+          // Only log in development environment
+          if (process.env.NODE_ENV === 'development') {
+            // eslint-disable-next-line no-console
+            console.error(`Error fetching data for ${city.name}:`, error);
+          }
+        });
     });
 
     return () => {
@@ -135,14 +147,13 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
   // Get mock or real AQI value for city
   const getCityAQI = (cityName) => {
     // If we have real data, use it
-    if (cityWeatherData[cityName] && 
-        cityWeatherData[cityName].airQuality && 
-        cityWeatherData[cityName].airQuality.hourly && 
-        cityWeatherData[cityName].airQuality.hourly.pm2_5) {
-      
+    if (cityWeatherData[cityName]
+        && cityWeatherData[cityName].airQuality
+        && cityWeatherData[cityName].airQuality.hourly
+        && cityWeatherData[cityName].airQuality.hourly.pm2_5) {
       const latestIndex = cityWeatherData[cityName].airQuality.hourly.time.length - 1;
       const pm25 = cityWeatherData[cityName].airQuality.hourly.pm2_5[latestIndex];
-      
+
       // Convert PM2.5 to AQI (simplified formula)
       if (pm25 <= 12) return 25;
       if (pm25 <= 35.4) return 75;
@@ -151,37 +162,36 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
       if (pm25 <= 250.4) return 250;
       return 350;
     }
-    
+
     // Use mock data as fallback
     const mockValues = {
       'New York': 45,
       'Los Angeles': 72,
-      'London': 38,
-      'Paris': 42,
-      'Beijing': 112,
-      'Tokyo': 56,
-      'Sydney': 28,
+      London: 38,
+      Paris: 42,
+      Beijing: 112,
+      Tokyo: 56,
+      Sydney: 28,
       'Rio de Janeiro': 63,
-      'Cairo': 95,
-      'Mumbai': 134,
-      'Moscow': 51,
+      Cairo: 95,
+      Mumbai: 134,
+      Moscow: 51,
       'Cape Town': 47,
     };
-    
+
     return mockValues[cityName] || Math.floor(Math.random() * 200);
   };
 
   // Get weather icon for city
   const getCityWeatherIcon = (cityName) => {
-    if (cityWeatherData[cityName] && 
-        cityWeatherData[cityName].weather && 
-        cityWeatherData[cityName].weather.current_weather) {
-      
+    if (cityWeatherData[cityName]
+        && cityWeatherData[cityName].weather
+        && cityWeatherData[cityName].weather.current_weather) {
       const weatherCode = cityWeatherData[cityName].weather.current_weather.weathercode;
       const weatherType = getWeatherType(weatherCode);
       return weatherIcons[weatherType];
     }
-    
+
     // Default icon if no data
     return weatherIcons.clear;
   };
@@ -190,19 +200,22 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
     <div className="interactive-map-container" onMouseMove={handleMouseMove}>
       {/* Display mode toggles */}
       <div className="map-display-options">
-        <button 
+        <button
+          type="button"
           className={`display-option ${displayMode === 'airQuality' ? 'active' : ''}`}
           onClick={() => setDisplayMode('airQuality')}
         >
           Air Quality
         </button>
-        <button 
+        <button
+          type="button"
           className={`display-option ${displayMode === 'weather' ? 'active' : ''}`}
           onClick={() => setDisplayMode('weather')}
         >
           Weather
         </button>
-        <button 
+        <button
+          type="button"
           className={`display-option ${displayMode === 'combined' ? 'active' : ''}`}
           onClick={() => setDisplayMode('combined')}
         >
@@ -221,7 +234,7 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
           {tooltipContent}
         </div>
       )}
-      
+
       <ComposableMap
         projectionConfig={{
           scale: 147,
@@ -267,12 +280,12 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
           </Geographies>
 
           {/* Air Quality & Weather Markers */}
-          {majorCities.map((city, index) => {
+          {majorCities.map((city) => {
             const aqi = getCityAQI(city.name);
             const weatherIcon = getCityWeatherIcon(city.name);
             
             return (
-              <React.Fragment key={index}>
+              <React.Fragment key={`city-${city.name}`}>
                 {/* Show different markers based on display mode */}
                 {(displayMode === 'airQuality' || displayMode === 'combined') && (
                   <Marker coordinates={city.coordinates} onClick={() => handleCityClick(city)}>
@@ -305,7 +318,7 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
                     </text>
                   </Marker>
                 )}
-                
+
                 {/* City name for selected city */}
                 {activeCity === city.name && (
                   <Annotation
@@ -349,7 +362,11 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
                         className="annotation-text"
                         fontSize={10}
                       >
-                        AQI: {aqi} ({aqi <= 50 ? 'Good' : aqi <= 100 ? 'Moderate' : 'Poor'})
+                        AQI:
+                        {' '}
+                        {aqi}
+                        {' '}
+                        ({getAqiLevel(aqi)})
                       </text>
                       <text
                         x={12}
@@ -360,10 +377,13 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
                         className="annotation-text"
                         fontSize={10}
                       >
-                        {weatherIcon} {
-                          cityWeatherData[city.name]?.weather?.current_weather?.temperature 
-                          ? `${cityWeatherData[city.name].weather.current_weather.temperature}°C` 
-                          : ''}
+                        {weatherIcon}
+                        {' '}
+                        {
+                          cityWeatherData[city.name]?.weather?.current_weather?.temperature
+                            ? `${cityWeatherData[city.name].weather.current_weather.temperature}°C`
+                            : ''
+}
                       </text>
                     </g>
                   </Annotation>
@@ -403,13 +423,13 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
             <span>Hazardous (300+)</span>
           </div>
         </div>
-        
-        <div className="legend-divider"></div>
-        
+
+        <div className="legend-divider" />
+
         <h4>Weather Conditions</h4>
         <div className="legend-items weather-legend">
-          {Object.entries(weatherIcons).map(([type, icon], index) => (
-            <div className="legend-item" key={index}>
+          {Object.entries(weatherIcons).map(([type, icon]) => (
+            <div className="legend-item" key={`weather-type-${type}`}>
               <span className="weather-icon">{icon}</span>
               <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
             </div>

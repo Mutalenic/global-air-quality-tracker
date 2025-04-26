@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import PropTypes from 'prop-types';
 import { fetchCombinedWeatherAndAirQuality } from '../../redux/Actions/Weather';
 import './Weather.css';
 
@@ -204,7 +205,7 @@ const Weather = ({ latitude, longitude }) => {
           <ul className="weather-impact-list">
             {analysis.effects.map((effect, index) => (
               <li
-                key={`effect-${index}`}
+                key={`effect-${effect.factor}-${index}`}
                 className={`impact-item impact-${effect.impact}`}
               >
                 <strong>
@@ -222,7 +223,7 @@ const Weather = ({ latitude, longitude }) => {
               <h4>Recommendations</h4>
               <ul>
                 {analysis.recommendations.map((rec, index) => (
-                  <li key={`rec-${index}`}>{rec}</li>
+                  <li key={`rec-${rec.substring(0, 10).replace(/\s/g, '')}-${index}`}>{rec}</li>
                 ))}
               </ul>
             </div>
@@ -231,6 +232,12 @@ const Weather = ({ latitude, longitude }) => {
       )}
     </div>
   );
+};
+
+// Add PropTypes validation
+Weather.propTypes = {
+  latitude: PropTypes.number.isRequired,
+  longitude: PropTypes.number.isRequired,
 };
 
 export default Weather;

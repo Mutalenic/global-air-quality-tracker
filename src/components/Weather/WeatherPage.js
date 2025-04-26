@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import Navbar from '../Navbar/Navbar';
 import Weather from './Weather';
 import './WeatherPage.css';
@@ -11,6 +10,7 @@ const WeatherPage = () => {
   });
   const [searchLocation, setSearchLocation] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [error, setError] = useState(null);
 
   // Handle location search
   const handleSearch = async (e) => {
@@ -30,11 +30,12 @@ const WeatherPage = () => {
           longitude: result.geometry.lng,
         });
       } else {
-        alert('Location not found. Please try a different search term.');
+        // Use a more user-friendly approach instead of alerts
+        setError('Location not found. Please try a different search term.');
       }
     } catch (error) {
-      console.error('Error searching for location:', error);
-      alert('Error searching for location. Please try again.');
+      // Log error and show user-friendly message
+      setError('Error searching for location. Please try again.');
     } finally {
       setIsSearching(false);
     }
@@ -68,6 +69,8 @@ const WeatherPage = () => {
               {isSearching ? 'Searching...' : 'Search'}
             </button>
           </form>
+
+          {error && <div className="search-error">{error}</div>}
         </div>
 
         <div className="weather-component-container">
@@ -79,19 +82,31 @@ const WeatherPage = () => {
           <div className="info-grid">
             <div className="info-card">
               <h3>Temperature</h3>
-              <p>Higher temperatures accelerate chemical reactions, increasing ground-level ozone formation. Cold temperatures can increase visible pollutants from sources like vehicle exhaust.</p>
+              <p>
+                Higher temperatures accelerate chemical reactions, increasing ground-level ozone formation. 
+                Cold temperatures can increase visible pollutants from sources like vehicle exhaust.
+              </p>
             </div>
             <div className="info-card">
               <h3>Wind</h3>
-              <p>Strong winds disperse pollutants, improving air quality. Calm conditions trap pollutants near their source, leading to stagnant air and poor quality.</p>
+              <p>
+                Strong winds disperse pollutants, improving air quality. Calm conditions trap pollutants near their source, 
+                leading to stagnant air and poor quality.
+              </p>
             </div>
             <div className="info-card">
               <h3>Precipitation</h3>
-              <p>Rain and snow wash away particulate matter and water-soluble pollutants, generally improving air quality during and after precipitation events.</p>
+              <p>
+                Rain and snow wash away particulate matter and water-soluble pollutants, 
+                generally improving air quality during and after precipitation events.
+              </p>
             </div>
             <div className="info-card">
               <h3>Humidity</h3>
-              <p>High humidity can affect pollutant formation and collection, while high-pressure systems can create stagnant air conditions, trapping pollutants.</p>
+              <p>
+                High humidity can affect pollutant formation and collection, while high-pressure systems 
+                can create stagnant air conditions, trapping pollutants.
+              </p>
             </div>
           </div>
         </div>

@@ -56,7 +56,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu toggle button */}
-          <button className="mobile-menu-toggle" onClick={toggleMobileMenu} aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}>
+          <button type="button" className="mobile-menu-toggle" onClick={toggleMobileMenu} aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}>
             <FontAwesomeIcon icon={isMobileMenuOpen ? faTimes : faBars} />
           </button>
 

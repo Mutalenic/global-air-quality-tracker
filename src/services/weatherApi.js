@@ -31,7 +31,12 @@ export const fetchWeatherData = async (latitude, longitude) => {
 
     return await response.json();
   } catch (error) {
-    console.error('Error fetching weather data:', error);
+    // Log to monitoring system or handle error according to environment
+    if (process.env.NODE_ENV === 'development') {
+      // Only log in development environment
+      // eslint-disable-next-line no-console
+      console.error('Error fetching weather data:', error);
+    }
     throw error;
   }
 };
@@ -60,7 +65,11 @@ export const fetchAirQualityForecast = async (latitude, longitude) => {
 
     return await response.json();
   } catch (error) {
-    console.error('Error fetching air quality forecast:', error);
+    // Only log in development environment
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching air quality forecast:', error);
+    }
     throw error;
   }
 };
@@ -83,7 +92,11 @@ export const fetchCombinedWeatherAndAirQuality = async (latitude, longitude) => 
       airQuality: airQualityData,
     };
   } catch (error) {
-    console.error('Error fetching combined data:', error);
+    // Only log in development environment
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching combined data:', error);
+    }
     throw error;
   }
 };

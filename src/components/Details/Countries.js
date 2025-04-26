@@ -1,5 +1,5 @@
 import React, {
-  useState, useEffect, useMemo, Suspense,
+  useState, useEffect, Suspense,
 } from 'react';
 import PropTypes from 'prop-types';
 import { NavLink, useLocation } from 'react-router-dom';
