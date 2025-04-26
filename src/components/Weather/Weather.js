@@ -203,9 +203,9 @@ const Weather = ({ latitude, longitude }) => {
         <div className="weather-impact-section">
           <h3>Weather Impact on Air Quality</h3>
           <ul className="weather-impact-list">
-            {analysis.effects.map((effect, index) => (
+            {analysis.effects.map((effect) => (
               <li
-                key={`effect-${effect.factor}-${index}`}
+                key={`effect-${effect.factor}-${effect.impact}`}
                 className={`impact-item impact-${effect.impact}`}
               >
                 <strong>
@@ -222,8 +222,8 @@ const Weather = ({ latitude, longitude }) => {
             <div className="recommendations">
               <h4>Recommendations</h4>
               <ul>
-                {analysis.recommendations.map((rec, index) => (
-                  <li key={`rec-${rec.substring(0, 10).replace(/\s/g, '')}-${index}`}>{rec}</li>
+                {analysis.recommendations.map((rec) => (
+                  <li key={`rec-${rec.substring(0, 15).replace(/\s/g, '-')}`}>{rec}</li>
                 ))}
               </ul>
             </div>

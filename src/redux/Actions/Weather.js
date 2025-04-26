@@ -1,4 +1,9 @@
-import weatherApi from '../../services/weatherApi';
+import {
+  fetchWeatherData,
+  fetchAirQualityForecast as fetchAirQualityData,
+  fetchCombinedWeatherAndAirQuality as fetchCombined,
+  analyzeWeatherAirQualityRelationship,
+} from '../../services/weatherApi';
 
 // Action Types
 export const FETCH_WEATHER_START = 'FETCH_WEATHER_START';
@@ -58,7 +63,7 @@ export const fetchCombinedDataFailure = (error) => ({
 export const fetchWeather = (latitude, longitude) => async (dispatch) => {
   dispatch(fetchWeatherStart());
   try {
-    const weatherData = await weatherApi.fetchWeatherData(latitude, longitude);
+    const weatherData = await fetchWeatherData(latitude, longitude);
     dispatch(fetchWeatherSuccess(weatherData));
     return weatherData;
   } catch (error) {
@@ -70,7 +75,7 @@ export const fetchWeather = (latitude, longitude) => async (dispatch) => {
 export const fetchAirQualityForecast = (latitude, longitude) => async (dispatch) => {
   dispatch(fetchAirQualityForecastStart());
   try {
-    const forecastData = await weatherApi.fetchAirQualityForecast(latitude, longitude);
+    const forecastData = await fetchAirQualityData(latitude, longitude);
     dispatch(fetchAirQualityForecastSuccess(forecastData));
     return forecastData;
   } catch (error) {
@@ -82,10 +87,10 @@ export const fetchAirQualityForecast = (latitude, longitude) => async (dispatch)
 export const fetchCombinedWeatherAndAirQuality = (latitude, longitude) => async (dispatch) => {
   dispatch(fetchCombinedDataStart());
   try {
-    const combinedData = await weatherApi.fetchCombinedWeatherAndAirQuality(latitude, longitude);
+    const combinedData = await fetchCombined(latitude, longitude);
 
     // Analyze the relationship between weather and air quality
-    const analysis = weatherApi.analyzeWeatherAirQualityRelationship(
+    const analysis = analyzeWeatherAirQualityRelationship(
       combinedData.weather,
       combinedData.airQuality,
     );

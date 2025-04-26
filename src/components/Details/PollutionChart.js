@@ -40,6 +40,39 @@ const getPollutantColor = (value, pollutant) => {
   return COLORS.hazardous;
 };
 
+// Function to determine health effect text based on pollutant and value
+const getHealthEffect = (pollutantKey, value) => {
+  if (pollutantKey === 'co') {
+    const displayValue = value * 100;
+    if (displayValue < 4400) return 'Good: Little to no health risk.';
+    if (displayValue < 9400) return 'Moderate: Few sensitive individuals may experience symptoms.';
+    if (displayValue < 12400) return 'Unhealthy for Sensitive Groups: Heart patients at risk.';
+    return 'Unhealthy: Increased risk for everyone, especially sensitive groups.';
+  }
+
+  if (pollutantKey === 'pm25') {
+    if (value < 12) return 'Good: Little to no health risk.';
+    if (value < 35.4) return 'Moderate: Unusually sensitive people should consider reducing outdoor activity.';
+    if (value < 55.4) {
+      return 'Unhealthy for Sensitive Groups: Limit activity if respiratory issues.';
+    }
+    return 'Unhealthy: Everyone may begin to experience health effects.';
+  }
+
+  if (pollutantKey === 'pm10') {
+    if (value < 54) return 'Good: Little to no health risk.';
+    if (value < 154) {
+      return 'Moderate: Unusually sensitive people should consider limiting outdoor activities.';
+    }
+    if (value < 254) {
+      return 'Unhealthy for Sensitive Groups: People with respiratory issues should limit exertion.';
+    }
+    return 'Unhealthy: Everyone may begin to experience health effects.';
+  }
+
+  return '';
+};
+
 const PollutionChart = ({ pollutionData }) => {
   const [chartType, setChartType] = useState('bar');
   const [timeRange, setTimeRange] = useState('day');
@@ -70,10 +103,23 @@ const PollutionChart = ({ pollutionData }) => {
     { value: 'co', label: 'CO (Carbon Monoxide)' },
   ];
 
+  // Determine the data key for X-axis based on the selected time range
+  const getXAxisDataKey = () => (timeRange === 'current' ? 'name' : 'date');
+
+  // Function to create a custom label for pollutant options
+  const getPollutantLabel = (pollutant) => pollutantOptions.find((opt) => opt.value === pollutant)?.label || pollutant.toUpperCase();
+
+  // Determine time range based on selection
+  const getTimeRangeDays = () => {
+    if (timeRange === 'day') return 1;
+    if (timeRange === 'week') return 7;
+    return 30; // month
+  };
+
   // Generate mock historical data for time series
   const generateHistoricalData = useMemo(() => {
     const data = [];
-    const days = timeRange === 'day' ? 1 : (timeRange === 'week' ? 7 : 30);
+    const days = getTimeRangeDays();
 
     for (let i = days; i >= 0; i -= 1) {
       const date = subDays(new Date(), i);
@@ -117,28 +163,14 @@ const PollutionChart = ({ pollutionData }) => {
       const pollutantKey = pollutantName.toLowerCase();
       const { value } = data;
       const unit = 'µg/m³';
-      let healthEffect = '';
       let displayValue = value;
 
       // Adjust CO value for display and set health effects
       if (pollutantKey === 'co') {
         displayValue *= 100;
-
-        if (displayValue < 4400) healthEffect = 'Good: Little to no health risk.';
-        else if (displayValue < 9400) healthEffect = 'Moderate: Few sensitive individuals may experience respiratory symptoms.';
-        else if (displayValue < 12400) healthEffect = 'Unhealthy for Sensitive Groups: Heart patients may experience symptoms.';
-        else healthEffect = 'Unhealthy: Increased risk for everyone, especially sensitive groups.';
-      } else if (pollutantKey === 'pm25') {
-        if (displayValue < 12) healthEffect = 'Good: Little to no health risk.';
-        else if (displayValue < 35.4) healthEffect = 'Moderate: Unusually sensitive people should consider reducing prolonged outdoor exertion.';
-        else if (displayValue < 55.4) healthEffect = 'Unhealthy for Sensitive Groups: People with respiratory or heart disease should limit outdoor exertion.';
-        else healthEffect = 'Unhealthy: Everyone may begin to experience health effects.';
-      } else if (pollutantKey === 'pm10') {
-        if (displayValue < 54) healthEffect = 'Good: Little to no health risk.';
-        else if (displayValue < 154) healthEffect = 'Moderate: Unusually sensitive people should consider reducing prolonged outdoor exertion.';
-        else if (displayValue < 254) healthEffect = 'Unhealthy for Sensitive Groups: People with respiratory disease should limit outdoor exertion.';
-        else healthEffect = 'Unhealthy: Everyone may begin to experience health effects.';
       }
+
+      const healthEffect = getHealthEffect(pollutantKey, displayValue);
 
       return (
         <div className="custom-tooltip">
@@ -185,7 +217,7 @@ const PollutionChart = ({ pollutionData }) => {
           <LineChart data={commonProps.data} margin={commonProps.margin}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
-              dataKey={timeRange === 'current' ? 'name' : 'date'}
+              dataKey={getXAxisDataKey()}
               angle={-45}
               textAnchor="end"
             />
@@ -206,7 +238,7 @@ const PollutionChart = ({ pollutionData }) => {
                   key={pollutant}
                   type="monotone"
                   dataKey={pollutant}
-                  name={pollutantOptions.find((opt) => opt.value === pollutant)?.label}
+                  name={getPollutantLabel(pollutant)}
                   stroke={Object.values(COLORS)[index % Object.values(COLORS).length]}
                   strokeWidth={2}
                   activeDot={{ r: 8 }}
@@ -229,7 +261,7 @@ const PollutionChart = ({ pollutionData }) => {
           <AreaChart data={commonProps.data} margin={commonProps.margin}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
-              dataKey={timeRange === 'current' ? 'name' : 'date'}
+              dataKey={getXAxisDataKey()}
               angle={-45}
               textAnchor="end"
             />
@@ -250,7 +282,7 @@ const PollutionChart = ({ pollutionData }) => {
                   key={pollutant}
                   type="monotone"
                   dataKey={pollutant}
-                  name={pollutantOptions.find((opt) => opt.value === pollutant)?.label}
+                  name={getPollutantLabel(pollutant)}
                   fill={Object.values(COLORS)[index % Object.values(COLORS).length]}
                   stroke={Object.values(COLORS)[index % Object.values(COLORS).length]}
                   fillOpacity={0.6}
@@ -272,7 +304,7 @@ const PollutionChart = ({ pollutionData }) => {
           <ComposedChart data={commonProps.data} margin={commonProps.margin}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
-              dataKey={timeRange === 'current' ? 'name' : 'date'}
+              dataKey={getXAxisDataKey()}
               angle={-45}
               textAnchor="end"
             />
@@ -289,14 +321,14 @@ const PollutionChart = ({ pollutionData }) => {
                 <React.Fragment key={pollutant}>
                   <Bar
                     dataKey={pollutant}
-                    name={`${pollutantOptions.find((opt) => opt.value === pollutant)?.label} (Bar)`}
+                    name={`${getPollutantLabel(pollutant)} (Bar)`}
                     fill={Object.values(COLORS)[index % Object.values(COLORS).length]}
                     fillOpacity={0.6}
                   />
                   <Line
                     type="monotone"
                     dataKey={pollutant}
-                    name={`${pollutantOptions.find((opt) => opt.value === pollutant)?.label} (Line)`}
+                    name={`${getPollutantLabel(pollutant)} (Line)`}
                     stroke={Object.values(COLORS)[index % Object.values(COLORS).length]}
                     strokeWidth={2}
                   />
@@ -318,7 +350,7 @@ const PollutionChart = ({ pollutionData }) => {
           <BarChart data={commonProps.data} margin={commonProps.margin}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
-              dataKey={timeRange === 'current' ? 'name' : 'date'}
+              dataKey={getXAxisDataKey()}
               angle={-45}
               textAnchor="end"
             />
@@ -346,7 +378,7 @@ const PollutionChart = ({ pollutionData }) => {
                 <Bar
                   key={pollutant}
                   dataKey={pollutant}
-                  name={pollutantOptions.find((opt) => opt.value === pollutant)?.label}
+                  name={getPollutantLabel(pollutant)}
                   fill={Object.values(COLORS)[index % Object.values(COLORS).length]}
                 />
               ))
@@ -369,9 +401,10 @@ const PollutionChart = ({ pollutionData }) => {
 
       <div className="chart-controls">
         <div className="control-group">
-          <label htmlFor="chart-type-select">Chart Type:</label>
+          <label htmlFor="chart-type-select" id="chart-type-label">Chart Type:</label>
           <Select
             id="chart-type-select"
+            aria-labelledby="chart-type-label"
             options={chartOptions}
             value={chartOptions.find((option) => option.value === chartType)}
             onChange={(option) => setChartType(option.value)}
@@ -381,9 +414,10 @@ const PollutionChart = ({ pollutionData }) => {
         </div>
 
         <div className="control-group">
-          <label htmlFor="time-range-select">Time Range:</label>
+          <label htmlFor="time-range-select" id="time-range-label">Time Range:</label>
           <Select
             id="time-range-select"
+            aria-labelledby="time-range-label"
             options={timeOptions}
             value={timeOptions.find((option) => option.value === timeRange)}
             onChange={(option) => setTimeRange(option.value)}
@@ -393,12 +427,17 @@ const PollutionChart = ({ pollutionData }) => {
         </div>
 
         <div className="control-group pollutant-select">
-          <label htmlFor="pollutants-select">Pollutants:</label>
+          <label htmlFor="pollutants-select" id="pollutants-label">Pollutants:</label>
           <Select
             id="pollutants-select"
+            aria-labelledby="pollutants-label"
             options={pollutantOptions}
-            value={pollutantOptions.filter((option) => selectedPollutants.includes(option.value))}
-            onChange={(options) => setSelectedPollutants(options.map((option) => option.value))}
+            value={pollutantOptions.filter(
+              (option) => selectedPollutants.includes(option.value),
+            )}
+            onChange={(options) => setSelectedPollutants(
+              options.map((option) => option.value),
+            )}
             isMulti
             className="select-control"
             classNamePrefix="select"
@@ -417,7 +456,7 @@ const PollutionChart = ({ pollutionData }) => {
         </div>
         <div className="legend-item">
           <span className="legend-color" style={{ backgroundColor: COLORS.unhealthySensitive }} />
-          <span>Unhealthy for Sensitive Groups</span>
+          <span>Unhealthy-Sens</span>
         </div>
         <div className="legend-item">
           <span className="legend-color" style={{ backgroundColor: COLORS.unhealthy }} />

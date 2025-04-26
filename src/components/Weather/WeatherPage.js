@@ -20,7 +20,9 @@ const WeatherPage = () => {
     setIsSearching(true);
     try {
       // Use OpenCage Geocoding API to convert location name to coordinates
-      const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(searchLocation)}&key=YOUR_API_KEY`);
+      const apiEndpoint = 'https://api.opencagedata.com/geocode/v1/json';
+      const queryParams = `?q=${encodeURIComponent(searchLocation)}&key=YOUR_API_KEY`;
+      const response = await fetch(`${apiEndpoint}${queryParams}`);
       const data = await response.json();
 
       if (data.results && data.results.length > 0) {
@@ -55,7 +57,7 @@ const WeatherPage = () => {
           <form className="location-search-form" onSubmit={handleSearch}>
             <input
               type="text"
-              placeholder="Search for a location (e.g. New York, Tokyo)"
+              placeholder="Search"
               value={searchLocation}
               onChange={(e) => setSearchLocation(e.target.value)}
               className="location-search-input"
@@ -83,29 +85,29 @@ const WeatherPage = () => {
             <div className="info-card">
               <h3>Temperature</h3>
               <p>
-                Higher temperatures accelerate chemical reactions, increasing ground-level ozone formation. 
-                Cold temperatures can increase visible pollutants from sources like vehicle exhaust.
+                Higher temperatures accelerate reactions, increasing ground-level ozone formation.
+                Cold temperatures can increase visible pollutants from vehicle exhaust.
               </p>
             </div>
             <div className="info-card">
               <h3>Wind</h3>
               <p>
-                Strong winds disperse pollutants, improving air quality. Calm conditions trap pollutants near their source, 
-                leading to stagnant air and poor quality.
+                Strong winds disperse pollutants, improving air quality. Calm conditions
+                trap pollutants, leading to stagnant air and poor quality.
               </p>
             </div>
             <div className="info-card">
               <h3>Precipitation</h3>
               <p>
-                Rain and snow wash away particulate matter and water-soluble pollutants, 
+                Rain and snow wash away particulate matter and water-soluble pollutants,
                 generally improving air quality during and after precipitation events.
               </p>
             </div>
             <div className="info-card">
               <h3>Humidity</h3>
               <p>
-                High humidity can affect pollutant formation and collection, while high-pressure systems 
-                can create stagnant air conditions, trapping pollutants.
+                High humidity can affect pollutant formation and collection, while high-pressure
+                systems can create stagnant air conditions, trapping pollutants.
               </p>
             </div>
           </div>

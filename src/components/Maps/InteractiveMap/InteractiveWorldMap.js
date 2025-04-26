@@ -283,7 +283,7 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
           {majorCities.map((city) => {
             const aqi = getCityAQI(city.name);
             const weatherIcon = getCityWeatherIcon(city.name);
-            
+
             return (
               <React.Fragment key={`city-${city.name}`}>
                 {/* Show different markers based on display mode */}
@@ -299,17 +299,17 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
                     />
                   </Marker>
                 )}
-                
+
                 {(displayMode === 'weather' || displayMode === 'combined') && (
-                  <Marker 
+                  <Marker
                     coordinates={[
-                      city.coordinates[0] + (displayMode === 'combined' ? 3 : 0), 
-                      city.coordinates[1] + (displayMode === 'combined' ? 3 : 0)
-                    ]} 
+                      city.coordinates[0] + (displayMode === 'combined' ? 3 : 0),
+                      city.coordinates[1] + (displayMode === 'combined' ? 3 : 0),
+                    ]}
                     onClick={() => handleCityClick(city)}
                   >
-                    <text 
-                      textAnchor="middle" 
+                    <text
+                      textAnchor="middle"
                       dominantBaseline="middle"
                       style={{ fontSize: displayMode === 'combined' ? '14px' : '18px' }}
                       className="weather-icon-marker"
@@ -366,7 +366,9 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
                         {' '}
                         {aqi}
                         {' '}
-                        ({getAqiLevel(aqi)})
+                        (
+                        {getAqiLevel(aqi)}
+                        )
                       </text>
                       <text
                         x={12}
