@@ -31,9 +31,13 @@ const Pollutions = () => {
               flag={pollution.flag}
               name={pollution.city}
             />
-            
+
             <div className="weather-impact-box">
-              <h3>How Weather Affects {pollution.city}'s Air Quality</h3>
+              <h3>
+                How Weather Affects
+                {pollution.city}
+                's Air Quality
+              </h3>
               <div className="weather-data-box">
                 <Weather latitude={pollution.lat} longitude={pollution.lng} />
               </div>

@@ -7,7 +7,7 @@ import {
   FETCH_AIR_QUALITY_FORECAST_FAILURE,
   FETCH_COMBINED_DATA_START,
   FETCH_COMBINED_DATA_SUCCESS,
-  FETCH_COMBINED_DATA_FAILURE
+  FETCH_COMBINED_DATA_FAILURE,
 } from '../Actions/Weather';
 
 const initialState = {
@@ -18,13 +18,13 @@ const initialState = {
   loading: {
     weather: false,
     airQualityForecast: false,
-    combinedData: false
+    combinedData: false,
   },
   error: {
     weather: null,
     airQualityForecast: null,
-    combinedData: null
-  }
+    combinedData: null,
+  },
 };
 
 const weatherReducer = (state = initialState, action) => {
@@ -35,12 +35,12 @@ const weatherReducer = (state = initialState, action) => {
         ...state,
         loading: {
           ...state.loading,
-          weather: true
+          weather: true,
         },
         error: {
           ...state.error,
-          weather: null
-        }
+          weather: null,
+        },
       };
     case FETCH_WEATHER_SUCCESS:
       return {
@@ -48,34 +48,34 @@ const weatherReducer = (state = initialState, action) => {
         weatherData: action.payload,
         loading: {
           ...state.loading,
-          weather: false
-        }
+          weather: false,
+        },
       };
     case FETCH_WEATHER_FAILURE:
       return {
         ...state,
         loading: {
           ...state.loading,
-          weather: false
+          weather: false,
         },
         error: {
           ...state.error,
-          weather: action.payload
-        }
+          weather: action.payload,
+        },
       };
-      
+
     // Air Quality Forecast Actions
     case FETCH_AIR_QUALITY_FORECAST_START:
       return {
         ...state,
         loading: {
           ...state.loading,
-          airQualityForecast: true
+          airQualityForecast: true,
         },
         error: {
           ...state.error,
-          airQualityForecast: null
-        }
+          airQualityForecast: null,
+        },
       };
     case FETCH_AIR_QUALITY_FORECAST_SUCCESS:
       return {
@@ -83,34 +83,34 @@ const weatherReducer = (state = initialState, action) => {
         airQualityForecast: action.payload,
         loading: {
           ...state.loading,
-          airQualityForecast: false
-        }
+          airQualityForecast: false,
+        },
       };
     case FETCH_AIR_QUALITY_FORECAST_FAILURE:
       return {
         ...state,
         loading: {
           ...state.loading,
-          airQualityForecast: false
+          airQualityForecast: false,
         },
         error: {
           ...state.error,
-          airQualityForecast: action.payload
-        }
+          airQualityForecast: action.payload,
+        },
       };
-      
+
     // Combined Data Actions
     case FETCH_COMBINED_DATA_START:
       return {
         ...state,
         loading: {
           ...state.loading,
-          combinedData: true
+          combinedData: true,
         },
         error: {
           ...state.error,
-          combinedData: null
-        }
+          combinedData: null,
+        },
       };
     case FETCH_COMBINED_DATA_SUCCESS:
       return {
@@ -121,22 +121,22 @@ const weatherReducer = (state = initialState, action) => {
         analysis: action.payload.analysis,
         loading: {
           ...state.loading,
-          combinedData: false
-        }
+          combinedData: false,
+        },
       };
     case FETCH_COMBINED_DATA_FAILURE:
       return {
         ...state,
         loading: {
           ...state.loading,
-          combinedData: false
+          combinedData: false,
         },
         error: {
           ...state.error,
-          combinedData: action.payload
-        }
+          combinedData: action.payload,
+        },
       };
-      
+
     default:
       return state;
   }

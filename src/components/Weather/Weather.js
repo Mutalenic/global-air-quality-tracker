@@ -11,16 +11,16 @@ const Weather = ({ latitude, longitude }) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Select the needed data from Redux store
   const { weatherData, airQualityForecast, analysis } = useSelector(
-    (state) => state.weatherReducer || {}
+    (state) => state.weatherReducer || {},
   );
 
   useEffect(() => {
     const fetchData = async () => {
       if (!latitude || !longitude) return;
-      
+
       try {
         setIsLoading(true);
         setError(null);
@@ -42,7 +42,7 @@ const Weather = ({ latitude, longitude }) => {
     }
 
     const { temperature, windspeed, weathercode } = weatherData.current_weather;
-    
+
     // Convert weather code to description
     const weatherCodes = {
       0: { desc: 'Clear sky', icon: '☀️' },
@@ -65,7 +65,7 @@ const Weather = ({ latitude, longitude }) => {
       82: { desc: 'Violent rain showers', icon: '⛈️' },
       95: { desc: 'Thunderstorm', icon: '⛈️' },
       96: { desc: 'Thunderstorm with slight hail', icon: '⛈️🌨️' },
-      99: { desc: 'Thunderstorm with heavy hail', icon: '⛈️🌨️' }
+      99: { desc: 'Thunderstorm with heavy hail', icon: '⛈️🌨️' },
     };
 
     const weather = weatherCodes[weathercode] || { desc: 'Unknown', icon: '❓' };
@@ -74,7 +74,7 @@ const Weather = ({ latitude, longitude }) => {
       temperature: Math.round(temperature),
       windspeed: Math.round(windspeed),
       description: weather.desc,
-      icon: weather.icon
+      icon: weather.icon,
     };
   };
 
@@ -83,12 +83,12 @@ const Weather = ({ latitude, longitude }) => {
     if (!airQualityForecast || !airQualityForecast.hourly) {
       return null;
     }
-    
+
     // Get the most recent hour's data
     const latestHourIndex = airQualityForecast.hourly.time.length - 1;
     const pm25 = airQualityForecast.hourly.pm2_5?.[latestHourIndex] || 0;
     const pm10 = airQualityForecast.hourly.pm10?.[latestHourIndex] || 0;
-    
+
     // Calculate AQI (simplified version)
     let aqi;
     if (pm25 <= 12) {
@@ -104,11 +104,11 @@ const Weather = ({ latitude, longitude }) => {
     } else {
       aqi = { level: 'Hazardous', color: '#7e0023', description: 'Health alert: everyone may experience serious health effects' };
     }
-    
+
     return {
       pm25,
       pm10,
-      aqi
+      aqi,
     };
   };
 
@@ -119,12 +119,17 @@ const Weather = ({ latitude, longitude }) => {
 
   // Display error state
   if (error) {
-    return <div className="weather-error">Error: {error}</div>;
+    return (
+      <div className="weather-error">
+        Error:
+        {error}
+      </div>
+    );
   }
 
   const weather = getCurrentWeather();
   const airQuality = getCurrentAirQuality();
-  
+
   // If no data is available, return message
   if (!weather || !airQuality) {
     return <div className="weather-no-data">No weather data available for this location.</div>;
@@ -137,15 +142,22 @@ const Weather = ({ latitude, longitude }) => {
           <h2>Current Weather</h2>
           <div className="weather-icon">{weather.icon}</div>
         </div>
-        
+
         <div className="weather-details">
           <div className="weather-item">
             <span className="label">Temperature:</span>
-            <span className="value">{weather.temperature}°C</span>
+            <span className="value">
+              {weather.temperature}
+              °C
+            </span>
           </div>
           <div className="weather-item">
             <span className="label">Wind Speed:</span>
-            <span className="value">{weather.windspeed} km/h</span>
+            <span className="value">
+              {weather.windspeed}
+              {' '}
+              km/h
+            </span>
           </div>
           <div className="weather-item">
             <span className="label">Conditions:</span>
@@ -153,45 +165,58 @@ const Weather = ({ latitude, longitude }) => {
           </div>
         </div>
       </div>
-      
+
       <div className="air-quality-section">
         <h2>Air Quality Impact</h2>
-        <div 
-          className="aqi-indicator" 
+        <div
+          className="aqi-indicator"
           style={{ backgroundColor: airQuality.aqi.color }}
         >
           {airQuality.aqi.level}
         </div>
-        
+
         <div className="air-quality-details">
           <div className="air-quality-item">
             <span className="label">PM2.5:</span>
-            <span className="value">{airQuality.pm25} µg/m³</span>
+            <span className="value">
+              {airQuality.pm25}
+              {' '}
+              µg/m³
+            </span>
           </div>
           <div className="air-quality-item">
             <span className="label">PM10:</span>
-            <span className="value">{airQuality.pm10} µg/m³</span>
+            <span className="value">
+              {airQuality.pm10}
+              {' '}
+              µg/m³
+            </span>
           </div>
           <div className="air-quality-item description">
             {airQuality.aqi.description}
           </div>
         </div>
       </div>
-      
+
       {analysis && analysis.effects && analysis.effects.length > 0 && (
         <div className="weather-impact-section">
           <h3>Weather Impact on Air Quality</h3>
           <ul className="weather-impact-list">
             {analysis.effects.map((effect, index) => (
-              <li 
-                key={`effect-${index}`} 
+              <li
+                key={`effect-${index}`}
                 className={`impact-item impact-${effect.impact}`}
               >
-                <strong>{effect.factor.charAt(0).toUpperCase() + effect.factor.slice(1)}:</strong> {effect.description}
+                <strong>
+                  {effect.factor.charAt(0).toUpperCase() + effect.factor.slice(1)}
+                  :
+                </strong>
+                {' '}
+                {effect.description}
               </li>
             ))}
           </ul>
-          
+
           {analysis.recommendations && analysis.recommendations.length > 0 && (
             <div className="recommendations">
               <h4>Recommendations</h4>

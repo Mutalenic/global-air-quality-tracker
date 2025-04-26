@@ -9,23 +9,26 @@ import {
 } from 'react-simple-maps';
 import { scaleLinear } from 'd3-scale';
 import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCombinedWeatherAndAirQuality } from '../../../redux/Actions/Weather';
 import './InteractiveWorldMap.css';
 
 const geoUrl = 'https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json';
 
-// Define mock air quality data for visualization purposes
-// In a real app this would come from your API/Redux store
-const mockAirQualityData = [
-  { name: 'United States', coordinates: [-95.7129, 37.0902], value: 35 },
-  { name: 'Brazil', coordinates: [-47.9292, -15.7801], value: 58 },
-  { name: 'China', coordinates: [104.1954, 35.8617], value: 85 },
-  { name: 'India', coordinates: [78.9629, 20.5937], value: 92 },
-  { name: 'United Kingdom', coordinates: [-3.4360, 55.3781], value: 45 },
-  { name: 'South Africa', coordinates: [22.9375, -30.5595], value: 62 },
-  { name: 'Australia', coordinates: [133.7751, -25.2744], value: 28 },
-  { name: 'Russia', coordinates: [105.3188, 61.5240], value: 57 },
-  { name: 'Japan', coordinates: [138.2529, 36.2048], value: 42 },
-  { name: 'Egypt', coordinates: [30.8025, 26.8206], value: 78 },
+// Define major cities with coordinates for air quality and weather data
+const majorCities = [
+  { name: 'New York', coordinates: [-74.0060, 40.7128], country: 'United States' },
+  { name: 'Los Angeles', coordinates: [-118.2437, 34.0522], country: 'United States' },
+  { name: 'London', coordinates: [-0.1278, 51.5074], country: 'United Kingdom' },
+  { name: 'Paris', coordinates: [2.3522, 48.8566], country: 'France' },
+  { name: 'Beijing', coordinates: [116.4074, 39.9042], country: 'China' },
+  { name: 'Tokyo', coordinates: [139.6917, 35.6895], country: 'Japan' },
+  { name: 'Sydney', coordinates: [151.2093, -33.8688], country: 'Australia' },
+  { name: 'Rio de Janeiro', coordinates: [-43.1729, -22.9068], country: 'Brazil' },
+  { name: 'Cairo', coordinates: [31.2357, 30.0444], country: 'Egypt' },
+  { name: 'Mumbai', coordinates: [72.8777, 19.0760], country: 'India' },
+  { name: 'Moscow', coordinates: [37.6173, 55.7558], country: 'Russia' },
+  { name: 'Cape Town', coordinates: [18.4241, -33.9249], country: 'South Africa' },
 ];
 
 // AQI color scale
@@ -40,11 +43,42 @@ const colorScale = scaleLinear()
     '#7E0023', // Hazardous
   ]);
 
+// Weather condition icons mapping (using emoji as placeholders)
+const weatherIcons = {
+  clear: '☀️',
+  cloudy: '☁️',
+  partlyCloudy: '⛅',
+  rain: '🌧️',
+  snow: '❄️',
+  fog: '🌫️',
+  thunderstorm: '⛈️',
+};
+
+// Convert weather code to weather type
+const getWeatherType = (code) => {
+  if (code === 0 || code === 1) return 'clear';
+  if (code === 2) return 'partlyCloudy';
+  if (code === 3) return 'cloudy';
+  if (code === 45 || code === 48) return 'fog';
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return 'rain';
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return 'snow';
+  if ([95, 96, 99].includes(code)) return 'thunderstorm';
+  return 'clear'; // default
+};
+
 const InteractiveWorldMap = ({ onRegionClick }) => {
+  const dispatch = useDispatch();
   const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
   const [tooltipContent, setTooltipContent] = useState('');
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
+  const [activeCity, setActiveCity] = useState(null);
+  const [cityWeatherData, setCityWeatherData] = useState({});
+  const [displayMode, setDisplayMode] = useState('airQuality'); // 'airQuality', 'weather', 'combined'
+
+  // Get weather data from Redux store
+  const weatherData = useSelector((state) => state.weatherReducer?.weatherData);
+  const airQualityData = useSelector((state) => state.weatherReducer?.airQualityForecast);
 
   useEffect(() => {
     const handleResize = () => {
@@ -54,10 +88,22 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
     window.addEventListener('resize', handleResize);
     handleResize();
 
+    // Fetch weather data for all major cities
+    majorCities.forEach(city => {
+      dispatch(fetchCombinedWeatherAndAirQuality(city.coordinates[1], city.coordinates[0]))
+        .then(data => {
+          setCityWeatherData(prevData => ({
+            ...prevData,
+            [city.name]: data
+          }));
+        })
+        .catch(error => console.error(`Error fetching data for ${city.name}:`, error));
+    });
+
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [dispatch]);
 
   const handleMoveEnd = (position) => {
     setPosition(position);
@@ -82,8 +128,88 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
     setShowTooltip(false);
   };
 
+  const handleCityClick = (city) => {
+    setActiveCity(city.name === activeCity ? null : city.name);
+  };
+
+  // Get mock or real AQI value for city
+  const getCityAQI = (cityName) => {
+    // If we have real data, use it
+    if (cityWeatherData[cityName] && 
+        cityWeatherData[cityName].airQuality && 
+        cityWeatherData[cityName].airQuality.hourly && 
+        cityWeatherData[cityName].airQuality.hourly.pm2_5) {
+      
+      const latestIndex = cityWeatherData[cityName].airQuality.hourly.time.length - 1;
+      const pm25 = cityWeatherData[cityName].airQuality.hourly.pm2_5[latestIndex];
+      
+      // Convert PM2.5 to AQI (simplified formula)
+      if (pm25 <= 12) return 25;
+      if (pm25 <= 35.4) return 75;
+      if (pm25 <= 55.4) return 125;
+      if (pm25 <= 150.4) return 175;
+      if (pm25 <= 250.4) return 250;
+      return 350;
+    }
+    
+    // Use mock data as fallback
+    const mockValues = {
+      'New York': 45,
+      'Los Angeles': 72,
+      'London': 38,
+      'Paris': 42,
+      'Beijing': 112,
+      'Tokyo': 56,
+      'Sydney': 28,
+      'Rio de Janeiro': 63,
+      'Cairo': 95,
+      'Mumbai': 134,
+      'Moscow': 51,
+      'Cape Town': 47,
+    };
+    
+    return mockValues[cityName] || Math.floor(Math.random() * 200);
+  };
+
+  // Get weather icon for city
+  const getCityWeatherIcon = (cityName) => {
+    if (cityWeatherData[cityName] && 
+        cityWeatherData[cityName].weather && 
+        cityWeatherData[cityName].weather.current_weather) {
+      
+      const weatherCode = cityWeatherData[cityName].weather.current_weather.weathercode;
+      const weatherType = getWeatherType(weatherCode);
+      return weatherIcons[weatherType];
+    }
+    
+    // Default icon if no data
+    return weatherIcons.clear;
+  };
+
   return (
     <div className="interactive-map-container" onMouseMove={handleMouseMove}>
+      {/* Display mode toggles */}
+      <div className="map-display-options">
+        <button 
+          className={`display-option ${displayMode === 'airQuality' ? 'active' : ''}`}
+          onClick={() => setDisplayMode('airQuality')}
+        >
+          Air Quality
+        </button>
+        <button 
+          className={`display-option ${displayMode === 'weather' ? 'active' : ''}`}
+          onClick={() => setDisplayMode('weather')}
+        >
+          Weather
+        </button>
+        <button 
+          className={`display-option ${displayMode === 'combined' ? 'active' : ''}`}
+          onClick={() => setDisplayMode('combined')}
+        >
+          Combined View
+        </button>
+      </div>
+
       {showTooltip && (
         <div
           className="map-tooltip"
@@ -95,6 +221,7 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
           {tooltipContent}
         </div>
       )}
+      
       <ComposableMap
         projectionConfig={{
           scale: 147,
@@ -139,43 +266,111 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
             ))}
           </Geographies>
 
-          {/* Air Quality Markers */}
-          {mockAirQualityData.map((city, index) => (
-            <Marker key={index} coordinates={city.coordinates}>
-              <circle
-                r={city.value / 15}
-                fill={colorScale(city.value)}
-                stroke="#FFFFFF"
-                strokeWidth={1}
-                opacity={0.8}
-                className="city-marker"
-              />
-            </Marker>
-          ))}
-
-          {/* Major annotations */}
-          <Annotation
-            subject={[78.9629, 20.5937]} // India
-            dx={-30}
-            dy={-30}
-            connectorProps={{
-              stroke: '#009688',
-              strokeWidth: 1.5,
-              strokeLinecap: 'round',
-            }}
-          >
-            <text
-              x={4}
-              y={-4}
-              fill="#009688"
-              textAnchor="end"
-              alignmentBaseline="middle"
-              className="annotation-text"
-              fontSize={14}
-            >
-              India
-            </text>
-          </Annotation>
+          {/* Air Quality & Weather Markers */}
+          {majorCities.map((city, index) => {
+            const aqi = getCityAQI(city.name);
+            const weatherIcon = getCityWeatherIcon(city.name);
+            
+            return (
+              <React.Fragment key={index}>
+                {/* Show different markers based on display mode */}
+                {(displayMode === 'airQuality' || displayMode === 'combined') && (
+                  <Marker coordinates={city.coordinates} onClick={() => handleCityClick(city)}>
+                    <circle
+                      r={aqi / 15 + 5}
+                      fill={colorScale(aqi)}
+                      stroke="#FFFFFF"
+                      strokeWidth={1}
+                      opacity={0.8}
+                      className="city-marker"
+                    />
+                  </Marker>
+                )}
+                
+                {(displayMode === 'weather' || displayMode === 'combined') && (
+                  <Marker 
+                    coordinates={[
+                      city.coordinates[0] + (displayMode === 'combined' ? 3 : 0), 
+                      city.coordinates[1] + (displayMode === 'combined' ? 3 : 0)
+                    ]} 
+                    onClick={() => handleCityClick(city)}
+                  >
+                    <text 
+                      textAnchor="middle" 
+                      dominantBaseline="middle"
+                      style={{ fontSize: displayMode === 'combined' ? '14px' : '18px' }}
+                      className="weather-icon-marker"
+                    >
+                      {weatherIcon}
+                    </text>
+                  </Marker>
+                )}
+                
+                {/* City name for selected city */}
+                {activeCity === city.name && (
+                  <Annotation
+                    subject={city.coordinates}
+                    dx={-40}
+                    dy={-40}
+                    connectorProps={{
+                      stroke: '#009688',
+                      strokeWidth: 2,
+                      strokeLinecap: 'round',
+                    }}
+                  >
+                    <g>
+                      <rect
+                        x={4}
+                        y={-30}
+                        width={120}
+                        height={50}
+                        rx={5}
+                        fill="rgba(255,255,255,0.9)"
+                        stroke="#009688"
+                      />
+                      <text
+                        x={12}
+                        y={-15}
+                        fill="#000"
+                        textAnchor="start"
+                        alignmentBaseline="middle"
+                        className="annotation-text city-name"
+                        fontSize={12}
+                        fontWeight="bold"
+                      >
+                        {city.name}
+                      </text>
+                      <text
+                        x={12}
+                        y={0}
+                        fill="#000"
+                        textAnchor="start"
+                        alignmentBaseline="middle"
+                        className="annotation-text"
+                        fontSize={10}
+                      >
+                        AQI: {aqi} ({aqi <= 50 ? 'Good' : aqi <= 100 ? 'Moderate' : 'Poor'})
+                      </text>
+                      <text
+                        x={12}
+                        y={15}
+                        fill="#000"
+                        textAnchor="start"
+                        alignmentBaseline="middle"
+                        className="annotation-text"
+                        fontSize={10}
+                      >
+                        {weatherIcon} {
+                          cityWeatherData[city.name]?.weather?.current_weather?.temperature 
+                          ? `${cityWeatherData[city.name].weather.current_weather.temperature}°C` 
+                          : ''}
+                      </text>
+                    </g>
+                  </Annotation>
+                )}
+              </React.Fragment>
+            );
+          })}
         </ZoomableGroup>
       </ComposableMap>
 
@@ -207,6 +402,18 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
             <span className="legend-color" style={{ backgroundColor: '#7E0023' }} />
             <span>Hazardous (300+)</span>
           </div>
+        </div>
+        
+        <div className="legend-divider"></div>
+        
+        <h4>Weather Conditions</h4>
+        <div className="legend-items weather-legend">
+          {Object.entries(weatherIcons).map(([type, icon], index) => (
+            <div className="legend-item" key={index}>
+              <span className="weather-icon">{icon}</span>
+              <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

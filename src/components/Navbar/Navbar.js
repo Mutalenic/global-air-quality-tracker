@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import './Navbar.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faHome, 
-  faArrowLeft, 
-  faCloud, 
-  faGlobe, 
+import {
+  faHome,
+  faArrowLeft,
+  faCloud,
+  faGlobe,
   faChartLine,
   faBars,
-  faTimes
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = () => {
@@ -23,7 +23,7 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -62,19 +62,19 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-            <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
               <FontAwesomeIcon icon={faHome} className="nav-icon" />
               <span>Home</span>
             </NavLink>
-            <NavLink to="/countries" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/countries" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
               <FontAwesomeIcon icon={faGlobe} className="nav-icon" />
               <span>Countries</span>
             </NavLink>
-            <NavLink to="/pollution" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/pollution" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
               <FontAwesomeIcon icon={faChartLine} className="nav-icon" />
               <span>Pollution</span>
             </NavLink>
-            <NavLink to="/weather" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/weather" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
               <FontAwesomeIcon icon={faCloud} className="nav-icon" />
               <span>Weather</span>
             </NavLink>

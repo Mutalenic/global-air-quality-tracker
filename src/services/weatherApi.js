@@ -20,15 +20,15 @@ export const fetchWeatherData = async (latitude, longitude) => {
       hourly: 'temperature_2m,relativehumidity_2m,windspeed_10m,precipitation',
       daily: 'weathercode,temperature_2m_max,temperature_2m_min',
       timezone: 'auto',
-      current_weather: 'true'
+      current_weather: 'true',
     });
 
     const response = await fetch(`${WEATHER_API_BASE_URL}?${params.toString()}`);
-    
+
     if (!response.ok) {
       throw new Error(`Weather API error: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error('Error fetching weather data:', error);
@@ -48,16 +48,16 @@ export const fetchAirQualityForecast = async (latitude, longitude) => {
       latitude,
       longitude,
       hourly: 'pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,ozone',
-      timezone: 'auto'
+      timezone: 'auto',
     });
-    
+
     // Open-Meteo uses a different endpoint for air quality
     const response = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${params.toString()}`);
-    
+
     if (!response.ok) {
       throw new Error(`Air Quality API error: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error('Error fetching air quality forecast:', error);
@@ -75,12 +75,12 @@ export const fetchCombinedWeatherAndAirQuality = async (latitude, longitude) => 
   try {
     const [weatherData, airQualityData] = await Promise.all([
       fetchWeatherData(latitude, longitude),
-      fetchAirQualityForecast(latitude, longitude)
+      fetchAirQualityForecast(latitude, longitude),
     ]);
-    
+
     return {
       weather: weatherData,
-      airQuality: airQualityData
+      airQuality: airQualityData,
     };
   } catch (error) {
     console.error('Error fetching combined data:', error);
@@ -123,9 +123,9 @@ export const getWeatherDescription = (code) => {
     86: 'Heavy snow showers',
     95: 'Thunderstorm',
     96: 'Thunderstorm with slight hail',
-    99: 'Thunderstorm with heavy hail'
+    99: 'Thunderstorm with heavy hail',
   };
-  
+
   return weatherCodes[code] || 'Unknown';
 };
 
@@ -139,59 +139,59 @@ export const analyzeWeatherAirQualityRelationship = (weatherData, airQualityData
   const analysis = {
     effects: [],
     overallImpact: 'neutral',
-    recommendations: []
+    recommendations: [],
   };
-  
+
   // Extract relevant data
   const temperature = weatherData.current_weather?.temperature || 0;
   const windSpeed = weatherData.current_weather?.windspeed || 0;
   const weatherCode = weatherData.current_weather?.weathercode || 0;
-  
+
   // Get the most recent hour's air quality data if available
   const latestHourIndex = airQualityData.hourly?.time?.length - 1 || 0;
   const pm25Level = airQualityData.hourly?.pm2_5?.[latestHourIndex] || 0;
-  
+
   // Temperature effects
   if (temperature > 30) {
     analysis.effects.push({
       factor: 'temperature',
       description: 'High temperatures accelerate chemical reactions that form ozone and other pollutants.',
-      impact: 'negative'
+      impact: 'negative',
     });
     analysis.recommendations.push('Consider limiting outdoor activities during peak heat hours.');
   }
-  
+
   // Wind effects
   if (windSpeed < 5) {
     analysis.effects.push({
       factor: 'wind',
       description: 'Low wind speed allows pollutants to accumulate near the ground.',
-      impact: 'negative'
+      impact: 'negative',
     });
   } else if (windSpeed > 20) {
     analysis.effects.push({
       factor: 'wind',
       description: 'Strong winds help disperse pollutants, improving air quality.',
-      impact: 'positive'
+      impact: 'positive',
     });
     analysis.overallImpact = 'positive';
   }
-  
+
   // Precipitation effects
   if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(weatherCode)) {
     analysis.effects.push({
       factor: 'precipitation',
       description: 'Rain helps clear particulate matter from the air.',
-      impact: 'positive'
+      impact: 'positive',
     });
     analysis.overallImpact = 'positive';
   }
-  
+
   // PM2.5 levels and weather combined analysis
   if (pm25Level > 35 && windSpeed < 5) {
     analysis.recommendations.push('Poor air quality and stagnant air conditions. Consider using air purifiers indoors.');
   }
-  
+
   return analysis;
 };
 
@@ -200,5 +200,5 @@ export default {
   fetchAirQualityForecast,
   fetchCombinedWeatherAndAirQuality,
   getWeatherDescription,
-  analyzeWeatherAirQualityRelationship
+  analyzeWeatherAirQualityRelationship,
 };

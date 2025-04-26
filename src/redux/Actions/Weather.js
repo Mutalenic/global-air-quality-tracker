@@ -13,45 +13,45 @@ export const FETCH_COMBINED_DATA_FAILURE = 'FETCH_COMBINED_DATA_FAILURE';
 
 // Action Creators
 export const fetchWeatherStart = () => ({
-  type: FETCH_WEATHER_START
+  type: FETCH_WEATHER_START,
 });
 
 export const fetchWeatherSuccess = (weatherData) => ({
   type: FETCH_WEATHER_SUCCESS,
-  payload: weatherData
+  payload: weatherData,
 });
 
 export const fetchWeatherFailure = (error) => ({
   type: FETCH_WEATHER_FAILURE,
-  payload: error
+  payload: error,
 });
 
 export const fetchAirQualityForecastStart = () => ({
-  type: FETCH_AIR_QUALITY_FORECAST_START
+  type: FETCH_AIR_QUALITY_FORECAST_START,
 });
 
 export const fetchAirQualityForecastSuccess = (forecastData) => ({
   type: FETCH_AIR_QUALITY_FORECAST_SUCCESS,
-  payload: forecastData
+  payload: forecastData,
 });
 
 export const fetchAirQualityForecastFailure = (error) => ({
   type: FETCH_AIR_QUALITY_FORECAST_FAILURE,
-  payload: error
+  payload: error,
 });
 
 export const fetchCombinedDataStart = () => ({
-  type: FETCH_COMBINED_DATA_START
+  type: FETCH_COMBINED_DATA_START,
 });
 
 export const fetchCombinedDataSuccess = (combinedData) => ({
   type: FETCH_COMBINED_DATA_SUCCESS,
-  payload: combinedData
+  payload: combinedData,
 });
 
 export const fetchCombinedDataFailure = (error) => ({
   type: FETCH_COMBINED_DATA_FAILURE,
-  payload: error
+  payload: error,
 });
 
 // Thunk Action Creators
@@ -83,19 +83,19 @@ export const fetchCombinedWeatherAndAirQuality = (latitude, longitude) => async 
   dispatch(fetchCombinedDataStart());
   try {
     const combinedData = await weatherApi.fetchCombinedWeatherAndAirQuality(latitude, longitude);
-    
+
     // Analyze the relationship between weather and air quality
     const analysis = weatherApi.analyzeWeatherAirQualityRelationship(
-      combinedData.weather, 
-      combinedData.airQuality
+      combinedData.weather,
+      combinedData.airQuality,
     );
-    
+
     // Add the analysis to the combined data
     const enrichedData = {
       ...combinedData,
-      analysis
+      analysis,
     };
-    
+
     dispatch(fetchCombinedDataSuccess(enrichedData));
     return enrichedData;
   } catch (error) {

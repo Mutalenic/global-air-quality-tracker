@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Navbar from '../Navbar/Navbar';
-import Weather from '../Weather/Weather';
+import Weather from './Weather';
 import './WeatherPage.css';
 
 const WeatherPage = () => {
   const [location, setLocation] = useState({
     latitude: 51.5074, // Default London
-    longitude: -0.1278
+    longitude: -0.1278,
   });
   const [searchLocation, setSearchLocation] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -16,18 +16,18 @@ const WeatherPage = () => {
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchLocation.trim()) return;
-    
+
     setIsSearching(true);
     try {
       // Use OpenCage Geocoding API to convert location name to coordinates
       const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(searchLocation)}&key=YOUR_API_KEY`);
       const data = await response.json();
-      
+
       if (data.results && data.results.length > 0) {
         const result = data.results[0];
         setLocation({
           latitude: result.geometry.lat,
-          longitude: result.geometry.lng
+          longitude: result.geometry.lng,
         });
       } else {
         alert('Location not found. Please try a different search term.');
@@ -43,14 +43,14 @@ const WeatherPage = () => {
   return (
     <div className="weather-page">
       <Navbar />
-      
+
       <div className="weather-page-content">
         <div className="weather-header-section">
           <h1>Weather & Air Quality</h1>
           <p className="weather-subheading">
             Explore how weather conditions affect air quality around the world
           </p>
-          
+
           <form className="location-search-form" onSubmit={handleSearch}>
             <input
               type="text"
@@ -60,8 +60,8 @@ const WeatherPage = () => {
               className="location-search-input"
               disabled={isSearching}
             />
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="location-search-button"
               disabled={isSearching}
             >
@@ -69,11 +69,11 @@ const WeatherPage = () => {
             </button>
           </form>
         </div>
-        
+
         <div className="weather-component-container">
           <Weather latitude={location.latitude} longitude={location.longitude} />
         </div>
-        
+
         <div className="weather-info-section">
           <h2>Understanding Weather & Air Quality</h2>
           <div className="info-grid">
