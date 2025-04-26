@@ -208,10 +208,45 @@ export const analyzeWeatherAirQualityRelationship = (weatherData, airQualityData
   return analysis;
 };
 
+/**
+ * OpenAQ API Service
+ * Fetches the latest air quality data for a given city or coordinates
+ */
+const OPENAQ_LATEST_URL = 'https://api.openaq.org/v2/latest';
+
+/**
+ * Fetch latest air quality data from OpenAQ for a given city or coordinates
+ * @param {Object} params - { city, coordinates: [lon, lat] }
+ * @returns {Promise} - Promise containing latest air quality data
+ */
+export const fetchOpenAQLatest = async ({ city, coordinates }) => {
+  try {
+    let url = `${OPENAQ_LATEST_URL}?`;
+    if (city) {
+      url += `city=${encodeURIComponent(city)}`;
+    } else if (coordinates && coordinates.length === 2) {
+      url += `coordinates=${coordinates[1]},${coordinates[0]}`;
+    } else {
+      throw new Error('City or coordinates required');
+    }
+    url += '&limit=1';
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`OpenAQ error: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching OpenAQ latest data:', error);
+    }
+    throw error;
+  }
+};
+
 export default {
   fetchWeatherData,
   fetchAirQualityForecast,
   fetchCombinedWeatherAndAirQuality,
   getWeatherDescription,
   analyzeWeatherAirQualityRelationship,
+  fetchOpenAQLatest,
 };

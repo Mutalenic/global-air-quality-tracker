@@ -3,6 +3,7 @@ import {
   fetchAirQualityForecast as fetchAirQualityData,
   fetchCombinedWeatherAndAirQuality as fetchCombined,
   analyzeWeatherAirQualityRelationship,
+  fetchOpenAQLatest,
 } from '../../services/weatherApi';
 
 // Action Types
@@ -15,6 +16,11 @@ export const FETCH_AIR_QUALITY_FORECAST_FAILURE = 'FETCH_AIR_QUALITY_FORECAST_FA
 export const FETCH_COMBINED_DATA_START = 'FETCH_COMBINED_DATA_START';
 export const FETCH_COMBINED_DATA_SUCCESS = 'FETCH_COMBINED_DATA_SUCCESS';
 export const FETCH_COMBINED_DATA_FAILURE = 'FETCH_COMBINED_DATA_FAILURE';
+
+// OpenAQ action types
+export const FETCH_OPENAQ_LATEST_START = 'FETCH_OPENAQ_LATEST_START';
+export const FETCH_OPENAQ_LATEST_SUCCESS = 'FETCH_OPENAQ_LATEST_SUCCESS';
+export const FETCH_OPENAQ_LATEST_FAILURE = 'FETCH_OPENAQ_LATEST_FAILURE';
 
 // Action Creators
 export const fetchWeatherStart = () => ({
@@ -58,6 +64,10 @@ export const fetchCombinedDataFailure = (error) => ({
   type: FETCH_COMBINED_DATA_FAILURE,
   payload: error,
 });
+
+export const fetchOpenAQLatestStart = () => ({ type: FETCH_OPENAQ_LATEST_START });
+export const fetchOpenAQLatestSuccess = (data) => ({ type: FETCH_OPENAQ_LATEST_SUCCESS, payload: data });
+export const fetchOpenAQLatestFailure = (error) => ({ type: FETCH_OPENAQ_LATEST_FAILURE, payload: error });
 
 // Thunk Action Creators
 export const fetchWeather = (latitude, longitude) => async (dispatch) => {
@@ -105,6 +115,19 @@ export const fetchCombinedWeatherAndAirQuality = (latitude, longitude) => async 
     return enrichedData;
   } catch (error) {
     dispatch(fetchCombinedDataFailure(error.message));
+    throw error;
+  }
+};
+
+// Thunk to fetch latest air quality from OpenAQ
+export const getOpenAQLatest = (params) => async (dispatch) => {
+  dispatch(fetchOpenAQLatestStart());
+  try {
+    const data = await fetchOpenAQLatest(params);
+    dispatch(fetchOpenAQLatestSuccess(data));
+    return data;
+  } catch (error) {
+    dispatch(fetchOpenAQLatestFailure(error.message));
     throw error;
   }
 };

@@ -8,6 +8,9 @@ import {
   FETCH_COMBINED_DATA_START,
   FETCH_COMBINED_DATA_SUCCESS,
   FETCH_COMBINED_DATA_FAILURE,
+  FETCH_OPENAQ_LATEST_START,
+  FETCH_OPENAQ_LATEST_SUCCESS,
+  FETCH_OPENAQ_LATEST_FAILURE,
 } from '../Actions/Weather';
 
 const initialState = {
@@ -15,15 +18,18 @@ const initialState = {
   airQualityForecast: null,
   combinedData: null,
   analysis: null,
+  openAQLatest: null,
   loading: {
     weather: false,
     airQualityForecast: false,
     combinedData: false,
+    openAQLatest: false,
   },
   error: {
     weather: null,
     airQualityForecast: null,
     combinedData: null,
+    openAQLatest: null,
   },
 };
 
@@ -134,6 +140,41 @@ const weatherReducer = (state = initialState, action) => {
         error: {
           ...state.error,
           combinedData: action.payload,
+        },
+      };
+
+    // OpenAQ Latest Data Actions
+    case FETCH_OPENAQ_LATEST_START:
+      return {
+        ...state,
+        loading: {
+          ...state.loading,
+          openAQLatest: true,
+        },
+        error: {
+          ...state.error,
+          openAQLatest: null,
+        },
+      };
+    case FETCH_OPENAQ_LATEST_SUCCESS:
+      return {
+        ...state,
+        openAQLatest: action.payload,
+        loading: {
+          ...state.loading,
+          openAQLatest: false,
+        },
+      };
+    case FETCH_OPENAQ_LATEST_FAILURE:
+      return {
+        ...state,
+        loading: {
+          ...state.loading,
+          openAQLatest: false,
+        },
+        error: {
+          ...state.error,
+          openAQLatest: action.payload,
         },
       };
 
