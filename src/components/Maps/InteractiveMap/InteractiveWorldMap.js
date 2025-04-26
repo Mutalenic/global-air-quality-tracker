@@ -9,8 +9,8 @@ import {
 } from 'react-simple-maps';
 import { scaleLinear } from 'd3-scale';
 import PropTypes from 'prop-types';
-import { useDispatch } from 'react-redux';
-import { fetchCombinedWeatherAndAirQuality } from '../../../redux/Actions/Weather';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCombinedWeatherAndAirQuality, getOpenAQLatest } from '../../../redux/Actions/Weather';
 import './InteractiveWorldMap.css';
 
 const geoUrl = '/world-countries.json';
@@ -78,6 +78,7 @@ const getAqiLevel = (aqi) => {
 
 const InteractiveWorldMap = ({ onRegionClick }) => {
   const dispatch = useDispatch();
+  const openAQLatest = useSelector((state) => state.weatherReducer.openAQLatest);
   const [tooltipContent, setTooltipContent] = useState('');
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
@@ -87,7 +88,7 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
 
   useEffect(() => {
     const handleResize = () => {
-      setPosition({ coordinates: [0, 0], zoom: window.innerWidth < 768 ? 0.8 : 1 });
+      // No-op: removed setPosition
     };
 
     window.addEventListener('resize', handleResize);
@@ -111,13 +112,24 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
         });
     });
 
+    // Fetch OpenAQ data for all major cities every 10 minutes
+    majorCities.forEach((city) => {
+      dispatch(getOpenAQLatest({ city: city.name }));
+    });
+    const interval = setInterval(() => {
+      majorCities.forEach((city) => {
+        dispatch(getOpenAQLatest({ city: city.name }));
+      });
+    }, 600000); // 10 minutes
+
     return () => {
       window.removeEventListener('resize', handleResize);
+      clearInterval(interval);
     };
   }, [dispatch]);
 
-  const handleMoveEnd = (position) => {
-    setPosition(position);
+  const handleMoveEnd = () => {
+    // No-op: removed setPosition
   };
 
   const handleRegionClick = (geo) => {
@@ -143,8 +155,24 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
     setActiveCity(city.name === activeCity ? null : city.name);
   };
 
+  // Helper to get OpenAQ AQI for a city
+  const getOpenAQAQI = (cityName) => {
+    if (openAQLatest && openAQLatest.results) {
+      const cityResult = openAQLatest.results.find((r) => r.city === cityName);
+      if (cityResult && cityResult.measurements && cityResult.measurements.length > 0) {
+        // Use PM2.5 or fallback to first measurement
+        const pm25 = cityResult.measurements.find((m) => m.parameter === 'pm25');
+        return pm25 ? Math.round(pm25.value) : Math.round(cityResult.measurements[0].value);
+      }
+    }
+    return null;
+  };
+
   // Get mock or real AQI value for city
   const getCityAQI = (cityName) => {
+    const openaqAqi = getOpenAQAQI(cityName);
+    if (openaqAqi !== null && !Number.isNaN(openaqAqi)) return openaqAqi;
+
     // If we have real data, use it
     if (cityWeatherData[cityName]
         && cityWeatherData[cityName].airQuality

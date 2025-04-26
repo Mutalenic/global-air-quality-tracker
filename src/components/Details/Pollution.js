@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import { getPollutionData } from '../../redux/Actions/Pollution';
+import { getOpenAQLatest } from '../../redux/Actions/Weather';
 import Weather from '../Weather/Weather';
 import PollutionChart from './PollutionChart';
 import './Pollution.css';
@@ -23,6 +24,7 @@ const Pollution = ({
 }) => {
   const dispatch = useDispatch();
   const pollutions = useSelector((state) => state.pollutionReducer);
+  const openAQLatest = useSelector((state) => state.weatherReducer.openAQLatest);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showWeather, setShowWeather] = useState(false);
@@ -32,19 +34,32 @@ const Pollution = ({
     const fetchData = async () => {
       try {
         await dispatch(getPollutionData(lat, lng, flag, name));
+        await dispatch(getOpenAQLatest({ city: name }));
         setLoading(false);
       } catch (err) {
         setError(err);
         setLoading(false);
       }
     };
-
     fetchData();
+    // Optionally, set up periodic refresh for OpenAQ
+    const interval = setInterval(() => {
+      dispatch(getOpenAQLatest({ city: name }));
+    }, 600000); // 10 minutes
+    return () => clearInterval(interval);
   }, [dispatch, lat, lng, flag, name]);
 
-  useEffect(() => {
-    // Removed console log statement
-  }, [flag]);
+  // Helper to get OpenAQ values for this city
+  const getOpenAQC = (param) => {
+    if (openAQLatest && openAQLatest.results) {
+      const cityResult = openAQLatest.results.find((r) => r.city === name);
+      if (cityResult && cityResult.measurements && cityResult.measurements.length > 0) {
+        const found = cityResult.measurements.find((m) => m.parameter === param);
+        return found ? found.value : null;
+      }
+    }
+    return null;
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -100,55 +115,62 @@ const Pollution = ({
           <div className="pollutionDataCard aqiCard">
             <p>Air Quality Index:</p>
             <span className={`aqi ${getAqiClass(pollution.aqi)}`}>
-              {pollution.aqi}
+              {getOpenAQC('pm25') !== null ? Math.round(getOpenAQC('pm25')) : pollution.aqi}
+              {getOpenAQC('pm25') !== null && <span className="source-label"> (OpenAQ)</span>}
             </span>
           </div>
           <div className="pollutionDataCard pm25Card">
             <p>PM2.5:</p>
             <span>
-              {pollution.pm25}
+              {getOpenAQC('pm25') !== null ? getOpenAQC('pm25') : pollution.pm25}
               {' '}
               µg/m³
+              {getOpenAQC('pm25') !== null && <span className="source-label"> (OpenAQ)</span>}
             </span>
           </div>
           <div className="pollutionDataCard pm10Card">
             <p>PM10:</p>
             <span>
-              {pollution.pm10}
+              {getOpenAQC('pm10') !== null ? getOpenAQC('pm10') : pollution.pm10}
               {' '}
               µg/m³
+              {getOpenAQC('pm10') !== null && <span className="source-label"> (OpenAQ)</span>}
             </span>
           </div>
           <div className="pollutionDataCard o3Card">
             <p>O3:</p>
             <span>
-              {pollution.o3}
+              {getOpenAQC('o3') !== null ? getOpenAQC('o3') : pollution.o3}
               {' '}
               µg/m³
+              {getOpenAQC('o3') !== null && <span className="source-label"> (OpenAQ)</span>}
             </span>
           </div>
           <div className="pollutionDataCard no2Card">
             <p>NO2:</p>
             <span>
-              {pollution.no2}
+              {getOpenAQC('no2') !== null ? getOpenAQC('no2') : pollution.no2}
               {' '}
               µg/m³
+              {getOpenAQC('no2') !== null && <span className="source-label"> (OpenAQ)</span>}
             </span>
           </div>
           <div className="pollutionDataCard so2Card">
             <p>SO2:</p>
             <span>
-              {pollution.so2}
+              {getOpenAQC('so2') !== null ? getOpenAQC('so2') : pollution.so2}
               {' '}
               µg/m³
+              {getOpenAQC('so2') !== null && <span className="source-label"> (OpenAQ)</span>}
             </span>
           </div>
           <div className="pollutionDataCard coCard">
             <p>CO:</p>
             <span>
-              {pollution.co}
+              {getOpenAQC('co') !== null ? getOpenAQC('co') : pollution.co}
               {' '}
               µg/m³
+              {getOpenAQC('co') !== null && <span className="source-label"> (OpenAQ)</span>}
             </span>
           </div>
         </div>
