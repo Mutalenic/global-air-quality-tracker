@@ -42,7 +42,7 @@ export const getCountries = (reg) => async (dispatch) => {
       code: country.cca2,
       flag: country.flags.png,
     }));
-    
+
     dispatch(fetchCountriesSuccess(mappedCountries));
     dispatch(setPagination(1, Math.ceil(mappedCountries.length / 10), mappedCountries.length));
   } catch (error) {
@@ -63,7 +63,7 @@ export const getPaginatedCountries = (reg, page, limit = 10) => async (dispatch)
       code: country.cca2,
       flag: country.flags.png,
     }));
-    
+
     dispatch(fetchCountriesSuccess(mappedCountries));
     dispatch(setPagination(page, Math.ceil(countries.length / limit), countries.length));
   } catch (error) {

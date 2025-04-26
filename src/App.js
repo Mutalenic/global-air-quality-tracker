@@ -14,7 +14,8 @@ const LoadingFallback = () => (
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
-  }}>
+  }}
+  >
     <p>Loading...</p>
   </div>
 );

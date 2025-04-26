@@ -14,7 +14,9 @@ jest.mock('../../workers/countriesWorker.js', () => {
     constructor() {
       this.onmessage = jest.fn();
     }
+
     postMessage = jest.fn();
+
     terminate = jest.fn();
   }
   return MockWorker;

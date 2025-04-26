@@ -1,29 +1,29 @@
 export const fetchCountries = async (reg, page = 1, limit = 10) => {
   // Construct pagination parameters for the API
   const paginationParams = `&page=${page}&limit=${limit}`;
-  
+
   try {
     // Fetch only the countries from a specific region with pagination
     const response = await fetch(`https://restcountries.com/v3.1/region/${reg}?fields=name,region,latlng,population,cca2,flags${paginationParams}`);
-    
+
     // Check if the API supports pagination or not
     // If not, we'll manually implement pagination on the client-side
     const data = await response.json();
-    
+
     if (Array.isArray(data)) {
       // If the API doesn't support pagination, we'll manually paginate the results
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       return data.slice(startIndex, endIndex);
     }
-    
+
     return data;
   } catch (error) {
     // Fallback to fetching all countries and filtering manually
     const allCountries = await fetch('https://restcountries.com/v3.1/all')
-      .then(response => response.json())
-      .then(data => data.filter(country => country.region === reg));
-    
+      .then((response) => response.json())
+      .then((data) => data.filter((country) => country.region === reg));
+
     // Manually implement pagination
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;

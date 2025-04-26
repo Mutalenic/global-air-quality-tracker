@@ -33,31 +33,31 @@ const Regions = () => {
       navigate(`/countries?search=${encodeURIComponent(searchTerm.trim())}&region=${selectedRegion || 'all'}`);
     }
   };
-  
+
   const handleRegionClick = (regionName) => {
     // Map the clicked region to our application's region structure
     const regionMap = {
       'United States of America': 'Americas',
-      'Canada': 'Americas',
-      'Brazil': 'Americas',
-      'Mexico': 'Americas',
+      Canada: 'Americas',
+      Brazil: 'Americas',
+      Mexico: 'Americas',
       'United Kingdom': 'Europe',
-      'France': 'Europe',
-      'Germany': 'Europe',
-      'Italy': 'Europe',
-      'Russia': 'Europe',
-      'China': 'Asia',
-      'India': 'Asia',
-      'Japan': 'Asia',
-      'Australia': 'Oceania',
+      France: 'Europe',
+      Germany: 'Europe',
+      Italy: 'Europe',
+      Russia: 'Europe',
+      China: 'Asia',
+      India: 'Asia',
+      Japan: 'Asia',
+      Australia: 'Oceania',
       'New Zealand': 'Oceania',
       'South Africa': 'Africa',
-      'Egypt': 'Africa',
-      'Nigeria': 'Africa',
-      'Kenya': 'Africa',
-      'Antarctica': 'Antarctic',
+      Egypt: 'Africa',
+      Nigeria: 'Africa',
+      Kenya: 'Africa',
+      Antarctica: 'Antarctic',
     };
-    
+
     const mappedRegion = regionMap[regionName] || '';
     if (mappedRegion) {
       navigate(`/countries?region=${mappedRegion}`);
@@ -74,7 +74,7 @@ const Regions = () => {
           <h1 className="hero-title">Global Air Quality Tracker</h1>
           <p className="hero-subtitle">Monitor air pollution data worldwide in real-time</p>
         </div>
-        
+
         <div className="world-container">
           <InteractiveWorldMap onRegionClick={handleRegionClick} />
         </div>

@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import React, {
+  useState, useEffect, useMemo, Suspense,
+} from 'react';
 import PropTypes from 'prop-types';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -48,31 +50,35 @@ ErrorFallback.propTypes = {
 };
 
 // Create a Pagination component for reusability
-const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  return (
-    <div className="pagination-container">
-      <button 
-        type="button" 
-        className="pagination-button" 
-        onClick={() => onPageChange(currentPage - 1)} 
-        disabled={currentPage <= 1}
-      >
-        <FontAwesomeIcon icon={faAngleLeft} />
-      </button>
-      <span className="pagination-info">
-        Page {currentPage} of {totalPages}
-      </span>
-      <button 
-        type="button" 
-        className="pagination-button" 
-        onClick={() => onPageChange(currentPage + 1)} 
-        disabled={currentPage >= totalPages}
-      >
-        <FontAwesomeIcon icon={faAngleRight} />
-      </button>
-    </div>
-  );
-};
+const Pagination = ({ currentPage, totalPages, onPageChange }) => (
+  <div className="pagination-container">
+    <button
+      type="button"
+      className="pagination-button"
+      onClick={() => onPageChange(currentPage - 1)}
+      disabled={currentPage <= 1}
+    >
+      <FontAwesomeIcon icon={faAngleLeft} />
+    </button>
+    <span className="pagination-info">
+      Page
+      {' '}
+      {currentPage}
+      {' '}
+      of
+      {' '}
+      {totalPages}
+    </span>
+    <button
+      type="button"
+      className="pagination-button"
+      onClick={() => onPageChange(currentPage + 1)}
+      disabled={currentPage >= totalPages}
+    >
+      <FontAwesomeIcon icon={faAngleRight} />
+    </button>
+  </div>
+);
 
 Pagination.propTypes = {
   currentPage: PropTypes.number.isRequired,
@@ -217,9 +223,9 @@ const Countries = () => {
           <div className="region-header">
             <h3>{region}</h3>
             <Suspense fallback={<div>Loading...</div>}>
-              <OptimizedImage 
-                src={regionImage} 
-                alt={region} 
+              <OptimizedImage
+                src={regionImage}
+                alt={region}
                 className="img1"
               />
             </Suspense>

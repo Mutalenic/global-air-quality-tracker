@@ -9,7 +9,9 @@ self.onmessage = (event) => {
 
   switch (type) {
     case 'FILTER_COUNTRIES':
-      const { countries, searchTerm, sortField, sortDirection } = data;
+      const {
+        countries, searchTerm, sortField, sortDirection,
+      } = data;
       const result = filterAndSortCountries(countries, searchTerm, sortField, sortDirection);
       self.postMessage({ type: 'FILTER_RESULT', data: result });
       break;
@@ -23,10 +25,10 @@ self.onmessage = (event) => {
  */
 function filterAndSortCountries(countries, searchTerm, sortField, sortDirection) {
   console.time('worker-filter-sort');
-  
+
   // First filter by search term
   let result = countries;
-  
+
   if (searchTerm) {
     const lowercaseSearch = searchTerm.toLowerCase();
     result = countries.filter((country) => {
@@ -34,7 +36,7 @@ function filterAndSortCountries(countries, searchTerm, sortField, sortDirection)
       return name.includes(lowercaseSearch);
     });
   }
-  
+
   // Then sort by the specified field
   if (sortField) {
     result.sort((a, b) => {
@@ -59,13 +61,13 @@ function filterAndSortCountries(countries, searchTerm, sortField, sortDirection)
           ? valueA.localeCompare(valueB)
           : valueB.localeCompare(valueA);
       }
-      
+
       return sortDirection === 'asc'
         ? valueA - valueB
         : valueB - valueA;
     });
   }
-  
+
   console.timeEnd('worker-filter-sort');
   return result;
 }
