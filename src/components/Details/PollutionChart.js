@@ -45,14 +45,18 @@ const getHealthEffect = (pollutantKey, value) => {
   if (pollutantKey === 'co') {
     const displayValue = value * 100;
     if (displayValue < 4400) return 'Good: Little to no health risk.';
-    if (displayValue < 9400) return 'Moderate: Few sensitive individuals may experience symptoms.';
-    if (displayValue < 12400) return 'Unhealthy for Sensitive Groups: Heart patients at risk.';
-    return 'Unhealthy: Increased risk for everyone, especially sensitive groups.';
+    if (displayValue < 9400) return 'Moderate: Few sensitive individuals may have symptoms.';
+    if (displayValue < 12400) {
+      return 'Unhealthy for Sensitive Groups: Heart patients at risk.';
+    }
+    return 'Unhealthy: Increased risk for all, especially sensitive groups.';
   }
 
   if (pollutantKey === 'pm25') {
     if (value < 12) return 'Good: Little to no health risk.';
-    if (value < 35.4) return 'Moderate: Unusually sensitive people should consider reducing outdoor activity.';
+    if (value < 35.4) {
+      return 'Moderate: Unusually sensitive people should reduce outdoor activity.';
+    }
     if (value < 55.4) {
       return 'Unhealthy for Sensitive Groups: Limit activity if respiratory issues.';
     }
@@ -401,7 +405,7 @@ const PollutionChart = ({ pollutionData }) => {
 
       <div className="chart-controls">
         <div className="control-group">
-          <label htmlFor="chart-type-select" id="chart-type-label">Chart Type:</label>
+          <label htmlFor="chart-type-select">Chart Type:</label>
           <Select
             id="chart-type-select"
             aria-labelledby="chart-type-label"
@@ -414,7 +418,7 @@ const PollutionChart = ({ pollutionData }) => {
         </div>
 
         <div className="control-group">
-          <label htmlFor="time-range-select" id="time-range-label">Time Range:</label>
+          <label htmlFor="time-range-select">Time Range:</label>
           <Select
             id="time-range-select"
             aria-labelledby="time-range-label"
@@ -427,7 +431,7 @@ const PollutionChart = ({ pollutionData }) => {
         </div>
 
         <div className="control-group pollutant-select">
-          <label htmlFor="pollutants-select" id="pollutants-label">Pollutants:</label>
+          <label htmlFor="pollutants-select">Pollutants:</label>
           <Select
             id="pollutants-select"
             aria-labelledby="pollutants-label"
@@ -456,7 +460,7 @@ const PollutionChart = ({ pollutionData }) => {
         </div>
         <div className="legend-item">
           <span className="legend-color" style={{ backgroundColor: COLORS.unhealthySensitive }} />
-          <span>Unhealthy-Sens</span>
+          <span>Unhealthy</span>
         </div>
         <div className="legend-item">
           <span className="legend-color" style={{ backgroundColor: COLORS.unhealthy }} />
