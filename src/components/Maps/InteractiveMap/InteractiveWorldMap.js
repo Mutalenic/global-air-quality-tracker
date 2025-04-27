@@ -209,10 +209,11 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
 
   // Animate legend collapse/expand
   const legendSpring = useSpring({
-    height: legendCollapsed ? 0 : 'auto',
-    opacity: legendCollapsed ? 0 : 1,
-    overflow: 'hidden',
+    // Animate height, opacity, and maybe transform for a slide effect
+    from: { height: legendCollapsed ? 0 : 'auto', opacity: legendCollapsed ? 0 : 1, transform: legendCollapsed ? 'translateY(20px)' : 'translateY(0px)' },
+    to: { height: legendCollapsed ? 0 : 'auto', opacity: legendCollapsed ? 0 : 1, transform: legendCollapsed ? 'translateY(20px)' : 'translateY(0px)' },
     config: { tension: 250, friction: 30 },
+    // Important: Don't set overflow: 'hidden' here if it causes issues with the button
   });
 
   // Animate tooltip
@@ -312,7 +313,12 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
   }
 
   return (
-    <div className="interactive-map-container" onMouseMove={handleMouseMove}>
+    <div
+      className="interactive-map-container"
+      onMouseMove={handleMouseMove}
+      role="application"
+      aria-label="Interactive world map showing air quality and weather data for major cities"
+    >
       {/* Display mode toggles */}
       <div className="map-display-options">
         <button
@@ -517,49 +523,92 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
         </ZoomableGroup>
       </ComposableMap>
 
-      {/* Legend */}
-      <animated.div className="map-legend" style={legendSpring}>
-        <button className="legend-collapse-btn" type="button" onClick={() => setLegendCollapsed((c) => !c)}>
-          {legendCollapsed ? 'Show Legend' : 'Hide Legend'}
-        </button>
-        {!legendCollapsed && (
+      {/* Legend Content (Animated) */}
+      <animated.div
+        className="map-legend" // This div contains the legend content and gets animated
+        style={legendSpring}
+        id="legend-content-animated"
+        role="region"
+        aria-labelledby="legend-heading"
+        // Add overflow hidden here if needed for content clipping, but ensure button is outside
+        // style={{ ...legendSpring, overflow: 'hidden' }} // Option 1: Apply overflow here
+      >
+        {/* Content is always rendered inside, animation handles visibility */}
+        <div id="legend-content">
+          {/* Conditionally render content based on state to avoid rendering when fully collapsed */}
+          {!legendCollapsed && (
           <>
-            <h4>Air Quality Index (AQI)</h4>
+            <h4 id="legend-heading">Map Legend & Filters</h4>
+            {/* ... rest of the legend content (AQI, Weather, Clear button) ... */}
+            <h5>Air Quality Index (AQI)</h5>
             <div className="legend-items">
               {aqiRanges.map((range) => (
                 <button
                   key={range.key}
-                  className={`legend-item legend-btn${selectedAqiRanges.includes(range.key) ? ' selected' : ''}`}
+                  className={`legend-btn${selectedAqiRanges.includes(range.key) ? ' selected' : ''}`}
                   onClick={() => toggleAqiRange(range.key)}
                   type="button"
+                  aria-pressed={selectedAqiRanges.includes(range.key)}
+                  aria-label={`Filter by AQI: ${range.label}`}
                 >
                   <span
                     className="legend-color-swatch"
                     style={{ backgroundColor: range.color }}
+                    aria-hidden="true"
                   />
                   <span>{range.label}</span>
                 </button>
               ))}
             </div>
             <div className="legend-divider" />
-            <h4>Weather Conditions</h4>
+            <h5>Weather Conditions</h5>
             <div className="legend-items weather-legend">
               {Object.entries(weatherIcons).map(([type, icon]) => (
                 <button
                   key={`weather-type-${type}`}
-                  className={`legend-item legend-btn${selectedWeatherTypes.includes(type) ? ' selected' : ''}`}
-                  style={{ margin: '2px', border: '1px solid #888' }}
+                  className={`legend-btn${selectedWeatherTypes.includes(type) ? ' selected' : ''}`}
                   onClick={() => toggleWeatherType(type)}
                   type="button"
+                  aria-pressed={selectedWeatherTypes.includes(type)}
+                  aria-label={`Filter by Weather: ${type.charAt(0).toUpperCase() + type.slice(1)}`}
                 >
-                  <span className="weather-icon">{icon}</span>
+                  <span className="weather-icon" aria-hidden="true">{icon}</span>
                   <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
                 </button>
               ))}
             </div>
+            {(selectedAqiRanges.length > 0 || selectedWeatherTypes.length > 0) && (
+            <>
+              <div className="legend-divider" />
+              <button
+                type="button"
+                className="legend-btn clear-filters-btn"
+                onClick={() => {
+                  setSelectedAqiRanges([]);
+                  setSelectedWeatherTypes([]);
+                }}
+                aria-label="Clear all map filters"
+              >
+                Clear All Filters
+              </button>
+            </>
+            )}
           </>
-        )}
+          )}
+        </div>
       </animated.div>
+
+      {/* Collapse/Expand Button - Positioned independently */}
+      <button
+        className="legend-collapse-btn" // Needs specific CSS positioning
+        type="button"
+        onClick={() => setLegendCollapsed((c) => !c)}
+        aria-expanded={!legendCollapsed}
+        aria-controls="legend-content-animated" // Still controls the animated div
+      >
+        {legendCollapsed ? 'Show Legend' : 'Hide Legend'}
+      </button>
+
     </div>
   );
 };
