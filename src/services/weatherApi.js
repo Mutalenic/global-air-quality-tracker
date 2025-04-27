@@ -212,7 +212,9 @@ export const analyzeWeatherAirQualityRelationship = (weatherData, airQualityData
  * OpenAQ API Service
  * Fetches the latest air quality data for a given city or coordinates
  */
-const OPENAQ_LATEST_URL = 'https://api.openaq.org/v2/latest';
+const OPENAQ_LATEST_URL = process.env.NODE_ENV === 'development'
+  ? '/openaq/v2/latest'
+  : 'https://api.openaq.org/v2/latest';
 
 /**
  * Fetch latest air quality data from OpenAQ for a given city or coordinates

@@ -31,6 +31,29 @@ export const fetchCountries = async (reg, page = 1, limit = 10) => {
   }
 };
 
+// Fetch all countries for autocomplete
+export const fetchAllCountries = async () => {
+  try {
+    const response = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2,region');
+    if (!response.ok) {
+      throw new Error(`RestCountries API error: ${response.status}`);
+    }
+    const data = await response.json();
+    // Format for react-select and filter out entries missing essential data
+    return data
+      .filter((country) => country.name?.common && country.cca2) // Ensure common name and cca2 exist
+      .map((country) => ({
+        value: country.cca2, // Use country code as value
+        label: country.name.common, // Use common name as label
+        region: country.region || 'Other', // Assign a default region if missing
+      }));
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error fetching all countries:', error);
+    return []; // Return empty array on error
+  }
+};
+
 const url = 'https://api.openweathermap.org/data/2.5/air_pollution?';
 const id = '6574f405463f1e3a64b32c567ddd4bc8';
 

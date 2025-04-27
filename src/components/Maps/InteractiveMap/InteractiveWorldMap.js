@@ -10,6 +10,7 @@ import {
 import { scaleLinear } from 'd3-scale';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSpring, animated } from 'react-spring';
 import { fetchCombinedWeatherAndAirQuality, getOpenAQLatest } from '../../../redux/Actions/Weather';
 import './InteractiveWorldMap.css';
 
@@ -85,6 +86,147 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
   const [activeCity, setActiveCity] = useState(null);
   const [cityWeatherData, setCityWeatherData] = useState({});
   const [displayMode, setDisplayMode] = useState('airQuality'); // 'airQuality', 'weather', 'combined'
+  const [selectedAqiRanges, setSelectedAqiRanges] = useState([]); // e.g., ['good', 'moderate']
+  const [selectedWeatherTypes, setSelectedWeatherTypes] = useState([]); // e.g., ['clear', 'rain']
+  const [legendCollapsed, setLegendCollapsed] = useState(false);
+
+  // AQI ranges for filtering
+  const aqiRanges = [
+    {
+      label: 'Good (0-50)', min: 0, max: 50, color: '#009966', key: 'good',
+    },
+    {
+      label: 'Moderate (51-100)', min: 51, max: 100, color: '#FFDE33', key: 'moderate',
+    },
+    {
+      label: 'Unhealthy for sensitive groups (101-150)', min: 101, max: 150, color: '#FF9933', key: 'unhealthySensitive',
+    },
+    {
+      label: 'Unhealthy (151-200)', min: 151, max: 200, color: '#CC0033', key: 'unhealthy',
+    },
+    {
+      label: 'Very unhealthy (201-300)', min: 201, max: 300, color: '#660099', key: 'veryUnhealthy',
+    },
+    {
+      label: 'Hazardous (300+)', min: 301, max: 1000, color: '#7E0023', key: 'hazardous',
+    },
+  ];
+
+  // Helper to get AQI range key
+  const getAqiRangeKey = (aqi) => {
+    if (aqi <= 50) return 'good';
+    if (aqi <= 100) return 'moderate';
+    if (aqi <= 150) return 'unhealthySensitive';
+    if (aqi <= 200) return 'unhealthy';
+    if (aqi <= 300) return 'veryUnhealthy';
+    return 'hazardous';
+  };
+
+  // Toggle AQI filter
+  const toggleAqiRange = (key) => {
+    setSelectedAqiRanges((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  };
+
+  // Toggle weather filter
+  const toggleWeatherType = (type) => {
+    setSelectedWeatherTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]));
+  };
+
+  // Helper to get OpenAQ AQI for a city
+  const getOpenAQAQI = (cityName) => {
+    if (openAQLatest && openAQLatest.results) {
+      const cityResult = openAQLatest.results.find((r) => r.city === cityName);
+      if (cityResult && cityResult.measurements && cityResult.measurements.length > 0) {
+        // Use PM2.5 or fallback to first measurement
+        const pm25 = cityResult.measurements.find((m) => m.parameter === 'pm25');
+        return pm25 ? Math.round(pm25.value) : Math.round(cityResult.measurements[0].value);
+      }
+    }
+    return null;
+  };
+
+  // Get mock or real AQI value for city
+  const getCityAQI = (cityName) => {
+    const openaqAqi = getOpenAQAQI(cityName);
+    if (openaqAqi !== null && !Number.isNaN(openaqAqi)) return openaqAqi;
+
+    // If we have real data, use it
+    if (cityWeatherData[cityName]
+        && cityWeatherData[cityName].airQuality
+        && cityWeatherData[cityName].airQuality.hourly
+        && cityWeatherData[cityName].airQuality.hourly.pm2_5) {
+      const latestIndex = cityWeatherData[cityName].airQuality.hourly.time.length - 1;
+      const pm25 = cityWeatherData[cityName].airQuality.hourly.pm2_5[latestIndex];
+
+      // Convert PM2.5 to AQI (simplified formula)
+      if (pm25 <= 12) return 25;
+      if (pm25 <= 35.4) return 75;
+      if (pm25 <= 55.4) return 125;
+      if (pm25 <= 150.4) return 175;
+      if (pm25 <= 250.4) return 250;
+      return 350;
+    }
+
+    // Use mock data as fallback
+    const mockValues = {
+      'New York': 45,
+      'Los Angeles': 72,
+      London: 38,
+      Paris: 42,
+      Beijing: 112,
+      Tokyo: 56,
+      Sydney: 28,
+      'Rio de Janeiro': 63,
+      Cairo: 95,
+      Mumbai: 134,
+      Moscow: 51,
+      'Cape Town': 47,
+    };
+
+    return mockValues[cityName] || Math.floor(Math.random() * 200);
+  };
+
+  // Update getCityWeatherIcon to optionally return type
+  const getCityWeatherIcon = (cityName, returnType = false) => {
+    if (cityWeatherData[cityName]
+        && cityWeatherData[cityName].weather
+        && cityWeatherData[cityName].weather.current_weather) {
+      const weatherCode = cityWeatherData[cityName].weather.current_weather.weathercode;
+      const weatherType = getWeatherType(weatherCode);
+      return returnType ? weatherType : weatherIcons[weatherType];
+    }
+    return returnType ? 'clear' : weatherIcons.clear;
+  };
+
+  // Filtered cities based on legend selection
+  const filteredCities = majorCities.filter((city) => {
+    const aqi = getCityAQI(city.name);
+    const weatherType = getCityWeatherIcon(city.name, true); // pass true to get type
+    const aqiMatch = selectedAqiRanges.length === 0 || selectedAqiRanges.includes(getAqiRangeKey(aqi));
+    const weatherMatch = selectedWeatherTypes.length === 0 || selectedWeatherTypes.includes(weatherType);
+    return aqiMatch && weatherMatch;
+  });
+
+  // Animate legend collapse/expand
+  const legendSpring = useSpring({
+    height: legendCollapsed ? 0 : 'auto',
+    opacity: legendCollapsed ? 0 : 1,
+    overflow: 'hidden',
+    config: { tension: 250, friction: 30 },
+  });
+
+  // Animate tooltip
+  const tooltipSpring = useSpring({
+    opacity: showTooltip ? 1 : 0,
+    transform: showTooltip ? 'scale(1)' : 'scale(0.95)',
+    config: { tension: 300, friction: 20 },
+  });
+
+  // Animate marker selection (scale up selected marker)
+  const getMarkerSpring = (cityName) => useSpring({
+    transform: activeCity === cityName ? 'scale(1.3)' : 'scale(1)',
+    config: { tension: 300, friction: 20 },
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -155,73 +297,19 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
     setActiveCity(city.name === activeCity ? null : city.name);
   };
 
-  // Helper to get OpenAQ AQI for a city
-  const getOpenAQAQI = (cityName) => {
-    if (openAQLatest && openAQLatest.results) {
-      const cityResult = openAQLatest.results.find((r) => r.city === cityName);
-      if (cityResult && cityResult.measurements && cityResult.measurements.length > 0) {
-        // Use PM2.5 or fallback to first measurement
-        const pm25 = cityResult.measurements.find((m) => m.parameter === 'pm25');
-        return pm25 ? Math.round(pm25.value) : Math.round(cityResult.measurements[0].value);
-      }
-    }
-    return null;
-  };
-
-  // Get mock or real AQI value for city
-  const getCityAQI = (cityName) => {
-    const openaqAqi = getOpenAQAQI(cityName);
-    if (openaqAqi !== null && !Number.isNaN(openaqAqi)) return openaqAqi;
-
-    // If we have real data, use it
-    if (cityWeatherData[cityName]
-        && cityWeatherData[cityName].airQuality
-        && cityWeatherData[cityName].airQuality.hourly
-        && cityWeatherData[cityName].airQuality.hourly.pm2_5) {
-      const latestIndex = cityWeatherData[cityName].airQuality.hourly.time.length - 1;
-      const pm25 = cityWeatherData[cityName].airQuality.hourly.pm2_5[latestIndex];
-
-      // Convert PM2.5 to AQI (simplified formula)
-      if (pm25 <= 12) return 25;
-      if (pm25 <= 35.4) return 75;
-      if (pm25 <= 55.4) return 125;
-      if (pm25 <= 150.4) return 175;
-      if (pm25 <= 250.4) return 250;
-      return 350;
-    }
-
-    // Use mock data as fallback
-    const mockValues = {
-      'New York': 45,
-      'Los Angeles': 72,
-      London: 38,
-      Paris: 42,
-      Beijing: 112,
-      Tokyo: 56,
-      Sydney: 28,
-      'Rio de Janeiro': 63,
-      Cairo: 95,
-      Mumbai: 134,
-      Moscow: 51,
-      'Cape Town': 47,
-    };
-
-    return mockValues[cityName] || Math.floor(Math.random() * 200);
-  };
-
-  // Get weather icon for city
-  const getCityWeatherIcon = (cityName) => {
-    if (cityWeatherData[cityName]
-        && cityWeatherData[cityName].weather
-        && cityWeatherData[cityName].weather.current_weather) {
-      const weatherCode = cityWeatherData[cityName].weather.current_weather.weathercode;
-      const weatherType = getWeatherType(weatherCode);
-      return weatherIcons[weatherType];
-    }
-
-    // Default icon if no data
-    return weatherIcons.clear;
-  };
+  // Show loading or error for OpenAQ
+  if (openAQLatest && openAQLatest.results && openAQLatest.results.length === 0) {
+    return <div className="interactive-map-container">No OpenAQ data available.</div>;
+  }
+  if (openAQLatest && openAQLatest.error) {
+    return (
+      <div className="interactive-map-container">
+        Error loading OpenAQ data:
+        <br />
+        {openAQLatest.error}
+      </div>
+    );
+  }
 
   return (
     <div className="interactive-map-container" onMouseMove={handleMouseMove}>
@@ -251,15 +339,18 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
       </div>
 
       {showTooltip && (
-        <div
+        <animated.div
           className="map-tooltip"
           style={{
+            ...tooltipSpring,
             left: `${tooltipPosition.x + 10}px`,
             top: `${tooltipPosition.y + 10}px`,
+            position: 'absolute',
+            pointerEvents: 'none',
           }}
         >
           {tooltipContent}
-        </div>
+        </animated.div>
       )}
 
       <ComposableMap
@@ -310,26 +401,27 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
           </Geographies>
 
           {/* Air Quality & Weather Markers */}
-          {majorCities.map((city) => {
+          {filteredCities.map((city) => {
             const aqi = getCityAQI(city.name);
             const weatherIcon = getCityWeatherIcon(city.name);
-
+            const markerSpring = getMarkerSpring(city.name);
             return (
               <React.Fragment key={`city-${city.name}`}>
                 {/* Show different markers based on display mode */}
                 {(displayMode === 'airQuality' || displayMode === 'combined') && (
                   <Marker coordinates={city.coordinates} onClick={() => handleCityClick(city)}>
-                    <circle
-                      r={Math.max(aqi / 15 + 5, 8)} // Ensure minimum radius of 8
-                      fill={colorScale(aqi) || '#1976d2'}
-                      stroke="#FFFFFF"
-                      strokeWidth={1}
-                      opacity={0.9}
-                      className="city-marker"
-                    />
+                    <animated.g style={markerSpring}>
+                      <circle
+                        r={Math.max(aqi / 15 + 5, 8)} // Ensure minimum radius of 8
+                        fill={colorScale(aqi) || '#1976d2'}
+                        stroke="#FFFFFF"
+                        strokeWidth={1}
+                        opacity={0.9}
+                        className="city-marker"
+                      />
+                    </animated.g>
                   </Marker>
                 )}
-
                 {(displayMode === 'weather' || displayMode === 'combined') && (
                   <Marker
                     coordinates={[
@@ -348,7 +440,6 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
                     </text>
                   </Marker>
                 )}
-
                 {/* City name for selected city */}
                 {activeCity === city.name && (
                   <Annotation
@@ -415,7 +506,7 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
                           cityWeatherData[city.name]?.weather?.current_weather?.temperature
                             ? `${cityWeatherData[city.name].weather.current_weather.temperature}°C`
                             : ''
-}
+                        }
                       </text>
                     </g>
                   </Annotation>
@@ -427,47 +518,47 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
       </ComposableMap>
 
       {/* Legend */}
-      <div className="map-legend">
-        <h4>Air Quality Index (AQI)</h4>
-        <div className="legend-items">
-          <div className="legend-item">
-            <span className="legend-color" style={{ backgroundColor: '#009966' }} />
-            <span>Good (0-50)</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-color" style={{ backgroundColor: '#FFDE33' }} />
-            <span>Moderate (51-100)</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-color" style={{ backgroundColor: '#FF9933' }} />
-            <span>Unhealthy for sensitive groups (101-150)</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-color" style={{ backgroundColor: '#CC0033' }} />
-            <span>Unhealthy (151-200)</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-color" style={{ backgroundColor: '#660099' }} />
-            <span>Very unhealthy (201-300)</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-color" style={{ backgroundColor: '#7E0023' }} />
-            <span>Hazardous (300+)</span>
-          </div>
-        </div>
-
-        <div className="legend-divider" />
-
-        <h4>Weather Conditions</h4>
-        <div className="legend-items weather-legend">
-          {Object.entries(weatherIcons).map(([type, icon]) => (
-            <div className="legend-item" key={`weather-type-${type}`}>
-              <span className="weather-icon">{icon}</span>
-              <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+      <animated.div className="map-legend" style={legendSpring}>
+        <button className="legend-collapse-btn" type="button" onClick={() => setLegendCollapsed((c) => !c)}>
+          {legendCollapsed ? 'Show Legend' : 'Hide Legend'}
+        </button>
+        {!legendCollapsed && (
+          <>
+            <h4>Air Quality Index (AQI)</h4>
+            <div className="legend-items">
+              {aqiRanges.map((range) => (
+                <button
+                  key={range.key}
+                  className={`legend-item legend-btn${selectedAqiRanges.includes(range.key) ? ' selected' : ''}`}
+                  style={{
+                    backgroundColor: range.color, color: '#222', margin: '2px', border: '1px solid #888',
+                  }}
+                  onClick={() => toggleAqiRange(range.key)}
+                  type="button"
+                >
+                  {range.label}
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="legend-divider" />
+            <h4>Weather Conditions</h4>
+            <div className="legend-items weather-legend">
+              {Object.entries(weatherIcons).map(([type, icon]) => (
+                <button
+                  key={`weather-type-${type}`}
+                  className={`legend-item legend-btn${selectedWeatherTypes.includes(type) ? ' selected' : ''}`}
+                  style={{ margin: '2px', border: '1px solid #888' }}
+                  onClick={() => toggleWeatherType(type)}
+                  type="button"
+                >
+                  <span className="weather-icon">{icon}</span>
+                  <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </animated.div>
     </div>
   );
 };

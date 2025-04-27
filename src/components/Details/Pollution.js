@@ -62,7 +62,7 @@ const Pollution = ({
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Loading air quality data...</div>;
   }
 
   if (error) {
@@ -70,6 +70,16 @@ const Pollution = ({
       <div>
         Error loading pollution data:
         {error.message}
+      </div>
+    );
+  }
+
+  if (openAQLatest && openAQLatest.error) {
+    return (
+      <div>
+        Error loading OpenAQ data:
+        <br />
+        {openAQLatest.error}
       </div>
     );
   }

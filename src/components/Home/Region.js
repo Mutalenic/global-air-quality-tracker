@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faInfoCircle,
@@ -8,14 +8,17 @@ import {
   faSearch,
 } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import Select from 'react-select';
 import Header from '../Navbar/Navbar';
 import Region from '../Details/Region';
 import InteractiveWorldMap from '../Maps/InteractiveMap/InteractiveWorldMap';
+import { fetchAllCountries } from '../../redux/apiFunctions';
 import './Region.css';
 
 const Regions = () => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('');
+  const [countryOptions, setCountryOptions] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState(null);
   const navigate = useNavigate();
 
   const regionList = [
@@ -27,10 +30,20 @@ const Regions = () => {
     { region: 'Antarctic', country: 5 },
   ];
 
+  // Fetch country options on mount
+  useEffect(() => {
+    const loadCountries = async () => {
+      const options = await fetchAllCountries();
+      setCountryOptions(options);
+    };
+    loadCountries();
+  }, []);
+
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
-      navigate(`/countries?search=${encodeURIComponent(searchTerm.trim())}&region=${selectedRegion || 'all'}`);
+    // Use selectedCountry.label for search term
+    if (selectedCountry) {
+      navigate(`/countries?search=${encodeURIComponent(selectedCountry.label)}&region=${selectedRegion || 'all'}`);
     }
   };
 
@@ -64,6 +77,11 @@ const Regions = () => {
     }
   };
 
+  // Filter country options based on selected region
+  const filteredCountryOptions = selectedRegion
+    ? countryOptions.filter((option) => option.region === selectedRegion)
+    : countryOptions;
+
   return (
     <div className="home-container">
       <Header id="/" />
@@ -94,20 +112,27 @@ const Regions = () => {
         <h2>Find Air Quality Data</h2>
         <form onSubmit={handleSearch} className="search-form">
           <div className="search-inputs">
-            <div className="search-field">
+            <div className="search-field" style={{ flexGrow: 2 }}>
+              {/* Allow select to grow */}
               <FontAwesomeIcon icon={faSearch} className="search-icon" />
-              <input
-                type="text"
+              {/* Replace input with react-select */}
+              <Select
+                options={filteredCountryOptions}
+                onChange={setSelectedCountry}
+                value={selectedCountry}
                 placeholder="Search for a country..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
+                isClearable
+                className="country-select"
+                classNamePrefix="react-select"
               />
             </div>
             <div className="select-field">
               <select
                 value={selectedRegion}
-                onChange={(e) => setSelectedRegion(e.target.value)}
+                onChange={(e) => {
+                  setSelectedRegion(e.target.value);
+                  setSelectedCountry(null); // Clear selected country when region changes
+                }}
                 className="region-select"
               >
                 <option value="">All Regions</option>
@@ -119,7 +144,7 @@ const Regions = () => {
               </select>
             </div>
           </div>
-          <button type="submit" className="search-button">
+          <button type="submit" className="search-button" disabled={!selectedCountry}>
             Search
           </button>
         </form>

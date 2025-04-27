@@ -90,17 +90,19 @@ const Countries = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const { countries, loading, pagination } = useSelector((state) => state.countriesReducer);
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Get the region and search term from URL query params
+  const queryParams = new URLSearchParams(location.search);
+  const region = queryParams.get('region') || 'Africa';
+  const initialSearchTerm = queryParams.get('search') || '';
+
+  const [search, setSearch] = useState(initialSearchTerm);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearchTerm);
   const [activeFilter, setActiveFilter] = useState(null);
   const [sortDirection, setSortDirection] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredCountries, setFilteredCountries] = useState([]);
   const [workerState, setWorkerState] = useState({ initialized: false, worker: null });
-
-  // Get the region from URL query params
-  const queryParams = new URLSearchParams(location.search);
-  const region = queryParams.get('region') || 'Africa';
 
   // Region to image mapping
   const regionToImageMap = {
@@ -165,6 +167,13 @@ const Countries = () => {
       });
     }
   }, [countries, debouncedSearch, activeFilter, sortDirection, workerState]);
+
+  // Initialize search state from URL param
+  useEffect(() => {
+    const urlSearchTerm = queryParams.get('search') || '';
+    setSearch(urlSearchTerm);
+    setDebouncedSearch(urlSearchTerm);
+  }, [location.search]); // Re-run if the URL search params change
 
   const handlePageChange = (newPage) => {
     // Scroll to top when changing pages
