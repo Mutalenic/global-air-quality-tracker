@@ -39,17 +39,41 @@ export const fetchAllCountries = async () => {
       throw new Error(`RestCountries API error: ${response.status}`);
     }
     const data = await response.json();
-    // Format for react-select and filter out entries missing essential data
+    // Log the raw count from the API
+    // eslint-disable-next-line no-console
+    console.log(`[fetchAllCountries] Raw count from API: ${data.length}`);
+
+    // Format for react-select, filter out only if cca2 is missing
     return data
-      .filter((country) => country.name?.common && country.cca2) // Ensure common name and cca2 exist
+      .filter((country) => country.cca2) // Only filter if cca2 (used for value) is missing
       .map((country) => ({
         value: country.cca2, // Use country code as value
-        label: country.name.common, // Use common name as label
+        label: country.name?.common || country.cca2, // Use common name or fallback to cca2 for label
         region: country.region || 'Other', // Assign a default region if missing
       }));
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error fetching all countries:', error);
+    return []; // Return empty array on error
+  }
+};
+
+// Search country by name
+export const searchCountryByNameAPI = async (name) => {
+  try {
+    const response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fields=name,region,latlng,population,cca2,flags`);
+    if (!response.ok) {
+      // If 404, it means not found, return empty array, otherwise throw error
+      if (response.status === 404) {
+        return [];
+      }
+      throw new Error(`RestCountries API error: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Error searching country by name "${name}":`, error);
     return []; // Return empty array on error
   }
 };

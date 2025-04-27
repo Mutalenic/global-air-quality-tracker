@@ -29,6 +29,7 @@ import './Countries.css';
 
 // Import pagination action
 import { getPaginatedCountries } from '../../redux/Actions/Countries';
+import { searchCountryByNameAPI } from '../../redux/apiFunctions'; // Import the new API function
 
 // Use dynamic import for Country component which is rendered multiple times
 const Country = React.lazy(() => import('../Home/Country'));
@@ -89,7 +90,8 @@ Pagination.propTypes = {
 const Countries = () => {
   const dispatch = useDispatch();
   const location = useLocation();
-  const { countries, loading, pagination } = useSelector((state) => state.countriesReducer);
+  // Keep redux state for paginated browsing
+  const { countries: paginatedCountries, loading: paginatedLoading, pagination } = useSelector((state) => state.countriesReducer);
 
   // Get the region and search term from URL query params
   const queryParams = new URLSearchParams(location.search);
@@ -101,8 +103,13 @@ const Countries = () => {
   const [activeFilter, setActiveFilter] = useState(null);
   const [sortDirection, setSortDirection] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredCountries, setFilteredCountries] = useState([]);
+  const [filteredCountries, setFilteredCountries] = useState([]); // For worker results when browsing
   const [workerState, setWorkerState] = useState({ initialized: false, worker: null });
+
+  // State for direct search results and loading
+  const [directSearchResults, setDirectSearchResults] = useState(null);
+  const [directSearchLoading, setDirectSearchLoading] = useState(false);
+  const [isDirectSearchMode, setIsDirectSearchMode] = useState(!!initialSearchTerm);
 
   // Region to image mapping
   const regionToImageMap = {
@@ -137,43 +144,82 @@ const Countries = () => {
     };
   }, []);
 
-  // Load paginated countries when page changes
+  // Fetch data based on mode
   useEffect(() => {
-    dispatch(getPaginatedCountries(region, currentPage, 10));
-  }, [dispatch, region, currentPage]);
+    const urlSearchTerm = queryParams.get('search') || '';
+    const urlRegion = queryParams.get('region') || 'Africa'; // Use consistent region fetching
+    setIsDirectSearchMode(!!urlSearchTerm);
 
-  // Debounced search effect
+    if (urlSearchTerm) {
+      // Direct search mode (unchanged)
+      setDirectSearchLoading(true);
+      setDirectSearchResults(null);
+      searchCountryByNameAPI(urlSearchTerm)
+        .then((data) => {
+          const results = (urlRegion && urlRegion !== 'all')
+            ? data.filter((country) => country.region === urlRegion) // Add parentheses
+            : data;
+          setDirectSearchResults(results);
+        })
+        .catch(() => setDirectSearchResults([]))
+        .finally(() => setDirectSearchLoading(false));
+      setFilteredCountries([]); // Clear browse state
+    } else {
+      // Browse Region mode: Fetch ALL countries for the region
+      setDirectSearchResults(null); // Clear direct search results
+      dispatch(getPaginatedCountries(urlRegion, currentPage, 10));
+    }
+    // Reset local search and filters when mode changes via URL
+    setSearch(urlSearchTerm);
+    setDebouncedSearch(urlSearchTerm);
+    setActiveFilter(null);
+    setSortDirection('asc');
+    setCurrentPage(1);
+  }, [location.search, dispatch]); // Rerun when URL search params change
+
+  // Debounced search effect for LOCAL filtering (only when NOT in direct search mode)
   useEffect(() => {
     const handler = debounce(() => {
-      setDebouncedSearch(search);
+      if (!isDirectSearchMode) { // Only apply debounce/worker filter if not in direct search mode
+        setDebouncedSearch(search);
+      }
     }, 300);
 
     handler();
     return () => handler.clear();
-  }, [search]);
+  }, [search, isDirectSearchMode]);
 
-  // Use web worker for filtering and sorting
+  // Use web worker for filtering and sorting (only when NOT in direct search mode)
   useEffect(() => {
-    if (workerState.initialized && countries.length > 0) {
-      // Send data to worker
+    if (workerState.initialized && paginatedCountries.length > 0 && !isDirectSearchMode) {
       workerState.worker.postMessage({
         type: 'FILTER_COUNTRIES',
         data: {
-          countries,
+          countries: paginatedCountries, // Use paginatedCountries from redux state
           searchTerm: debouncedSearch,
           sortField: activeFilter,
           sortDirection,
         },
       });
+    } else if (!isDirectSearchMode) {
+      // If not direct search and no paginated countries yet, clear filtered list
+      setFilteredCountries([]);
     }
-  }, [countries, debouncedSearch, activeFilter, sortDirection, workerState]);
+  }, [paginatedCountries, debouncedSearch, activeFilter, sortDirection, workerState, isDirectSearchMode]);
 
-  // Initialize search state from URL param
-  useEffect(() => {
-    const urlSearchTerm = queryParams.get('search') || '';
-    setSearch(urlSearchTerm);
-    setDebouncedSearch(urlSearchTerm);
-  }, [location.search]); // Re-run if the URL search params change
+  // Update local search state and switch mode if search is cleared
+  const handleLocalSearchChange = (e) => {
+    const newSearchTerm = e.target.value;
+    setSearch(newSearchTerm);
+    if (isDirectSearchMode && !newSearchTerm) {
+      // If user clears the search that came from URL, switch back to browse mode
+      setIsDirectSearchMode(false);
+      setDirectSearchResults(null);
+      // Trigger fetch for the first page of the current region
+      setCurrentPage(1); // Reset to page 1
+      dispatch(getPaginatedCountries(region, 1, 10));
+    }
+  };
 
   const handlePageChange = (newPage) => {
     // Scroll to top when changing pages
@@ -190,7 +236,15 @@ const Countries = () => {
     }
   };
 
-  if (loading) {
+  // Determine loading state based on mode
+  const isLoading = isDirectSearchMode ? directSearchLoading : paginatedLoading;
+  // Determine which list to display
+  const displayCountries = isDirectSearchMode ? directSearchResults : filteredCountries;
+
+  // Get region image using the mapping - Moved definition before usage
+  const regionImage = regionToImageMap[region] || regionToImageMap.default;
+
+  if (isLoading) {
     return (
       <div className="loading-container">
         <RotatingLines
@@ -209,7 +263,92 @@ const Countries = () => {
     );
   }
 
-  if (!countries.length) {
+  // Handle no results found specifically for direct search
+  if (isDirectSearchMode && !isLoading && (!displayCountries || displayCountries.length === 0)) {
+    return (
+      <div>
+        <Navbar id="/" />
+        <div className="countryContainer">
+          <div className="region-header">
+            <h3>{region}</h3>
+            <Suspense fallback={<div>Loading...</div>}>
+              <OptimizedImage
+                src={regionImage} // Now defined
+                alt={region}
+                className="img1"
+              />
+            </Suspense>
+          </div>
+          <div className="search-filter-container">
+            <div className="search-container">
+              <FontAwesomeIcon icon={faSearch} className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search country..."
+                className="searchCountry"
+                onChange={handleLocalSearchChange} // Use updated handler
+                value={search}
+              />
+            </div>
+            <div className="filter-container">
+              <button
+                type="button"
+                className={`filter-button ${activeFilter === 'name' ? 'active' : ''}`}
+                onClick={() => handleFilter('name')}
+              >
+                Name
+                {activeFilter === 'name' && (
+                  sortDirection === 'asc'
+                    ? <FontAwesomeIcon icon={faArrowUp} className="sort-icon" />
+                    : <FontAwesomeIcon icon={faArrowDown} className="sort-icon" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                className={`filter-button ${activeFilter === 'population' ? 'active' : ''}`}
+                onClick={() => handleFilter('population')}
+              >
+                Population
+                {activeFilter === 'population' && (
+                  sortDirection === 'asc'
+                    ? <FontAwesomeIcon icon={faArrowUp} className="sort-icon" />
+                    : <FontAwesomeIcon icon={faArrowDown} className="sort-icon" />
+                )}
+              </button>
+            </div>
+          </div>
+          <div className="no-results">
+            No countries found matching
+            {' '}
+            &quot;
+            {initialSearchTerm}
+            &quot;
+            {' '}
+            {region && region !== 'all'
+              ? ` in the ${region} region.`
+              : '.'}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle no results for browsing/filtering mode
+  if (!isDirectSearchMode && !paginatedLoading && displayCountries.length === 0 && debouncedSearch) {
+    return (
+      <div className="error-container">
+        <p>No countries match your search criteria.</p>
+        <NavLink to="/" className="reloadText">
+          <p>Click to reload</p>
+          <FontAwesomeIcon icon={faRotate} className="icon" />
+        </NavLink>
+      </div>
+    );
+  }
+
+  // Handle initial load or error for paginated view
+  if (!isDirectSearchMode && !paginatedLoading && !paginatedCountries.length && !debouncedSearch) {
     return (
       <div className="error-container">
         <p>No countries data available.</p>
@@ -220,9 +359,6 @@ const Countries = () => {
       </div>
     );
   }
-
-  // Get region image using the mapping
-  const regionImage = regionToImageMap[region] || regionToImageMap.default;
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -247,11 +383,11 @@ const Countries = () => {
                 type="text"
                 placeholder="Search country..."
                 className="searchCountry"
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={handleLocalSearchChange} // Use updated handler
                 value={search}
               />
             </div>
-
+            {/* Conditionally disable filters if in direct search mode? Or allow filtering direct results? Let's allow filtering for now */}
             <div className="filter-container">
               <button
                 type="button"
@@ -281,33 +417,43 @@ const Countries = () => {
             </div>
           </div>
 
-          {filteredCountries.length === 0 ? (
-            <div className="no-results">No countries match your search criteria.</div>
-          ) : (
+          {/* Display countries based on the determined list */}
+          {displayCountries && displayCountries.length > 0 ? (
             <>
               <div className="countriesGrid">
                 <Suspense fallback={<div className="loading-container">Loading countries...</div>}>
-                  {filteredCountries.map((country) => (
+                  {displayCountries.map((country) => (
                     <Country
-                      key={country.code}
-                      id={country.code}
+                      // Ensure unique key, cca2 should be reliable
+                      key={country.cca2 || country.name?.common}
+                      id={country.cca2}
                       name={country.name.common}
-                      lat={country.latlng[0]}
-                      lng={country.latlng[1]}
+                      // Handle potential missing latlng
+                      lat={country.latlng ? country.latlng[0] : 0}
+                      lng={country.latlng ? country.latlng[1] : 0}
                       population={country.population}
                       region={country.region}
-                      flag={country.flag}
+                      // Handle potential missing flags or using flag emoji
+                      flag={country.flags?.png || country.flag || ''}
                     />
                   ))}
                 </Suspense>
               </div>
 
-              <Pagination
-                currentPage={currentPage}
-                totalPages={pagination.totalPages || Math.ceil(filteredCountries.length / 10)}
-                onPageChange={handlePageChange}
-              />
+              {/* Only show pagination if NOT in direct search mode */}
+              {!isDirectSearchMode && pagination.totalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  // Use totalPages from Redux state for pagination
+                  totalPages={pagination.totalPages}
+                  onPageChange={handlePageChange}
+                />
+              )}
             </>
+          ) : (
+            // This case might be hit if loading finished but displayCountries is empty/null
+            // (and not handled by the specific 'no results' messages above)
+            <div className="no-results">No countries to display.</div>
           )}
         </div>
       </div>
