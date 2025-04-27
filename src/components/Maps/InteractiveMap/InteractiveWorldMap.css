@@ -52,6 +52,37 @@
   color: white;
 }
 
+/* Focus states for accessibility */
+.display-option:focus,
+.legend-btn:focus,
+.legend-collapse-btn:focus {
+  outline: 2px solid #005a4f; /* Teal outline */
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.3); /* Subtle glow */
+}
+
+/* Focus state for Geography (handled inline style in JS for react-simple-maps) */
+/* Example if it were a standard element:
+.geography-element:focus {
+  outline: 2px solid #005a4f;
+  outline-offset: 1px;
+}
+*/
+
+/* Focus state for Marker groups */
+.marker-group:focus {
+  outline: 2px solid #005a4f;
+  outline-offset: 1px;
+  border-radius: 50%; /* Apply to group if possible, or style inner circle */
+}
+
+/* Style the circle within a focused group */
+.marker-group:focus .city-marker,
+.marker-group:focus .weather-icon-marker {
+  stroke: #005a4f; /* Darker stroke on focus */
+  stroke-width: 2;
+}
+
 /* Map Tooltip */
 .map-tooltip {
   position: fixed;
@@ -82,17 +113,21 @@
   overflow-y: auto;
 }
 
-.map-legend h4 {
-  margin: 0 0 8px 0;
+.map-legend h4, .map-legend h5 {
+  margin: 10px 0 5px 0;
   color: #333;
-  font-size: 14px;
+  font-size: 13px; /* Slightly smaller heading */
   font-weight: 600;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #eee;
 }
 
 .legend-items {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  /* Adjust minmax based on typical content width, allow wrapping */
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 5px; /* Adjust gap */
+  align-items: center; /* Center items vertically in grid cells */
 }
 
 .legend-item {
@@ -102,13 +137,47 @@
   color: #555;
 }
 
-.legend-color {
+/* Remove button-like appearance, make it a clickable item */
+.legend-btn {
+  display: flex; /* Use flex for alignment within the item */
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, border 0.2s, box-shadow 0.2s;
+  text-align: left;
+  background-color: transparent; /* Remove default background */
+  border: 1px solid transparent; /* Transparent border initially */
+  max-width: 100%;
+  white-space: normal;
+  line-height: 1.3;
+  font-size: 11px;
+  color: #444;
+}
+
+.legend-btn:hover {
+  background-color: #f0f0f0; /* Subtle hover background */
+  border-color: #ccc;
+}
+
+/* Style for selected state */
+.legend-btn.selected {
+  background-color: #e0eaf0; /* Light blue background for selected */
+  border: 1px solid #007bff; /* Blue border for selected */
+  color: #000;
+  font-weight: 500; /* Slightly bolder */
+  box-shadow: none; /* Remove inset shadow */
+}
+
+/* Ensure AQI color swatch is visible */
+.legend-btn .legend-color-swatch {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-right: 8px;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
   border-radius: 3px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  flex-shrink: 0; /* Prevent swatch from shrinking */
 }
 
 .legend-divider {
@@ -118,14 +187,46 @@
 }
 
 .weather-legend {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  /* Inherits grid from .legend-items */
+  /* grid-template-columns can be adjusted if needed */
+}
+
+.weather-legend .legend-btn {
+  /* Styles specific to weather buttons if needed */
 }
 
 .weather-icon {
-  font-size: 16px;
-  margin-right: 8px;
+  font-size: 14px; /* Adjust icon size */
+  margin-right: 6px;
+  min-width: 16px; /* Ensure space for icon */
+  text-align: center;
+}
+
+/* Remove previous button-specific styles no longer needed */
+.legend-btn.selected {
+  /* font-weight: bold; */ /* Replaced with 500 */
+  /* box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2); */ /* Removed */
+}
+
+.weather-legend .legend-btn {
+  /* justify-self: start; */ /* No longer needed with grid auto-fit */
+}
+
+.clear-filters-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 5px 8px;
+  text-align: center;
+  background-color: #e8e8e8;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #333;
+}
+
+.clear-filters-btn:hover {
+  background-color: #d8d8d8;
+  border-color: #aaa;
 }
 
 /* City markers */

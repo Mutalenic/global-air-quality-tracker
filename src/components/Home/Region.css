@@ -1,7 +1,7 @@
 .home-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 80px 20px 20px 20px; /* Added top padding (e.g., 80px) */
 }
 
 .world-container {
@@ -276,6 +276,10 @@
   .search-button {
     padding: 12px;
   }
+
+  .home-container {
+    padding-top: 70px; /* Adjust padding for smaller screens if navbar height changes */
+  }
 }
 
 @media (max-width: 480px) {
@@ -294,5 +298,9 @@
   
   .features-grid {
     grid-template-columns: 1fr;
+  }
+
+  .home-container {
+    padding-top: 65px; /* Adjust padding for mobile screens */
   }
 }

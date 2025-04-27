@@ -530,13 +530,14 @@ const InteractiveWorldMap = ({ onRegionClick }) => {
                 <button
                   key={range.key}
                   className={`legend-item legend-btn${selectedAqiRanges.includes(range.key) ? ' selected' : ''}`}
-                  style={{
-                    backgroundColor: range.color, color: '#222', margin: '2px', border: '1px solid #888',
-                  }}
                   onClick={() => toggleAqiRange(range.key)}
                   type="button"
                 >
-                  {range.label}
+                  <span
+                    className="legend-color-swatch"
+                    style={{ backgroundColor: range.color }}
+                  />
+                  <span>{range.label}</span>
                 </button>
               ))}
             </div>
