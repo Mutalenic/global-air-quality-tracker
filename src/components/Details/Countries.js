@@ -88,9 +88,12 @@ Pagination.propTypes = {
   onPageChange: PropTypes.func.isRequired,
 };
 
-import {
-  Paper, Typography, Select, MenuItem, RadioGroup, FormControlLabel, Radio, Grid, Card, Chip
-} from "@mui/material";
+import { Box, Paper, Typography, TextField, Button, ButtonGroup, ToggleButton, ToggleButtonGroup, Grid, Card, Chip, Pagination as MuiPagination, SpeedDial, SpeedDialAction } from '@mui/material';
+import MapIcon from '@mui/icons-material/Map';
+import SearchIcon from '@mui/icons-material/Search';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import ViewListIcon from '@mui/icons-material/ViewList';
 
 const countries = [
   { name: "Zambia", flag: "/flags/za.png", aqi: 72 },
@@ -386,160 +389,103 @@ const Countries = () => {
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <main>
         <Navbar id="/" />
-        <section className="countryContainer" aria-label="Country list section">
-          <header className="region-header">
-            <h3>{region}</h3>
+        <Paper sx={{ p: 3, my: 4 }}>
+          <Box display="flex" alignItems="center" gap={2} mb={2}>
+            <Typography variant="h5" flexGrow={1}>{region}</Typography>
             <Suspense fallback={<div>Loading...</div>}>
-              <OptimizedImage
-                src={regionImage}
-                alt={`Map of ${region}`}
-                className="img1"
-              />
+              <OptimizedImage src={regionImage} alt={`Map of ${region}`} style={{ width: 48, height: 48, borderRadius: 8 }} />
             </Suspense>
-            <button
-              type="button"
-              className="toggle-view-btn"
-              aria-label={viewMode === 'grid' ? 'Switch to map view' : 'Switch to grid view'}
-              onClick={() => setViewMode(viewMode === 'grid' ? 'map' : 'grid')}
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={(_, val) => val && setViewMode(val)}
+              size="small"
+              sx={{ ml: 2 }}
             >
-              {viewMode === 'grid' ? '🗺️ Map View' : '📋 List View'}
-            </button>
-          </header>
-
-          <section className="search-filter-container" aria-label="Search and filter controls">
-            <div className="search-container">
-              <FontAwesomeIcon icon={faSearch} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search country..."
-                className="searchCountry"
-                onChange={handleLocalSearchChange}
-                value={search}
-                aria-label="Search country by name"
-              />
-            </div>
-            <div className="filter-container">
-              <button
-                type="button"
-                className={`filter-button ${activeFilter === 'name' ? 'active' : ''}`}
+              <ToggleButton value="grid" aria-label="Grid View"><ViewModuleIcon /></ToggleButton>
+              <ToggleButton value="map" aria-label="Map View"><MapIcon /></ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          <Box display="flex" gap={2} mb={2}>
+            <TextField
+              variant="outlined"
+              size="small"
+              placeholder="Search country..."
+              value={search}
+              onChange={handleLocalSearchChange}
+              InputProps={{ startAdornment: <SearchIcon sx={{ mr: 1 }} /> }}
+              sx={{ flexGrow: 1, minWidth: 220 }}
+            />
+            <ButtonGroup variant="outlined" size="small">
+              <Button
+                variant={activeFilter === 'name' ? 'contained' : 'outlined'}
                 onClick={() => handleFilter('name')}
-                aria-pressed={activeFilter === 'name'}
-                aria-label="Sort by name"
               >
                 Name
-                {activeFilter === 'name' && (
-                  sortDirection === 'asc'
-                    ? <FontAwesomeIcon icon={faArrowUp} className="sort-icon" />
-                    : <FontAwesomeIcon icon={faArrowDown} className="sort-icon" />
-                )}
-              </button>
-              <button
-                type="button"
-                className={`filter-button ${activeFilter === 'population' ? 'active' : ''}`}
+              </Button>
+              <Button
+                variant={activeFilter === 'population' ? 'contained' : 'outlined'}
                 onClick={() => handleFilter('population')}
-                aria-pressed={activeFilter === 'population'}
-                aria-label="Sort by population"
               >
                 Population
-                {activeFilter === 'population' && (
-                  sortDirection === 'asc'
-                    ? <FontAwesomeIcon icon={faArrowUp} className="sort-icon" />
-                    : <FontAwesomeIcon icon={faArrowDown} className="sort-icon" />
-                )}
-              </button>
-            </div>
-          </section>
-
-          {/* Toggle between grid and map view */}
-          {(() => {
-            if (viewMode === 'grid') {
-              if (displayCountries && displayCountries.length > 0) {
-                return (
-                  <>
-                    <section
-                      className="countriesGrid"
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                        gap: '24px',
-                        margin: '32px 0',
-                      }}
-                      aria-label="List of countries"
-                    >
-                      <Suspense fallback={<div className="loading-container">Loading countries...</div>}>
-                        {displayCountries.map((country) => (
-                          <Country
-                            key={country.cca2 || country.name?.common}
-                            id={country.cca2}
-                            name={country.name.common}
-                            lat={country.latlng ? country.latlng[0] : 0}
-                            lng={country.latlng ? country.latlng[1] : 0}
-                            population={country.population}
-                            region={country.region}
-                            flag={country.flags?.png || country.flag || ''}
-                          />
-                        ))}
-                      </Suspense>
-                    </section>
-                    {/* Only show pagination if NOT in direct search mode */}
-                    {!isDirectSearchMode && pagination.totalPages > 1 && (
-                      <Pagination
-                        currentPage={currentPage}
-                        totalPages={pagination.totalPages}
-                        onPageChange={handlePageChange}
-                      />
-                    )}
-                  </>
-                );
-              }
-              return <div className="no-results">No countries to display.</div>;
-            }
-            // Map view
-            return (
-              <div
-                className="map-view-container"
-                style={{
-                  minHeight: 400,
-                  margin: '32px 0',
-                }}
-              >
-                <InteractiveWorldMap region={region} countries={displayCountries} />
-              </div>
-            );
-          })()}
-        </section>
-        {/* Floating Action Button (FAB) */}
-        <div
-          className={`fab-menu${fabOpen ? ' open' : ''}`}
-          style={{
-            position: 'fixed',
-            bottom: 70,
-            right: 24,
-            zIndex: 20,
-          }}
+              </Button>
+            </ButtonGroup>
+          </Box>
+          {viewMode === 'grid' ? (
+            <Grid container spacing={2} mt={1}>
+              {displayCountries && displayCountries.length > 0 ? (
+                displayCountries.map((country, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={country.cca2 || country.name?.common || index}>
+                    <Suspense fallback={<div>Loading...</div>}>
+                      <Card sx={{ textAlign: 'center', p: 2 }}>
+                        <img src={country.flags?.png || country.flag || ''} alt="" style={{ width: 30 }} />
+                        <Typography>{country.name?.common || country.name}</Typography>
+                        <Chip label={`AQI ${country.aqi || '--'}`} color={getAQIColor(country.aqi)} />
+                      </Card>
+                    </Suspense>
+                  </Grid>
+                ))
+              ) : (
+                <Grid item xs={12}><Typography>No countries to display.</Typography></Grid>
+              )}
+            </Grid>
+          ) : (
+            <Box sx={{ minHeight: 400, my: 3 }}>
+              <InteractiveWorldMap region={region} countries={displayCountries} />
+            </Box>
+          )}
+          {!isDirectSearchMode && pagination.totalPages > 1 && (
+            <Box display="flex" justifyContent="center" mt={3}>
+              <MuiPagination
+                count={pagination.totalPages}
+                page={currentPage}
+                onChange={(_, page) => handlePageChange(page)}
+                color="primary"
+              />
+            </Box>
+          )}
+        </Paper>
+        <SpeedDial
+          ariaLabel="Quick Actions"
+          sx={{ position: 'fixed', bottom: 32, right: 32 }}
+          icon={<SearchIcon />}
         >
-          <button
-            type="button"
-            className="fab-main"
-            aria-label="Open quick menu"
-            onClick={() => setFabOpen((open) => !open)}
-          >
-            ＋
-          </button>
-          <div
-            className="fab-actions"
-            style={{
-              display: fabOpen ? 'flex' : 'none',
-              flexDirection: 'column',
-              gap: '0.5rem',
-              marginBottom: '0.5rem',
-            }}
-          >
-            <button type="button" aria-label="Search Country" onClick={() => document.querySelector('.searchCountry')?.focus()}>🔍</button>
-            <button type="button" aria-label="Go to Map View" onClick={() => setViewMode('map')}>🧭</button>
-            <button type="button" aria-label="Refresh Data" onClick={() => window.location.reload()}>🔄</button>
-          </div>
-        </div>
+          <SpeedDialAction
+            icon={<SearchIcon />}
+            tooltipTitle="Focus Search"
+            onClick={() => document.querySelector('input[placeholder="Search country..."]')?.focus()}
+          />
+          <SpeedDialAction
+            icon={<MapIcon />}
+            tooltipTitle="Map View"
+            onClick={() => setViewMode('map')}
+          />
+          <SpeedDialAction
+            icon={<RefreshIcon />}
+            tooltipTitle="Refresh"
+            onClick={() => window.location.reload()}
+          />
+        </SpeedDial>
       </main>
     </ErrorBoundary>
   );
