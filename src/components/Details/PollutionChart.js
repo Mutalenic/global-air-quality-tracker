@@ -5,8 +5,7 @@ import {
   LineChart, Line, Area, AreaChart, ComposedChart, Brush,
 } from 'recharts';
 import { format, subDays } from 'date-fns';
-import Select from 'react-select';
-import './PollutionChart.css';
+import { Box, Paper, Typography, FormControl, InputLabel, Select as MuiSelect, MenuItem, Checkbox, FormGroup, FormControlLabel, Chip } from '@mui/material';
 
 // Color scheme based on air quality levels (good to dangerous)
 const COLORS = {
@@ -400,101 +399,76 @@ const PollutionChart = ({ pollutionData }) => {
   };
 
   return (
-    <section className="card pollution-chart-container" aria-label="Air pollution trends chart" style={{ margin: '32px 0', background: 'var(--background-color)' }}>
-      <h3 className="chart-title" style={{ color: 'var(--primary-color)', marginBottom: 16 }}>Air Pollution Analysis</h3>
-      <div
-        className="chart-controls"
-        style={{
-          display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 24,
-        }}
-      >
-        <div className="control-group">
-          <label htmlFor="chart-type-select">Chart Type:</label>
-          <Select
-            id="chart-type-select"
-            aria-labelledby="chart-type-label"
-            options={chartOptions}
-            value={chartOptions.find((option) => option.value === chartType)}
-            onChange={(option) => setChartType(option.value)}
-            className="select-control"
-            classNamePrefix="select"
-          />
-        </div>
-
-        <div className="control-group">
-          <label htmlFor="time-range-select">Time Range:</label>
-          <Select
-            id="time-range-select"
-            aria-labelledby="time-range-label"
-            options={timeOptions}
-            value={timeOptions.find((option) => option.value === timeRange)}
-            onChange={(option) => setTimeRange(option.value)}
-            className="select-control"
-            classNamePrefix="select"
-          />
-        </div>
-
-        <div className="control-group pollutant-select">
-          <label htmlFor="pollutants-select">Pollutants:</label>
-          <Select
-            id="pollutants-select"
-            aria-labelledby="pollutants-label"
-            options={pollutantOptions}
-            value={pollutantOptions.filter(
-              (option) => selectedPollutants.includes(option.value),
-            )}
-            onChange={(options) => setSelectedPollutants(
-              options.map((option) => option.value),
-            )}
-            isMulti
-            className="select-control"
-            classNamePrefix="select"
-          />
-        </div>
-      </div>
-      <div className="chart-legend" style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-        <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: COLORS.good }} />
-          <span>Good</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: COLORS.moderate }} />
-          <span>Moderate</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: COLORS.unhealthySensitive }} />
-          <span>Unhealthy</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: COLORS.unhealthy }} />
-          <span>Unhealthy</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: COLORS.veryUnhealthy }} />
-          <span>Very Unhealthy</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: COLORS.hazardous }} />
-          <span>Hazardous</span>
-        </div>
-      </div>
-      <div className="chart-wrapper" style={{ width: '100%', height: 350 }}>
+    <Paper elevation={3} sx={{ p: 3, my: 4 }}>
+      <Typography variant="h6" sx={{ color: 'primary.main', mb: 2 }}>Air Pollution Analysis</Typography>
+      <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
+        <FormControl sx={{ minWidth: 140 }}>
+          <InputLabel id="chart-type-label">Chart Type</InputLabel>
+          <MuiSelect
+            labelId="chart-type-label"
+            value={chartType}
+            label="Chart Type"
+            onChange={e => setChartType(e.target.value)}
+          >
+            {chartOptions.map(opt => (
+              <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+            ))}
+          </MuiSelect>
+        </FormControl>
+        <FormControl sx={{ minWidth: 140 }}>
+          <InputLabel id="time-range-label">Time Range</InputLabel>
+          <MuiSelect
+            labelId="time-range-label"
+            value={timeRange}
+            label="Time Range"
+            onChange={e => setTimeRange(e.target.value)}
+          >
+            {timeOptions.map(opt => (
+              <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+            ))}
+          </MuiSelect>
+        </FormControl>
+        <FormControl component="fieldset" sx={{ minWidth: 200 }}>
+          <Typography variant="caption" sx={{ mb: 1 }}>Pollutants</Typography>
+          <FormGroup row>
+            {pollutantOptions.map(opt => (
+              <FormControlLabel
+                key={opt.value}
+                control={
+                  <Checkbox
+                    checked={selectedPollutants.includes(opt.value)}
+                    onChange={() => {
+                      setSelectedPollutants(selectedPollutants.includes(opt.value)
+                        ? selectedPollutants.filter(p => p !== opt.value)
+                        : [...selectedPollutants, opt.value]);
+                    }}
+                  />
+                }
+                label={opt.label}
+              />
+            ))}
+          </FormGroup>
+        </FormControl>
+      </Box>
+      <Box display="flex" gap={2} mb={2}>
+        <Chip label="Good" sx={{ bgcolor: COLORS.good, color: '#fff' }} />
+        <Chip label="Moderate" sx={{ bgcolor: COLORS.moderate, color: '#333' }} />
+        <Chip label="Unhealthy" sx={{ bgcolor: COLORS.unhealthy, color: '#fff' }} />
+        <Chip label="Very Unhealthy" sx={{ bgcolor: COLORS.veryUnhealthy, color: '#fff' }} />
+        <Chip label="Hazardous" sx={{ bgcolor: COLORS.hazardous, color: '#fff' }} />
+      </Box>
+      <Box sx={{ width: '100%', height: 350 }}>
         <ResponsiveContainer width="100%" height="100%">
           {renderChart()}
         </ResponsiveContainer>
-      </div>
-      <div className="chart-info" style={{ marginTop: 16, color: 'var(--text-color)' }}>
-        <p>
-          This chart displays air pollution data for the selected pollutants.
-          The colors indicate the pollution level severity according to standard air quality indices.
-        </p>
-        <p className="chart-note">
-          <strong>Note:</strong>
-          {' '}
-          CO values are scaled by a factor of 100 for better visualization.
-        </p>
-      </div>
-    </section>
+      </Box>
+      <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+        This chart displays air pollution data for the selected pollutants. The colors indicate the pollution level severity according to standard air quality indices.
+      </Typography>
+      <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+        <strong>Note:</strong> CO values are scaled by a factor of 100 for better visualization.
+      </Typography>
+    </Paper>
   );
 };
 

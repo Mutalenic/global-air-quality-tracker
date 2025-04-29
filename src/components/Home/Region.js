@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faInfoCircle,
-  faMapMarkerAlt,
-  faChartBar,
-  faGlobeAmericas,
-  faSearch,
-  faLungs,
-  faClock,
-  faExclamationTriangle,
-  faMapMarkedAlt,
-  faLayerGroup, // Icon for the trigger button
-  faTimes, // Icon to close the menu
-} from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
-import Select from 'react-select';
 import Header from '../Navbar/Navbar';
 import InteractiveWorldMap from '../Maps/InteractiveMap/InteractiveWorldMap';
 import { fetchAllCountries } from '../../redux/apiFunctions';
-import './Region.css';
+import {
+  Box, Typography, Grid, Card, CardContent, CardActions, Button, Autocomplete, TextField, FormControl, InputLabel, Select, MenuItem, Paper, Dialog, DialogTitle, DialogContent, IconButton, SpeedDial, SpeedDialAction
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import PublicIcon from '@mui/icons-material/Public';
+import CloseIcon from '@mui/icons-material/Close';
+import LayersIcon from '@mui/icons-material/Layers';
 
 const Regions = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
@@ -36,7 +27,6 @@ const Regions = () => {
     { region: 'Antarctic', country: 5 },
   ];
 
-  // Fetch country options on mount
   useEffect(() => {
     const loadCountries = async () => {
       const options = await fetchAllCountries();
@@ -47,14 +37,12 @@ const Regions = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // Use selectedCountry.label for search term
     if (selectedCountry) {
       navigate(`/countries?search=${encodeURIComponent(selectedCountry.label)}&region=${selectedRegion || 'all'}`);
     }
   };
 
   const handleRegionClick = (regionName) => {
-    // Map the clicked region to our application's region structure
     const regionMap = {
       'United States of America': 'Americas',
       Canada: 'Americas',
@@ -76,7 +64,6 @@ const Regions = () => {
       Kenya: 'Africa',
       Antarctica: 'Antarctic',
     };
-
     const mappedRegion = regionMap[regionName] || '';
     if (mappedRegion) {
       navigate(`/countries?region=${mappedRegion}`);
@@ -85,189 +72,139 @@ const Regions = () => {
 
   const handleRegionLinkClick = (regionName) => {
     navigate(`/countries?region=${regionName}`);
-    setIsRegionMenuOpen(false); // Close menu on selection
+    setIsRegionMenuOpen(false);
   };
 
-  // Filter country options based on selected region
   const filteredCountryOptions = selectedRegion
     ? countryOptions.filter((option) => option.region === selectedRegion)
     : countryOptions;
 
   return (
-    <div className="home-container">
+    <Box className="home-container">
       <Header id="/" />
-
-      {/* Hero Section with Interactive World Map */}
-      <div className="hero-section">
-        <div className="map-header-container">
-          {/* Updated Title and Subtitle */}
-          <h1 className="hero-title">Breathe Easier, Know Your Air</h1>
-          <p className="hero-subtitle">Explore real-time air quality and weather conditions across the globe.</p>
-        </div>
-
-        <div className="world-container">
+      <Box className="hero-section">
+        <Box className="map-header-container">
+          <Typography variant="h3" fontWeight="bold" gutterBottom>Breathe Easier, Know Your Air</Typography>
+          <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+            Explore real-time air quality and weather conditions across the globe.
+          </Typography>
+        </Box>
+        <Box className="world-container" sx={{ my: 3 }}>
           <InteractiveWorldMap onRegionClick={handleRegionClick} />
-        </div>
-
-        {/* Why Use This Tracker? Section (Replaces App Intro) */}
-        <div className="benefits-section">
-          <h2>Why Track Air Quality?</h2>
-          <div className="benefits-grid">
-            <div className="benefit-card">
-              <FontAwesomeIcon icon={faLungs} className="benefit-icon" />
-              <h3>Protect Your Health</h3>
-              <p>Understand pollution levels to make informed decisions for outdoor activities and reduce health risks.</p>
-            </div>
-            <div className="benefit-card">
-              <FontAwesomeIcon icon={faClock} className="benefit-icon" />
-              <h3>Real-Time Data</h3>
-              <p>Access up-to-the-minute air quality (AQI) and weather information from reliable sources.</p>
-            </div>
-            <div className="benefit-card">
-              <FontAwesomeIcon icon={faMapMarkedAlt} className="benefit-icon" />
-              <h3>Global & Local Insights</h3>
-              <p>Explore pollution trends worldwide or zoom in on specific countries and cities.</p>
-            </div>
-            <div className="benefit-card">
-              <FontAwesomeIcon icon={faExclamationTriangle} className="benefit-icon" />
-              <h3>Stay Aware</h3>
-              <p>Be informed about hazardous conditions and environmental changes affecting air quality.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Search Section */}
-      <div className="search-section">
-        <h2>Find Air Quality Data for a Specific Country</h2>
-        <form onSubmit={handleSearch} className="search-form">
-          <div className="search-inputs">
-            <div className="search-field" style={{ flexGrow: 2 }}>
-              {/* Allow select to grow */}
-              <FontAwesomeIcon icon={faSearch} className="search-icon" />
-              {/* Replace input with react-select */}
-              <Select
-                options={filteredCountryOptions}
-                onChange={setSelectedCountry}
-                value={selectedCountry}
-                placeholder="Search for a country..."
-                isClearable
-                className="country-select"
-                classNamePrefix="react-select"
-              />
-            </div>
-            <div className="select-field">
-              <select
-                value={selectedRegion}
-                onChange={(e) => {
-                  setSelectedRegion(e.target.value);
-                  setSelectedCountry(null); // Clear selected country when region changes
-                }}
-                className="region-select"
-              >
-                <option value="">All Regions</option>
-                {regionList.map((region) => (
-                  <option key={region.region} value={region.region}>
-                    {region.region}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <button type="submit" className="search-button" disabled={!selectedCountry}>
+        </Box>
+        <Box className="benefits-section" sx={{ my: 4 }}>
+          <Typography variant="h5" gutterBottom>Why Track Air Quality?</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <PublicIcon color="primary" fontSize="large" />
+                  <Typography variant="h6">Global Coverage</Typography>
+                  <Typography variant="body2">Air quality data for countries across all regions</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <LayersIcon color="secondary" fontSize="large" />
+                  <Typography variant="h6">Location-Based</Typography>
+                  <Typography variant="body2">Find data specific to your region or country</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <MenuIcon color="action" fontSize="large" />
+                  <Typography variant="h6">Visual Analytics</Typography>
+                  <Typography variant="body2">Easy-to-understand pollution metrics</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <CloseIcon color="error" fontSize="large" />
+                  <Typography variant="h6">Health Insights</Typography>
+                  <Typography variant="body2">Learn how air quality affects your wellbeing</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+      <Paper sx={{ p: 3, my: 4 }}>
+        <Typography variant="h5" gutterBottom>Find Air Quality Data for a Specific Country</Typography>
+        <Box component="form" onSubmit={handleSearch} display="flex" gap={2} alignItems="center" flexWrap="wrap">
+          <Autocomplete
+            options={filteredCountryOptions}
+            getOptionLabel={option => option.label || ''}
+            value={selectedCountry}
+            onChange={(_, value) => setSelectedCountry(value)}
+            renderInput={params => (
+              <TextField {...params} label="Search for a country..." variant="outlined" sx={{ minWidth: 220 }} />
+            )}
+            isOptionEqualToValue={(option, value) => option.value === value.value}
+            sx={{ flexGrow: 2 }}
+            clearOnEscape
+          />
+          <FormControl sx={{ minWidth: 160 }}>
+            <InputLabel>Region</InputLabel>
+            <Select
+              value={selectedRegion}
+              label="Region"
+              onChange={e => {
+                setSelectedRegion(e.target.value);
+                setSelectedCountry(null);
+              }}
+            >
+              <MenuItem value="">All Regions</MenuItem>
+              {regionList.map(region => (
+                <MenuItem key={region.region} value={region.region}>{region.region}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button type="submit" variant="contained" disabled={!selectedCountry} sx={{ minWidth: 120 }}>
             Search
-          </button>
-        </form>
-      </div>
-
-      {/* Features Section */}
-      <div className="features-section">
-        <h2>Key Features</h2>
-        <div className="features-grid">
-          <div className="feature-card">
-            <FontAwesomeIcon icon={faGlobeAmericas} className="feature-icon" />
-            <h3>Global Coverage</h3>
-            <p>Air quality data for countries across all regions</p>
-          </div>
-          <div className="feature-card">
-            <FontAwesomeIcon icon={faMapMarkerAlt} className="feature-icon" />
-            <h3>Location-Based</h3>
-            <p>Find data specific to your region or country</p>
-          </div>
-          <div className="feature-card">
-            <FontAwesomeIcon icon={faChartBar} className="feature-icon" />
-            <h3>Visual Analytics</h3>
-            <p>Easy-to-understand pollution metrics</p>
-          </div>
-          <div className="feature-card">
-            <FontAwesomeIcon icon={faInfoCircle} className="feature-icon" />
-            <h3>Health Insights</h3>
-            <p>Learn how air quality affects your wellbeing</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Remove the old static regions section */}
-      {/*
-      <div className="regions-section">
-        <h2>Explore Air Quality by Region</h2>
-        <p>Select a continent to view countries and their air quality data</p>
-        <div className="row">
-          {
-            regionList.map((element) => (
-              <Region
-                key={element.region}
-                region={element.region}
-                regionCountry={element.country}
-              />
-            ))
-          }
-        </div>
-      </div>
-      */}
-
-      {/* Floating Region Menu Trigger Button */}
-      <button
-        type="button"
-        className="region-menu-trigger"
-        onClick={() => setIsRegionMenuOpen(!isRegionMenuOpen)}
-        aria-haspopup="true"
-        aria-expanded={isRegionMenuOpen}
-        aria-label="Open regions menu"
+          </Button>
+        </Box>
+      </Paper>
+      <SpeedDial
+        ariaLabel="Open regions menu"
+        sx={{ position: 'fixed', bottom: 32, right: 32 }}
+        icon={<LayersIcon />}
+        onClick={() => setIsRegionMenuOpen(true)}
       >
-        <FontAwesomeIcon icon={faLayerGroup} />
-        <span>Regions</span>
-      </button>
-
-      {/* Floating Region Menu */}
-      {isRegionMenuOpen && (
-        <div className="floating-region-menu" role="menu">
-          <button
-            type="button"
-            className="close-region-menu"
+        {/* No actions, just opens dialog */}
+      </SpeedDial>
+      <Dialog open={isRegionMenuOpen} onClose={() => setIsRegionMenuOpen(false)}>
+        <DialogTitle>
+          Explore by Region
+          <IconButton
+            aria-label="close"
             onClick={() => setIsRegionMenuOpen(false)}
-            aria-label="Close regions menu"
+            sx={{ position: 'absolute', right: 8, top: 8 }}
           >
-            <FontAwesomeIcon icon={faTimes} />
-          </button>
-          <h3 className="floating-menu-title">Explore by Region</h3>
-          <ul>
-            {regionList.map((item) => (
-              <li key={item.region}>
-                <button
-                  type="button"
-                  className="floating-region-item"
-                  onClick={() => handleRegionLinkClick(item.region)}
-                  role="menuitem"
-                >
-                  {item.region}
-                </button>
-              </li>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Box display="flex" flexDirection="column" gap={2}>
+            {regionList.map(item => (
+              <Button
+                key={item.region}
+                variant="outlined"
+                onClick={() => handleRegionLinkClick(item.region)}
+                fullWidth
+              >
+                {item.region}
+              </Button>
             ))}
-          </ul>
-        </div>
-      )}
-    </div>
+          </Box>
+        </DialogContent>
+      </Dialog>
+    </Box>
   );
 };
 
