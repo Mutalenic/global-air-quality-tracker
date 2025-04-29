@@ -377,7 +377,6 @@ const Countries = () => {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <main>
-        <Navbar id="/" />
         <Paper sx={{ p: 3, my: 4 }}>
           <Box display="flex" alignItems="center" gap={2} mb={2}>
             <Typography variant="h5" flexGrow={1}>{region}</Typography>
@@ -421,17 +420,47 @@ const Countries = () => {
             </ButtonGroup>
           </Box>
           {viewMode === 'grid' ? (
-            <Grid container spacing={2} mt={1}>
+            <Grid container spacing={3} mt={1}>
               {displayCountries && displayCountries.length > 0 ? (
                 displayCountries.map((country, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={country.cca2 || country.name?.common || index}>
-                    <Suspense fallback={<div>Loading...</div>}>
-                      <Card sx={{ textAlign: 'center', p: 2 }}>
-                        <img src={country.flags?.png || country.flag || ''} alt="" style={{ width: 30 }} />
-                        <Typography>{country.name?.common || country.name}</Typography>
-                        <Chip label={`AQI ${country.aqi || '--'}`} color={getAQIColor(country.aqi)} />
-                      </Card>
-                    </Suspense>
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={country.cca2 || country.name?.common || index}>
+                    <Card
+                      sx={{
+                        textAlign: 'center',
+                        p: 2,
+                        borderRadius: 3,
+                        boxShadow: 3,
+                        transition: '0.2s',
+                        '&:hover': { boxShadow: 8, transform: 'translateY(-4px)' },
+                        minHeight: 180,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <img
+                        src={country.flags?.png || country.flag || ''}
+                        alt={country.name?.common || country.name}
+                        style={{
+                          width: 48,
+                          height: 32,
+                          borderRadius: 4,
+                          marginBottom: 8,
+                          objectFit: 'cover',
+                          boxShadow: '0 1px 4px #ccc',
+                        }}
+                      />
+                      <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+                        {country.name?.common || country.name}
+                      </Typography>
+                      <Chip label={`AQI ${country.aqi || '--'}`} color={getAQIColor(country.aqi)} sx={{ fontWeight: 500 }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Population:
+                        <br />
+                        {country.population ? country.population.toLocaleString() : '--'}
+                      </Typography>
+                    </Card>
                   </Grid>
                 ))
               ) : (
