@@ -30,6 +30,7 @@ import './Countries.css';
 // Import pagination action
 import { getPaginatedCountries } from '../../redux/Actions/Countries';
 import { searchCountryByNameAPI } from '../../redux/apiFunctions'; // Import the new API function
+import InteractiveWorldMap from '../Maps/InteractiveMap/InteractiveWorldMap';
 
 // Use dynamic import for Country component which is rendered multiple times
 const Country = React.lazy(() => import('../Home/Country'));
@@ -110,6 +111,10 @@ const Countries = () => {
   const [directSearchResults, setDirectSearchResults] = useState(null);
   const [directSearchLoading, setDirectSearchLoading] = useState(false);
   const [isDirectSearchMode, setIsDirectSearchMode] = useState(!!initialSearchTerm);
+
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'map'
+  // FAB state
+  const [fabOpen, setFabOpen] = useState(false);
 
   // Region to image mapping
   const regionToImageMap = {
@@ -374,6 +379,14 @@ const Countries = () => {
                 className="img1"
               />
             </Suspense>
+            <button
+              type="button"
+              className="toggle-view-btn"
+              aria-label={viewMode === 'grid' ? 'Switch to map view' : 'Switch to grid view'}
+              onClick={() => setViewMode(viewMode === 'grid' ? 'map' : 'grid')}
+            >
+              {viewMode === 'grid' ? '🗺️ Map View' : '📋 List View'}
+            </button>
           </header>
 
           <section className="search-filter-container" aria-label="Search and filter controls">
@@ -420,49 +433,96 @@ const Countries = () => {
             </div>
           </section>
 
-          {/* Display countries based on the determined list */}
-          {displayCountries && displayCountries.length > 0 ? (
-            <>
-              <section
-                className="countriesGrid"
+          {/* Toggle between grid and map view */}
+          {(() => {
+            if (viewMode === 'grid') {
+              if (displayCountries && displayCountries.length > 0) {
+                return (
+                  <>
+                    <section
+                      className="countriesGrid"
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                        gap: '24px',
+                        margin: '32px 0',
+                      }}
+                      aria-label="List of countries"
+                    >
+                      <Suspense fallback={<div className="loading-container">Loading countries...</div>}>
+                        {displayCountries.map((country) => (
+                          <Country
+                            key={country.cca2 || country.name?.common}
+                            id={country.cca2}
+                            name={country.name.common}
+                            lat={country.latlng ? country.latlng[0] : 0}
+                            lng={country.latlng ? country.latlng[1] : 0}
+                            population={country.population}
+                            region={country.region}
+                            flag={country.flags?.png || country.flag || ''}
+                          />
+                        ))}
+                      </Suspense>
+                    </section>
+                    {/* Only show pagination if NOT in direct search mode */}
+                    {!isDirectSearchMode && pagination.totalPages > 1 && (
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={pagination.totalPages}
+                        onPageChange={handlePageChange}
+                      />
+                    )}
+                  </>
+                );
+              }
+              return <div className="no-results">No countries to display.</div>;
+            }
+            // Map view
+            return (
+              <div
+                className="map-view-container"
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                  gap: '24px',
+                  minHeight: 400,
                   margin: '32px 0',
                 }}
-                aria-label="List of countries"
               >
-                <Suspense fallback={<div className="loading-container">Loading countries...</div>}>
-                  {displayCountries.map((country) => (
-                    <Country
-                      key={country.cca2 || country.name?.common}
-                      id={country.cca2}
-                      name={country.name.common}
-                      lat={country.latlng ? country.latlng[0] : 0}
-                      lng={country.latlng ? country.latlng[1] : 0}
-                      population={country.population}
-                      region={country.region}
-                      flag={country.flags?.png || country.flag || ''}
-                    />
-                  ))}
-                </Suspense>
-              </section>
-              {/* Only show pagination if NOT in direct search mode */}
-              {!isDirectSearchMode && pagination.totalPages > 1 && (
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={pagination.totalPages}
-                  onPageChange={handlePageChange}
-                />
-              )}
-            </>
-          ) : (
-            // This case might be hit if loading finished but displayCountries is empty/null
-            // (and not handled by the specific 'no results' messages above)
-            <div className="no-results">No countries to display.</div>
-          )}
+                <InteractiveWorldMap region={region} countries={displayCountries} />
+              </div>
+            );
+          })()}
         </section>
+        {/* Floating Action Button (FAB) */}
+        <div
+          className={`fab-menu${fabOpen ? ' open' : ''}`}
+          style={{
+            position: 'fixed',
+            bottom: 70,
+            right: 24,
+            zIndex: 20,
+          }}
+        >
+          <button
+            type="button"
+            className="fab-main"
+            aria-label="Open quick menu"
+            onClick={() => setFabOpen((open) => !open)}
+          >
+            ＋
+          </button>
+          <div
+            className="fab-actions"
+            style={{
+              display: fabOpen ? 'flex' : 'none',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              marginBottom: '0.5rem',
+            }}
+          >
+            <button type="button" aria-label="Search Country" onClick={() => document.querySelector('.searchCountry')?.focus()}>🔍</button>
+            <button type="button" aria-label="Go to Map View" onClick={() => setViewMode('map')}>🧭</button>
+            <button type="button" aria-label="Refresh Data" onClick={() => window.location.reload()}>🔄</button>
+          </div>
+        </div>
       </main>
     </ErrorBoundary>
   );
