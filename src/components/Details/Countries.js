@@ -88,6 +88,23 @@ Pagination.propTypes = {
   onPageChange: PropTypes.func.isRequired,
 };
 
+import {
+  Paper, Typography, Select, MenuItem, RadioGroup, FormControlLabel, Radio, Grid, Card, Chip
+} from "@mui/material";
+
+const countries = [
+  { name: "Zambia", flag: "/flags/za.png", aqi: 72 },
+  { name: "Nigeria", flag: "/flags/ng.png", aqi: 110 },
+  // ...more
+];
+
+function getAQIColor(aqi) {
+  if (aqi <= 50) return "success";
+  if (aqi <= 100) return "warning";
+  if (aqi <= 150) return "error";
+  return "default";
+}
+
 const Countries = () => {
   const dispatch = useDispatch();
   const location = useLocation();

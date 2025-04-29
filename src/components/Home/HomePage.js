@@ -1,100 +1,108 @@
-import React from 'react';
-import './HomePage.css';
+import React from "react";
+import {
+  AppBar, Toolbar, Typography, IconButton, Box, Container, Paper, Button, TextField,
+  InputAdornment, Chip, Grid, Card, Divider, Alert, Fab, BottomNavigation, BottomNavigationAction
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import SearchIcon from "@mui/icons-material/Search";
+import AddIcon from "@mui/icons-material/Add";
+import HomeIcon from "@mui/icons-material/Home";
+import MapIcon from "@mui/icons-material/Map";
+import PublicIcon from "@mui/icons-material/Public";
+import ArticleIcon from "@mui/icons-material/Article";
+import SettingsIcon from "@mui/icons-material/Settings";
 
-// Placeholder subcomponents
-const HeroSection = () => (
-  <div className="hero-section glass">
-    <div className="logo">🌱 AirTrack</div>
-    <button className="menu-btn" aria-label="Open settings menu">☰</button>
-    <button className="location-btn" aria-label="Use my location">
-      <span className="pulsing-dot" />
-      {' '}
-      Use My Location
-    </button>
-    <input
-      className="search-bar"
-      type="text"
-      placeholder="🔍 Search by city or country..."
-      aria-label="Search by city or country"
-    />
-  </div>
-);
+const forecastData = [
+  { time: "12:00", emoji: "🌤️", aqi: 65 },
+  { time: "15:00", emoji: "🌧️", aqi: 70 },
+  // ...more
+];
 
-const AQIDisplay = () => (
-  <div className="aqi-display glass">
-    <div className="aqi-number" aria-live="polite">72</div>
-    <div className="aqi-status">Moderate Air Quality in Lusaka</div>
-    <div className="aqi-icon" aria-label="Wind cloud icon">🌬️</div>
-  </div>
-);
+export default function HomePage() {
+  return (
+    <Container maxWidth="md">
+      <AppBar position="static" color="transparent" elevation={0}>
+        <Toolbar>
+          <Typography variant="h6">AirQuality</Typography>
+          <Box flexGrow={1} />
+          <IconButton><MenuIcon /></IconButton>
+        </Toolbar>
+      </AppBar>
 
-const PollutantCards = () => (
-  <div className="pollutant-cards-scroll">
-    {/* Example pollutant card */}
-    <div className="pollutant-card" tabIndex={0} aria-label="PM2.5: 35 micrograms per cubic meter, steady">
-      <span className="pollutant-icon">⚠️</span>
-      <span className="pollutant-name">PM2.5</span>
-      <span className="pollutant-value">35 µg/m³</span>
-      <span className="pollutant-trend">→</span>
-      <span className="pollutant-dot moderate" />
-    </div>
-    {/* Add more cards as needed */}
-  </div>
-);
+      <Paper elevation={3} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="body2">Current Location</Typography>
+          <Button size="small" startIcon={<LocationOnIcon />}>Use My Location</Button>
+        </Box>
 
-const HealthAdvisory = () => (
-  <div className="health-advisory glass" aria-live="polite">
-    <span role="img" aria-label="Health advisory">💡</span>
-    {' '}
-    Reduce prolonged outdoor exertion.
-  </div>
-);
+        <TextField
+          fullWidth
+          label="Search City or Country"
+          variant="outlined"
+          margin="normal"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
 
-const ForecastSlider = () => (
-  <div className="forecast-slider">
-    {/* Example forecast tile */}
-    <div className="forecast-tile">
-      <span className="forecast-time">12:00</span>
-      <span className="forecast-aqi">65</span>
-      <span className="forecast-emoji">🌤️</span>
-    </div>
-    {/* Add more tiles as needed */}
-  </div>
-);
+        <Box mt={4} textAlign="center">
+          <Chip label="Moderate" color="warning" />
+          <Typography variant="h3" fontWeight="bold" mt={1}>AQI: 72</Typography>
+          <Typography variant="subtitle1" color="text.secondary">Lusaka, Zambia</Typography>
+        </Box>
 
-const BottomNav = () => (
-  <nav className="bottom-nav" aria-label="Main navigation">
-    <button aria-label="Home">🏠</button>
-    <button aria-label="Map">🗺️</button>
-    <button aria-label="Explore">🔎</button>
-    <button aria-label="News">📰</button>
-    <button aria-label="Settings">⚙️</button>
-  </nav>
-);
+        <Grid container spacing={2} mt={2}>
+          <Grid item xs={6}>
+            <Card sx={{ textAlign: 'center', p: 2 }}>
+              <Typography color="success.main" fontWeight="bold">PM2.5</Typography>
+              <Typography variant="h6">35 µg/m³</Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={6}>
+            <Card sx={{ textAlign: 'center', p: 2 }}>
+              <Typography color="error.main" fontWeight="bold">PM10</Typography>
+              <Typography variant="h6">50 µg/m³</Typography>
+            </Card>
+          </Grid>
+        </Grid>
 
-const FABMenu = () => (
-  <div className="fab-menu">
-    <button className="fab-main" aria-label="Open quick menu">＋</button>
-    {/* Expanded actions (hidden by default, show on click) */}
-    <div className="fab-actions">
-      <button aria-label="Search City">🔍</button>
-      <button aria-label="Set Health Sensitivity">👤</button>
-      <button aria-label="Change Theme">🎨</button>
-      <button aria-label="Share App">🔗</button>
-    </div>
-  </div>
-);
+        <Divider sx={{ my: 3 }} />
 
-const HomePage = () => (
-  <main className="home-page">
-    <HeroSection />
-    <AQIDisplay />
-    <PollutantCards />
-    <HealthAdvisory />
-    <ForecastSlider />
-    <FABMenu />
-    <BottomNav />
-  </main>
-);
+        <Typography variant="body1" fontWeight="bold" mt={2}>
+          Health Advice
+        </Typography>
+        <Alert severity="info" sx={{ mt: 1 }}>
+          Reduce prolonged outdoor exertion if you are unusually sensitive.
+        </Alert>
 
-export default HomePage;
+        <Typography variant="h6" mt={3} gutterBottom>Forecast</Typography>
+        <Box display="flex" gap={1} overflow="auto">
+          {forecastData.map((day, index) => (
+            <Card key={index} sx={{ minWidth: 80, p: 1, textAlign: 'center' }}>
+              <Typography variant="caption">{day.time}</Typography>
+              <Typography>{day.emoji}</Typography>
+              <Typography variant="body2">{day.aqi}</Typography>
+            </Card>
+          ))}
+        </Box>
+
+        <Fab color="primary" aria-label="menu" sx={{ position: 'fixed', bottom: 16, right: 16 }}>
+          <AddIcon />
+        </Fab>
+      </Paper>
+
+      <BottomNavigation showLabels>
+        <BottomNavigationAction label="Home" icon={<HomeIcon />} />
+        <BottomNavigationAction label="Map" icon={<MapIcon />} />
+        <BottomNavigationAction label="Explore" icon={<PublicIcon />} />
+        <BottomNavigationAction label="News" icon={<ArticleIcon />} />
+        <BottomNavigationAction label="Settings" icon={<SettingsIcon />} />
+      </BottomNavigation>
+    </Container>
+  );
+}

@@ -1,0 +1,146 @@
+/* CityDetail.css: Styles for city detail page, glassmorphism, pollutant cards, alert, FAB */
+.city-detail-page {
+  font-family: 'Inter', 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #FFEB3B 0%, #F44336 100%);
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+.glass {
+  background: rgba(255,255,255,0.25);
+  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18);
+  backdrop-filter: blur(8px);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.18);
+  margin: 2rem auto 1rem auto;
+  max-width: 600px;
+  padding: 2rem;
+}
+.city-aqi-display {
+  text-align: center;
+  color: #222;
+  margin-bottom: 1.5rem;
+}
+.aqi-number {
+  font-size: 4rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+.aqi-impact {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+.pollutant-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin: 2rem 0;
+}
+.pollutant-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 1rem 1.2rem;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1rem;
+}
+.pollutant-icon {
+  font-size: 1.5rem;
+}
+.pollutant-name {
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+.pollutant-value {
+  font-size: 1.1rem;
+  margin: 0.25rem 0;
+}
+.pollutant-desc {
+  font-size: 0.95rem;
+  color: #888;
+}
+.alert-banner {
+  background: #F44336;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: bold;
+  margin: 1rem auto;
+  max-width: 500px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+.daily-tips {
+  margin: 2rem auto;
+  max-width: 500px;
+  background: #fff8;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.daily-tips h3 {
+  margin-top: 0;
+}
+.fab-menu {
+  position: fixed;
+  bottom: 70px;
+  right: 24px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.fab-main {
+  background: #F44336;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  font-size: 2rem;
+  box-shadow: 0 4px 16px rgba(244,67,54,0.18);
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+  outline: none;
+}
+.fab-main:active {
+  transform: scale(1.1);
+}
+.fab-actions {
+  display: none;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.fab-menu.open .fab-actions {
+  display: flex;
+  animation: fab-expand 0.3s cubic-bezier(.68,-0.55,.27,1.55);
+}
+.fab-actions button {
+  background: #fff;
+  color: #222;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 1.3rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.fab-actions button:focus {
+  background: #FFEB3B;
+}
+@media (max-width: 600px) {
+  .glass {
+    max-width: 98vw;
+    padding: 1.2rem 0.5rem;
+  }
+  .pollutant-breakdown {
+    flex-direction: column;
+    align-items: center;
+  }
+}
