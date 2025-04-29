@@ -1,3 +1,6 @@
+import {
+  Box, Paper, Typography, Grid, Chip, Alert, CircularProgress,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -115,16 +118,21 @@ const Weather = ({ latitude, longitude }) => {
 
   // Display loading state
   if (isLoading) {
-    return <div className="weather-loading">Loading weather data...</div>;
+    return (
+      <Box display="flex" alignItems="center" justifyContent="center" minHeight={120}>
+        <CircularProgress color="primary" />
+        <Typography sx={{ ml: 2 }}>Loading weather data...</Typography>
+      </Box>
+    );
   }
 
   // Display error state
   if (error) {
     return (
-      <div className="weather-error">
+      <Alert severity="error" sx={{ my: 2 }}>
         Error:
         {error}
-      </div>
+      </Alert>
     );
   }
 
@@ -133,80 +141,69 @@ const Weather = ({ latitude, longitude }) => {
 
   // If no data is available, return message
   if (!weather || !airQuality) {
-    return <div className="weather-no-data">No weather data available for this location.</div>;
+    return <Alert severity="info" sx={{ my: 2 }}>No weather data available for this location.</Alert>;
   }
 
   return (
-    <div className="weather-container">
-      <div className="weather-section">
-        <div className="weather-header">
-          <h2>Current Weather</h2>
-          <div className="weather-icon">{weather.icon}</div>
-        </div>
-
-        <div className="weather-details">
-          <div className="weather-item">
-            <span className="label">Temperature:</span>
-            <span className="value">
-              {weather.temperature}
-              °C
-            </span>
-          </div>
-          <div className="weather-item">
-            <span className="label">Wind Speed:</span>
-            <span className="value">
-              {weather.windspeed}
-              {' '}
-              km/h
-            </span>
-          </div>
-          <div className="weather-item">
-            <span className="label">Conditions:</span>
-            <span className="value">{weather.description}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="air-quality-section">
-        <h2>Air Quality Impact</h2>
-        <div
-          className="aqi-indicator"
-          style={{ backgroundColor: airQuality.aqi.color }}
-        >
-          {airQuality.aqi.level}
-        </div>
-
-        <div className="air-quality-details">
-          <div className="air-quality-item">
-            <span className="label">PM2.5:</span>
-            <span className="value">
-              {airQuality.pm25}
-              {' '}
-              µg/m³
-            </span>
-          </div>
-          <div className="air-quality-item">
-            <span className="label">PM10:</span>
-            <span className="value">
-              {airQuality.pm10}
-              {' '}
-              µg/m³
-            </span>
-          </div>
-          <div className="air-quality-item description">
-            {airQuality.aqi.description}
-          </div>
-        </div>
-      </div>
-
+    <Paper elevation={2} sx={{ p: 3, mb: 2 }}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Typography variant="h6" gutterBottom>Current Weather</Typography>
+          <Box display="flex" alignItems="center" mb={2}>
+            <Typography variant="h2" sx={{ mr: 2 }}>{weather.icon}</Typography>
+            <Box>
+              <Typography variant="body1">{weather.description}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Temperature:
+                {weather.temperature}
+                °C
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Wind Speed:
+                {weather.windspeed}
+                {' '}
+                km/h
+              </Typography>
+            </Box>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Typography variant="h6" gutterBottom>Air Quality Impact</Typography>
+          <Chip
+            label={airQuality.aqi.level}
+            sx={{
+              bgcolor: airQuality.aqi.color, color: '#fff', fontWeight: 'bold', fontSize: 18, mb: 1,
+            }}
+          />
+          <Typography variant="body2" color="text.secondary">{airQuality.aqi.description}</Typography>
+          <Box mt={2}>
+            <Typography variant="body2">
+              PM2.5:
+              <b>
+                {airQuality.pm25}
+                {' '}
+                µg/m³
+              </b>
+            </Typography>
+            <Typography variant="body2">
+              PM10:
+              <b>
+                {airQuality.pm10}
+                {' '}
+                µg/m³
+              </b>
+            </Typography>
+          </Box>
+        </Grid>
+      </Grid>
       {analysis && analysis.effects && analysis.effects.length > 0 && (
-        <div className="weather-impact-section">
-          <h3>Weather Impact on Air Quality</h3>
-          <ul className="weather-impact-list">
+        <Box mt={4}>
+          <Typography variant="h6" gutterBottom>Weather Impact on Air Quality</Typography>
+          <ul style={{ paddingLeft: 20 }}>
             {analysis.effects.map((effect) => (
               <li
                 key={`effect-${effect.factor}-${effect.impact}`}
-                className={`impact-item impact-${effect.impact}`}
+                style={{ color: effect.impact === 'negative' ? '#d32f2f' : '#388e3c', marginBottom: 4 }}
               >
                 <strong>
                   {effect.factor.charAt(0).toUpperCase() + effect.factor.slice(1)}
@@ -217,20 +214,19 @@ const Weather = ({ latitude, longitude }) => {
               </li>
             ))}
           </ul>
-
           {analysis.recommendations && analysis.recommendations.length > 0 && (
-            <div className="recommendations">
-              <h4>Recommendations</h4>
-              <ul>
+            <Box mt={2}>
+              <Typography variant="subtitle1">Recommendations</Typography>
+              <ul style={{ paddingLeft: 20 }}>
                 {analysis.recommendations.map((rec) => (
                   <li key={`rec-${rec.substring(0, 15).replace(/\s/g, '-')}`}>{rec}</li>
                 ))}
               </ul>
-            </div>
+            </Box>
           )}
-        </div>
+        </Box>
       )}
-    </div>
+    </Paper>
   );
 };
 

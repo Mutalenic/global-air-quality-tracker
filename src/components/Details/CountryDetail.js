@@ -1,87 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { getPollutionData } from '../../redux/Actions/Pollution';
-import PollutionChart from './PollutionChart';
 import './CountryDetail.css';
 import {
-  Card, Box, IconButton, Typography, List, ListItem, ListItemText, ListItemIcon
-} from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-
-const AQISummary = ({
-  countryName, nationalAQI, trendData, healthAdvisory,
-}) => (
-  <section className="aqi-summary glass">
-    <h2>
-      National AQI for
-      {countryName}
-      :
-      <span className="aqi-number">{nationalAQI}</span>
-    </h2>
-    <div className="trend-chart-placeholder">
-      <PollutionChart pollutionData={trendData} />
-    </div>
-    <div className="health-advisory">
-      💡
-      {healthAdvisory}
-    </div>
-  </section>
-);
-
-const BestWorstCities = ({ bestCity, worstCity }) => (
-  <section className="best-worst-cities">
-    {bestCity && (
-      <div className="best-city banner">
-        ✅ Best:
-        {' '}
-        {bestCity.name}
-        {' '}
-        (AQI
-        {' '}
-        {bestCity.aqi}
-        )
-      </div>
-    )}
-    {worstCity && (
-      <div className="worst-city banner">
-        ❗ Worst:
-        {' '}
-        {worstCity.name}
-        {' '}
-        (AQI
-        {' '}
-        {worstCity.aqi}
-        )
-      </div>
-    )}
-  </section>
-);
-
-const CityList = ({ cities }) => (
-  <section className="city-list">
-    {cities.map((city) => (
-      <div className="city-card" key={city.name}>
-        <div className="city-header">
-          <span className="city-name">{city.name}</span>
-          <span className={`city-aqi ${city.aqiClass}`}>{city.aqi}</span>
-        </div>
-        <div className="city-pollutant">
-          {city.mainPollutant}
-          :
-          {' '}
-          {city.mainValue}
-          {' '}
-          µg/m³
-        </div>
-        <div className="city-sparkline">
-          <PollutionChart pollutionData={city.trendData} small />
-        </div>
-      </div>
-    ))}
-  </section>
-);
+  Card, Box, IconButton, Typography, List, ListItem, ListItemText, ListItemIcon, Chip, Grid, SpeedDial, SpeedDialAction,
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import MapIcon from '@mui/icons-material/Map';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+import PollutionChart from './PollutionChart';
 
 const getAqiClass = (aqi) => {
   if (aqi <= 50) return 'good';
@@ -101,20 +30,8 @@ const getHealthAdvisory = (aqi) => {
   return 'Hazardous: Remain indoors.';
 };
 
-const FABMenu = () => (
-  <div className="fab-menu">
-    <button type="button" className="fab-main" aria-label="Open quick menu">＋</button>
-    <div className="fab-actions">
-      <button type="button" aria-label="Go to Map">🧭</button>
-      <button type="button" aria-label="Copy Summary">📋</button>
-      <button type="button" aria-label="View Trends">📊</button>
-    </div>
-  </div>
-);
-
 const CountryDetail = () => {
   const { country } = useParams();
-  const dispatch = useDispatch();
   const { pollutionData } = useSelector((state) => state.pollutionReducer);
   const [cities, setCities] = useState([]);
   const [nationalAQI, setNationalAQI] = useState(0);
@@ -154,23 +71,57 @@ const CountryDetail = () => {
         <img src="/flags/za.png" alt="Zambia" style={{ width: 30, marginLeft: 8 }} />
         <Typography variant="h6" ml={1}>Zambia</Typography>
       </Box>
-      <Typography variant="h4" align="center" mt={2}>AQI: 72</Typography>
-      <Typography align="center" color="text.secondary">Moderate</Typography>
-      {/* <ChartComponent data={trendData} /> */}
-      <List>
-        {cities.map((city, index) => (
-          <ListItem button key={index} divider>
-            <ListItemText primary={city.name} secondary={`AQI: ${city.aqi}`} />
-            <ListItemIcon>
-              <ArrowForwardIosIcon fontSize="small" />
-            </ListItemIcon>
-          </ListItem>
-        ))}
-      </List>
-      <Box mt={2}>
-        <Typography color="success.main">Best: Livingstone (AQI 43)</Typography>
-        <Typography color="error.main">Worst: Kitwe (AQI 120)</Typography>
+      <Box textAlign="center" my={2}>
+        <Typography variant="h4">
+          AQI:
+          {nationalAQI}
+        </Typography>
+        <Chip label={getHealthAdvisory(nationalAQI)} color="warning" sx={{ mt: 1 }} />
       </Box>
+      <Box my={2}>
+        <Typography variant="h6" mb={1}>Best & Worst Cities</Typography>
+        <Grid container spacing={2} justifyContent="center">
+          {bestCity && (
+            <Grid item>
+              <Chip label={`Best: ${bestCity.name} (AQI ${bestCity.aqi})`} color="success" />
+            </Grid>
+          )}
+          {worstCity && (
+            <Grid item>
+              <Chip label={`Worst: ${worstCity.name} (AQI ${worstCity.aqi})`} color="error" />
+            </Grid>
+          )}
+        </Grid>
+      </Box>
+      <Box my={2}>
+        <Typography variant="h6" mb={1}>Major Cities</Typography>
+        <List>
+          {cities.map((city) => (
+            <ListItem button key={city.name} divider>
+              <ListItemText
+                primary={city.name}
+                secondary={`AQI: ${city.aqi} | ${city.mainPollutant}: ${city.mainValue} µg/m³`}
+              />
+              <ListItemIcon>
+                <ArrowForwardIosIcon fontSize="small" />
+              </ListItemIcon>
+            </ListItem>
+          ))}
+        </List>
+      </Box>
+      <Box my={2}>
+        <Typography variant="h6" mb={1}>7-Day AQI Trend</Typography>
+        <PollutionChart pollutionData={trendData} />
+      </Box>
+      <SpeedDial
+        ariaLabel="Country actions"
+        sx={{ position: 'fixed', bottom: 32, right: 32 }}
+        icon={<ShowChartIcon />}
+      >
+        <SpeedDialAction icon={<MapIcon />} tooltipTitle="Go to Map" />
+        <SpeedDialAction icon={<ContentCopyIcon />} tooltipTitle="Copy Summary" />
+        <SpeedDialAction icon={<ShowChartIcon />} tooltipTitle="View Trends" />
+      </SpeedDial>
     </Card>
   );
 };

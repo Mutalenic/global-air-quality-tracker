@@ -1,13 +1,11 @@
 import React from 'react';
-import './LoadingSpinner.css';
+import { Box, CircularProgress, Typography } from '@mui/material';
 
 const LoadingSpinner = () => (
-  <div className="loading-container">
-    <div className="spinner-container">
-      <div className="spinner" />
-    </div>
-    <p className="loading-text">Loading air quality data...</p>
-  </div>
+  <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight={120}>
+    <CircularProgress color="primary" />
+    <Typography sx={{ mt: 2 }}>Loading air quality data...</Typography>
+  </Box>
 );
 
 export default LoadingSpinner;

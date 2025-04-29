@@ -5,7 +5,9 @@ import {
   LineChart, Line, Area, AreaChart, ComposedChart, Brush,
 } from 'recharts';
 import { format, subDays } from 'date-fns';
-import { Box, Paper, Typography, FormControl, InputLabel, Select as MuiSelect, MenuItem, Checkbox, FormGroup, FormControlLabel, Chip } from '@mui/material';
+import {
+  Box, Paper, Typography, FormControl, InputLabel, Select as MuiSelect, MenuItem, Checkbox, FormGroup, FormControlLabel, Chip,
+} from '@mui/material';
 
 // Color scheme based on air quality levels (good to dangerous)
 const COLORS = {
@@ -408,9 +410,9 @@ const PollutionChart = ({ pollutionData }) => {
             labelId="chart-type-label"
             value={chartType}
             label="Chart Type"
-            onChange={e => setChartType(e.target.value)}
+            onChange={(e) => setChartType(e.target.value)}
           >
-            {chartOptions.map(opt => (
+            {chartOptions.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
             ))}
           </MuiSelect>
@@ -421,9 +423,9 @@ const PollutionChart = ({ pollutionData }) => {
             labelId="time-range-label"
             value={timeRange}
             label="Time Range"
-            onChange={e => setTimeRange(e.target.value)}
+            onChange={(e) => setTimeRange(e.target.value)}
           >
-            {timeOptions.map(opt => (
+            {timeOptions.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
             ))}
           </MuiSelect>
@@ -431,19 +433,19 @@ const PollutionChart = ({ pollutionData }) => {
         <FormControl component="fieldset" sx={{ minWidth: 200 }}>
           <Typography variant="caption" sx={{ mb: 1 }}>Pollutants</Typography>
           <FormGroup row>
-            {pollutantOptions.map(opt => (
+            {pollutantOptions.map((opt) => (
               <FormControlLabel
                 key={opt.value}
-                control={
+                control={(
                   <Checkbox
                     checked={selectedPollutants.includes(opt.value)}
                     onChange={() => {
                       setSelectedPollutants(selectedPollutants.includes(opt.value)
-                        ? selectedPollutants.filter(p => p !== opt.value)
+                        ? selectedPollutants.filter((p) => p !== opt.value)
                         : [...selectedPollutants, opt.value]);
                     }}
                   />
-                }
+                )}
                 label={opt.label}
               />
             ))}
@@ -466,7 +468,9 @@ const PollutionChart = ({ pollutionData }) => {
         This chart displays air pollution data for the selected pollutants. The colors indicate the pollution level severity according to standard air quality indices.
       </Typography>
       <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-        <strong>Note:</strong> CO values are scaled by a factor of 100 for better visualization.
+        <strong>Note:</strong>
+        {' '}
+        CO values are scaled by a factor of 100 for better visualization.
       </Typography>
     </Paper>
   );

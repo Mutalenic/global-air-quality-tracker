@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import {
+  Box, Paper, Typography, TextField, Button, Alert, Grid,
+} from '@mui/material';
 import Navbar from '../Navbar/Navbar';
 import Weather from './Weather';
-import './WeatherPage.css';
 
 const WeatherPage = () => {
   const [location, setLocation] = useState({
@@ -44,75 +46,81 @@ const WeatherPage = () => {
   };
 
   return (
-    <div className="weather-page">
+    <Box className="weather-page">
       <Navbar />
-      <main className="weather-page-content">
-        <section className="card" style={{ marginBottom: 32 }} aria-label="Weather and air quality search">
-          <h1>Weather & Air Quality</h1>
-          <p className="weather-subheading">
+      <Box className="weather-page-content">
+        <Paper elevation={3} sx={{ p: 3, mb: 4 }} aria-label="Weather and air quality search">
+          <Typography variant="h4" gutterBottom>Weather & Air Quality</Typography>
+          <Typography variant="subtitle1" color="text.secondary" gutterBottom>
             Explore how weather conditions affect air quality around the world
-          </p>
-          <form className="location-search-form" onSubmit={handleSearch} style={{ display: 'flex', gap: 12, margin: '16px 0' }}>
-            <input
-              type="text"
+          </Typography>
+          <Box component="form" onSubmit={handleSearch} display="flex" gap={2} my={2}>
+            <TextField
               placeholder="Search"
               value={searchLocation}
               onChange={(e) => setSearchLocation(e.target.value)}
-              className="location-search-input"
               disabled={isSearching}
-              aria-label="Search for a location"
+              label="Search for a location"
+              variant="outlined"
+              sx={{ flexGrow: 1, minWidth: 220 }}
             />
-            <button
+            <Button
               type="submit"
-              className="btn-primary"
+              variant="contained"
               disabled={isSearching}
-              aria-label="Search"
+              sx={{ minWidth: 120 }}
             >
               {isSearching ? 'Searching...' : 'Search'}
-            </button>
-          </form>
-          {error && <div className="search-error" role="alert">{error}</div>}
-        </section>
-
-        <section className="card weather-component-container" aria-label="Weather results" style={{ marginBottom: 32 }}>
+            </Button>
+          </Box>
+          {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+        </Paper>
+        <Paper elevation={3} sx={{ p: 3, mb: 4 }} aria-label="Weather results">
           <Weather latitude={location.latitude} longitude={location.longitude} />
-        </section>
-
-        <section className="weather-info-section" aria-label="Weather and air quality info">
-          <h2>Understanding Weather & Air Quality</h2>
-          <div className="info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24 }}>
-            <div className="card info-card">
-              <h3>Temperature</h3>
-              <p>
-                Higher temperatures accelerate reactions, increasing ground-level ozone formation.
-                Cold temperatures can increase visible pollutants from vehicle exhaust.
-              </p>
-            </div>
-            <div className="card info-card">
-              <h3>Wind</h3>
-              <p>
-                Strong winds disperse pollutants, improving air quality. Calm conditions
-                trap pollutants, leading to stagnant air and poor quality.
-              </p>
-            </div>
-            <div className="card info-card">
-              <h3>Precipitation</h3>
-              <p>
-                Rain and snow wash away particulate matter and water-soluble pollutants,
-                generally improving air quality during and after precipitation events.
-              </p>
-            </div>
-            <div className="card info-card">
-              <h3>Humidity</h3>
-              <p>
-                High humidity can affect pollutant formation and collection, while high-pressure
-                systems can create stagnant air conditions, trapping pollutants.
-              </p>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+        </Paper>
+        <Paper elevation={1} sx={{ p: 3, mb: 4 }} aria-label="Weather and air quality info">
+          <Typography variant="h5" gutterBottom>Understanding Weather & Air Quality</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper sx={{ p: 2, height: '100%' }}>
+                <Typography variant="h6">Temperature</Typography>
+                <Typography variant="body2">
+                  Higher temperatures accelerate reactions, increasing ground-level ozone formation.
+                  Cold temperatures can increase visible pollutants from vehicle exhaust.
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper sx={{ p: 2, height: '100%' }}>
+                <Typography variant="h6">Wind</Typography>
+                <Typography variant="body2">
+                  Strong winds disperse pollutants, improving air quality. Calm conditions
+                  trap pollutants, leading to stagnant air and poor quality.
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper sx={{ p: 2, height: '100%' }}>
+                <Typography variant="h6">Precipitation</Typography>
+                <Typography variant="body2">
+                  Rain and snow wash away particulate matter and water-soluble pollutants,
+                  generally improving air quality during and after precipitation events.
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper sx={{ p: 2, height: '100%' }}>
+                <Typography variant="h6">Humidity</Typography>
+                <Typography variant="body2">
+                  High humidity can affect pollutant formation and collection, while high-pressure
+                  systems can create stagnant air conditions, trapping pollutants.
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Paper>
+      </Box>
+    </Box>
   );
 };
 

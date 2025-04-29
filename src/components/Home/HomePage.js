@@ -1,21 +1,21 @@
-import React from "react";
+import React from 'react';
 import {
   AppBar, Toolbar, Typography, IconButton, Box, Container, Paper, Button, TextField,
-  InputAdornment, Chip, Grid, Card, Divider, Alert, Fab, BottomNavigation, BottomNavigationAction
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
-import HomeIcon from "@mui/icons-material/Home";
-import MapIcon from "@mui/icons-material/Map";
-import PublicIcon from "@mui/icons-material/Public";
-import ArticleIcon from "@mui/icons-material/Article";
-import SettingsIcon from "@mui/icons-material/Settings";
+  InputAdornment, Chip, Grid, Card, Divider, Alert, Fab, BottomNavigation, BottomNavigationAction,
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
+import HomeIcon from '@mui/icons-material/Home';
+import MapIcon from '@mui/icons-material/Map';
+import PublicIcon from '@mui/icons-material/Public';
+import ArticleIcon from '@mui/icons-material/Article';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const forecastData = [
-  { time: "12:00", emoji: "🌤️", aqi: 65 },
-  { time: "15:00", emoji: "🌧️", aqi: 70 },
+  { time: '12:00', emoji: '🌤️', aqi: 65 },
+  { time: '15:00', emoji: '🌧️', aqi: 70 },
   // ...more
 ];
 
@@ -82,8 +82,8 @@ export default function HomePage() {
 
         <Typography variant="h6" mt={3} gutterBottom>Forecast</Typography>
         <Box display="flex" gap={1} overflow="auto">
-          {forecastData.map((day, index) => (
-            <Card key={index} sx={{ minWidth: 80, p: 1, textAlign: 'center' }}>
+          {forecastData.map((day) => (
+            <Card key={day.time} sx={{ minWidth: 80, p: 1, textAlign: 'center' }}>
               <Typography variant="caption">{day.time}</Typography>
               <Typography>{day.emoji}</Typography>
               <Typography variant="body2">{day.aqi}</Typography>

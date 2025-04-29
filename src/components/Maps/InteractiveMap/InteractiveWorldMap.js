@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './InteractiveWorldMap.css';
-import { Box, Typography, Drawer, FormGroup, FormControlLabel, Checkbox } from "@mui/material";
+import {
+  Box, Typography, Drawer, FormGroup, FormControlLabel, Checkbox,
+} from '@mui/material';
 
 const pollutantColors = {
   pm25: '#FFEB3B',
@@ -26,18 +28,12 @@ function getAqiColor(aqi) {
   return AQI_COLORS.find((c) => aqi <= c.max).color;
 }
 
-const markers = [
-  { lon: 28.3, lat: -15.4, aqi: 72 },
-  { lon: 27.5, lat: -12.8, aqi: 120 },
-  // ...more
-];
 const showFilters = true;
 
 export default function MapPage() {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
-  const [activeLayer, setActiveLayer] = useState('aqi');
-  const [showHazardous, setShowHazardous] = useState(false);
+  const activeLayer = 'aqi';
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -48,51 +44,39 @@ export default function MapPage() {
       }).addTo(leafletMap);
       setMap(leafletMap);
     }
-    // Clean up on unmount
-    return () => map && map.remove();
-    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
-    if (!map) return;
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker || layer instanceof L.CircleMarker) {
-        map.removeLayer(layer);
-      }
-    });
-    data.forEach((city) => {
-      if (showHazardous && city.aqi < 200) return;
-      const value = activeLayer === 'aqi' ? city.aqi : city[activeLayer];
-      const color = activeLayer === 'aqi' ? getAqiColor(city.aqi) : pollutantColors[activeLayer];
-      const marker = L.circleMarker([city.lat, city.lng], {
-        radius: 10,
-        color,
-        fillColor: color,
-        fillOpacity: 0.8,
-      }).addTo(map);
-      marker.bindTooltip(
-        `<b>${city.name}</b><br/>AQI: ${city.aqi}<br/>PM2.5: ${city.pm25} µg/m³<br/>CO: ${city.co} µg/m³`,
-        { direction: 'top' },
-      );
-    });
-  }, [map, data, activeLayer, showHazardous]);
-
-  // FAB actions
-  const [fabOpen, setFabOpen] = useState(false);
-  const handleLayerToggle = (layer) => setActiveLayer(layer);
-  const handleCenterLocation = () => {
-    if (navigator.geolocation && map) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        map.setView([pos.coords.latitude, pos.coords.longitude], 8);
+    if (map) {
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Marker || layer instanceof L.CircleMarker) {
+          map.removeLayer(layer);
+        }
+      });
+      const data = []; // Replace with actual data
+      data.forEach((city) => {
+        if (city.aqi < 200) return;
+        const color = activeLayer === 'aqi' ? getAqiColor(city.aqi) : pollutantColors[activeLayer];
+        const marker = L.circleMarker([city.lat, city.lng], {
+          radius: 10,
+          color,
+          fillColor: color,
+          fillOpacity: 0.8,
+        }).addTo(map);
+        marker.bindTooltip(
+          `<b>${city.name}</b><br/>AQI: ${city.aqi}<br/>PM2.5: ${city.pm25} \u00b5g/m\u00b3<br/>CO: ${city.co} \u00b5g/m\u00b3`,
+          { direction: 'top' },
+        );
       });
     }
-  };
-  const handleZoomIn = () => map && map.zoomIn();
-  const handleZoomOut = () => map && map.zoomOut();
+  }, [map, activeLayer]);
 
   return (
     <Box sx={{ height: '100vh', position: 'relative' }}>
-      <Box sx={{ height: '80vh', background: '#e0e0e0', mb: 2, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{
+        height: '80vh', background: '#e0e0e0', mb: 2, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}
+      >
         <Typography variant="h6">[Map goes here]</Typography>
       </Box>
       <Drawer anchor="bottom" open={showFilters}>

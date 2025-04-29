@@ -1,11 +1,15 @@
-import React from "react";
+import React from 'react';
 import {
-  Container, Typography, Grid, Card, CardMedia, CardContent, CardActions, Button
-} from "@mui/material";
+  Container, Typography, Grid, Card, CardMedia, CardContent, CardActions, Button,
+} from '@mui/material';
 
 const newsArticles = [
-  { image: "/images/news1.jpg", category: "#Health", title: "Air Quality Improves in Lusaka", summary: "Recent rains have helped reduce PM2.5 levels..." },
-  { image: "/images/news2.jpg", category: "#Climate", title: "New Policy on Emissions", summary: "Government introduces stricter emission standards..." },
+  {
+    id: 1, image: '/images/news1.jpg', category: '#Health', title: 'Air Quality Improves in Lusaka', summary: 'Recent rains have helped reduce PM2.5 levels...',
+  },
+  {
+    id: 2, image: '/images/news2.jpg', category: '#Climate', title: 'New Policy on Emissions', summary: 'Government introduces stricter emission standards...',
+  },
   // ...more
 ];
 
@@ -14,8 +18,8 @@ export default function NewsPage() {
     <Container maxWidth="md">
       <Typography variant="h5" gutterBottom>Latest Air Quality News</Typography>
       <Grid container spacing={2}>
-        {newsArticles.map((article, index) => (
-          <Grid item xs={12} sm={6} key={index}>
+        {newsArticles.map((article) => (
+          <Grid item xs={12} sm={6} key={article.id || article.title}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               <CardMedia component="img" image={article.image} height="140" />
               <CardContent>

@@ -17,6 +17,13 @@ import {
   faAngleRight,
 } from '@fortawesome/free-solid-svg-icons';
 // Import images normally but optimize their loading
+import {
+  Box, Paper, Typography, TextField, Button, ButtonGroup, ToggleButton, ToggleButtonGroup, Grid, Card, Chip, Pagination as MuiPagination, SpeedDial, SpeedDialAction,
+} from '@mui/material';
+import MapIcon from '@mui/icons-material/Map';
+import SearchIcon from '@mui/icons-material/Search';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import Africa from '../Maps/Africa.png';
 import Antarctic from '../Maps/Antarctica.png';
 import Asia from '../Maps/Asia.png';
@@ -31,9 +38,6 @@ import './Countries.css';
 import { getPaginatedCountries } from '../../redux/Actions/Countries';
 import { searchCountryByNameAPI } from '../../redux/apiFunctions'; // Import the new API function
 import InteractiveWorldMap from '../Maps/InteractiveMap/InteractiveWorldMap';
-
-// Use dynamic import for Country component which is rendered multiple times
-const Country = React.lazy(() => import('../Home/Country'));
 
 // Error fallback component
 const ErrorFallback = ({ error, resetErrorBoundary }) => (
@@ -88,24 +92,11 @@ Pagination.propTypes = {
   onPageChange: PropTypes.func.isRequired,
 };
 
-import { Box, Paper, Typography, TextField, Button, ButtonGroup, ToggleButton, ToggleButtonGroup, Grid, Card, Chip, Pagination as MuiPagination, SpeedDial, SpeedDialAction } from '@mui/material';
-import MapIcon from '@mui/icons-material/Map';
-import SearchIcon from '@mui/icons-material/Search';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
-import ViewListIcon from '@mui/icons-material/ViewList';
-
-const countries = [
-  { name: "Zambia", flag: "/flags/za.png", aqi: 72 },
-  { name: "Nigeria", flag: "/flags/ng.png", aqi: 110 },
-  // ...more
-];
-
 function getAQIColor(aqi) {
-  if (aqi <= 50) return "success";
-  if (aqi <= 100) return "warning";
-  if (aqi <= 150) return "error";
-  return "default";
+  if (aqi <= 50) return 'success';
+  if (aqi <= 100) return 'warning';
+  if (aqi <= 150) return 'error';
+  return 'default';
 }
 
 const Countries = () => {
@@ -133,8 +124,6 @@ const Countries = () => {
   const [isDirectSearchMode, setIsDirectSearchMode] = useState(!!initialSearchTerm);
 
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'map'
-  // FAB state
-  const [fabOpen, setFabOpen] = useState(false);
 
   // Region to image mapping
   const regionToImageMap = {

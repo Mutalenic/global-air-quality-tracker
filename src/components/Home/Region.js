@@ -1,15 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../Navbar/Navbar';
-import InteractiveWorldMap from '../Maps/InteractiveMap/InteractiveWorldMap';
-import { fetchAllCountries } from '../../redux/apiFunctions';
 import {
-  Box, Typography, Grid, Card, CardContent, CardActions, Button, Autocomplete, TextField, FormControl, InputLabel, Select, MenuItem, Paper, Dialog, DialogTitle, DialogContent, IconButton, SpeedDial, SpeedDialAction
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  Autocomplete,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
+  SpeedDial,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import PublicIcon from '@mui/icons-material/Public';
 import CloseIcon from '@mui/icons-material/Close';
 import LayersIcon from '@mui/icons-material/Layers';
+import { fetchAllCountries } from '../../redux/apiFunctions';
+import InteractiveWorldMap from '../Maps/InteractiveMap/InteractiveWorldMap';
+import Header from '../Navbar/Navbar';
 
 const Regions = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
@@ -139,11 +156,11 @@ const Regions = () => {
         <Box component="form" onSubmit={handleSearch} display="flex" gap={2} alignItems="center" flexWrap="wrap">
           <Autocomplete
             options={filteredCountryOptions}
-            getOptionLabel={option => option.label || ''}
+            getOptionLabel={(option) => option.label || ''}
             value={selectedCountry}
             onChange={(_, value) => setSelectedCountry(value)}
-            renderInput={params => (
-              <TextField {...params} label="Search for a country..." variant="outlined" sx={{ minWidth: 220 }} />
+            renderInput={() => (
+              <TextField label="Search for a country..." variant="outlined" sx={{ minWidth: 220 }} />
             )}
             isOptionEqualToValue={(option, value) => option.value === value.value}
             sx={{ flexGrow: 2 }}
@@ -154,13 +171,13 @@ const Regions = () => {
             <Select
               value={selectedRegion}
               label="Region"
-              onChange={e => {
+              onChange={(e) => {
                 setSelectedRegion(e.target.value);
                 setSelectedCountry(null);
               }}
             >
               <MenuItem value="">All Regions</MenuItem>
-              {regionList.map(region => (
+              {regionList.map((region) => (
                 <MenuItem key={region.region} value={region.region}>{region.region}</MenuItem>
               ))}
             </Select>
@@ -191,7 +208,7 @@ const Regions = () => {
         </DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2}>
-            {regionList.map(item => (
+            {regionList.map((item) => (
               <Button
                 key={item.region}
                 variant="outlined"

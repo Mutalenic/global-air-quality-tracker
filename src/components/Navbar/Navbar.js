@@ -1,105 +1,103 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import './Navbar.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faHome,
-  faArrowLeft,
-  faCloud,
-  faGlobe,
-  faBars,
-  faTimes,
-  faMoon,
-  faSun,
-} from '@fortawesome/free-solid-svg-icons';
+  AppBar, Toolbar, IconButton, Typography, Box, Drawer, List, ListItem, ListItemIcon, ListItemText, Switch,
+} from '@mui/material';
+import PropTypes from 'prop-types';
+import MenuIcon from '@mui/icons-material/Menu';
+import HomeIcon from '@mui/icons-material/Home';
+import PublicIcon from '@mui/icons-material/Public';
+import CloudIcon from '@mui/icons-material/Cloud';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 
-const Navbar = () => {
+const Navbar = ({ mode, setMode }) => {
   const location = useLocation();
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [theme, setTheme] = useState('light');
   const isPollutionPage = location.pathname.includes('pollution');
 
-  // Handle scroll effect for navbar
+  const toggleMobileMenu = () => setIsMobileMenuOpen((open) => !open);
+  const toggleTheme = () => setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
+
+  // Optionally: update document body or context for theme
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    document.body.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // Toggle mobile menu
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-  };
+    document.body.setAttribute('data-theme', mode);
+  }, [mode]);
 
   return (
-    <div className={`navbar-wrapper ${isScrolled ? 'scrolled' : ''}`}>
-      <nav className="main-navbar">
-        <div className="navbar-container">
-          <div className="navbar-brand">
-            {isPollutionPage && (
-              <button
-                type="button"
-                className="nav-btn back-button"
-                aria-label="Go back"
-              >
-                <NavLink to="/countries" className="nav-link">
-                  <FontAwesomeIcon icon={faArrowLeft} className="nav-icon small-icon" />
-                </NavLink>
-              </button>
-            )}
-            <NavLink to="/" className="brand-link">
-              <FontAwesomeIcon icon={faGlobe} className="brand-icon" />
-              <span className="brand-text">Air Quality Tracker</span>
-            </NavLink>
-          </div>
-
-          {/* Mobile menu toggle button */}
-          <button type="button" className="mobile-menu-toggle" onClick={toggleMobileMenu} aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}>
-            <FontAwesomeIcon icon={isMobileMenuOpen ? faTimes : faBars} />
-          </button>
-
-          {/* Navigation Links */}
-          <div className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-            <NavLink to="/" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              <FontAwesomeIcon icon={faHome} className="nav-icon" />
-              <span>Home</span>
-            </NavLink>
-            <NavLink to="/countries" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              <FontAwesomeIcon icon={faGlobe} className="nav-icon" />
-              <span>Countries</span>
-            </NavLink>
-            {/* Removed Pollution link from navbar */}
-            <NavLink to="/weather" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              <FontAwesomeIcon icon={faCloud} className="nav-icon" />
-              <span>Weather</span>
-            </NavLink>
-          </div>
-
-          {/* Theme Toggle Button */}
-          <button
-            type="button"
-            className="theme-toggle-btn"
-            onClick={toggleTheme}
-            aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-          >
-            <FontAwesomeIcon icon={theme === 'light' ? faMoon : faSun} />
-          </button>
-        </div>
-      </nav>
-    </div>
+    <AppBar position="sticky" color="default" elevation={1} sx={{ mb: 2 }}>
+      <Toolbar>
+        {isPollutionPage && (
+          <IconButton component={NavLink} to="/countries" edge="start" color="inherit" aria-label="back">
+            <ArrowBackIcon />
+          </IconButton>
+        )}
+        <Typography
+          variant="h6"
+          component={NavLink}
+          to="/"
+          sx={{
+            textDecoration: 'none', color: 'inherit', flexGrow: 1, display: 'flex', alignItems: 'center',
+          }}
+        >
+          <PublicIcon sx={{ mr: 1 }} />
+          Air Quality Tracker
+        </Typography>
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
+          <IconButton component={NavLink} to="/" color="inherit">
+            <HomeIcon />
+          </IconButton>
+          <IconButton component={NavLink} to="/countries" color="inherit">
+            <PublicIcon />
+          </IconButton>
+          <IconButton component={NavLink} to="/weather" color="inherit">
+            <CloudIcon />
+          </IconButton>
+        </Box>
+        <IconButton sx={{ ml: 1 }} onClick={toggleTheme} color="inherit" aria-label="toggle theme">
+          {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+        </IconButton>
+        <IconButton
+          edge="end"
+          color="inherit"
+          aria-label="menu"
+          sx={{ display: { md: 'none' } }}
+          onClick={toggleMobileMenu}
+        >
+          <MenuIcon />
+        </IconButton>
+      </Toolbar>
+      <Drawer anchor="right" open={isMobileMenuOpen} onClose={toggleMobileMenu}>
+        <Box sx={{ width: 220 }} role="presentation" onClick={toggleMobileMenu}>
+          <List>
+            <ListItem button component={NavLink} to="/">
+              <ListItemIcon><HomeIcon /></ListItemIcon>
+              <ListItemText primary="Home" />
+            </ListItem>
+            <ListItem button component={NavLink} to="/countries">
+              <ListItemIcon><PublicIcon /></ListItemIcon>
+              <ListItemText primary="Countries" />
+            </ListItem>
+            <ListItem button component={NavLink} to="/weather">
+              <ListItemIcon><CloudIcon /></ListItemIcon>
+              <ListItemText primary="Weather" />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>{mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}</ListItemIcon>
+              <Switch checked={mode === 'dark'} onChange={toggleTheme} />
+              <ListItemText primary={mode === 'light' ? 'Dark Mode' : 'Light Mode'} />
+            </ListItem>
+          </List>
+        </Box>
+      </Drawer>
+    </AppBar>
   );
+};
+
+Navbar.propTypes = {
+  mode: PropTypes.string.isRequired,
+  setMode: PropTypes.func.isRequired,
 };
 
 export default Navbar;

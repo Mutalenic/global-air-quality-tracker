@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 import {
-  Paper, Typography, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Divider, Button, Autocomplete, TextField
-} from "@mui/material";
+  Paper, Typography, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Divider, Button, Autocomplete, TextField,
+} from '@mui/material';
 
 export default function SettingsPage() {
   return (
@@ -15,8 +15,8 @@ export default function SettingsPage() {
         </RadioGroup>
       </FormControl>
       <Autocomplete
-        options={["General", "Asthma", "Athlete"]}
-        renderInput={(params) => <TextField {...params} label="Health Sensitivity" />}
+        options={['General', 'Asthma', 'Athlete']}
+        renderInput={() => <TextField label="Health Sensitivity" />}
       />
       <Divider sx={{ my: 2 }} />
       <Typography variant="h6" gutterBottom>About</Typography>
