@@ -23,7 +23,7 @@ const Pollution = ({
   name,
 }) => {
   const dispatch = useDispatch();
-  const pollutions = useSelector((state) => state.pollutionReducer);
+  const { pollutionData, error: reduxError } = useSelector((state) => state.pollutionReducer);
   const openAQLatest = useSelector((state) => state.weatherReducer.openAQLatest);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -65,127 +65,234 @@ const Pollution = ({
     return <div>Loading air quality data...</div>;
   }
 
+  // Show the Redux error if one exists
+  if (reduxError) {
+    return (
+      <div className="error-container">
+        <h3>Error loading pollution data:</h3>
+        <p>{reduxError}</p>
+      </div>
+    );
+  }
+
   if (error) {
     return (
-      <div>
-        Error loading pollution data:
-        {error.message}
+      <div className="error-container">
+        <h3>Error loading data:</h3>
+        <p>{error.message}</p>
       </div>
     );
   }
 
   if (openAQLatest && openAQLatest.error) {
     return (
-      <div>
-        Error loading OpenAQ data:
-        <br />
-        {openAQLatest.error}
+      <div className="error-container">
+        <h3>Error loading OpenAQ data:</h3>
+        <p>{openAQLatest.error}</p>
       </div>
     );
   }
 
-  if (!Array.isArray(pollutions) || pollutions.length === 0) {
+  // Find the latest or matching pollution data for the selected country
+  let pollutionToShow = null;
+  if (Array.isArray(pollutionData) && pollutionData.length > 0) {
+    // Try to find by city/name, fallback to last item
+    pollutionToShow = pollutionData.find((p) => p.city === name) || pollutionData[pollutionData.length - 1];
+  }
+
+  if (!pollutionToShow) {
     return <div>No pollution data available.</div>;
   }
 
   return (
-    <div className="pollutionContainer">
-      {pollutions.map((pollution) => (
-        <div key={pollution.id} className="pollutionCard">
-          <h3>{pollution.city}</h3>
-          <div className="pollutionFlagCard">
-            <img src={flag} alt={`${pollution.city} flag`} className="pollutionFlag" />
-          </div>
-
-          <div className="toggleButtons">
-            <button
-              type="button"
-              onClick={() => setShowWeather(!showWeather)}
-              className="weatherToggleButton"
-            >
-              {showWeather ? 'Hide Weather' : 'Show Weather'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowChart(!showChart)}
-              className="chartToggleButton"
-            >
-              {showChart ? 'Hide Chart' : 'Show Chart'}
-            </button>
-          </div>
-
-          {showWeather && (
-            <Weather lat={lat} lng={lng} city={pollution.city} />
-          )}
-
-          {showChart && (
-            <PollutionChart pollutionData={pollution} />
-          )}
-
-          <div className="pollutionDataCard aqiCard">
-            <p>Air Quality Index:</p>
-            <span className={`aqi ${getAqiClass(pollution.aqi)}`}>
-              {getOpenAQC('pm25') !== null ? Math.round(getOpenAQC('pm25')) : pollution.aqi}
-              {getOpenAQC('pm25') !== null && <span className="source-label"> (OpenAQ)</span>}
-            </span>
-          </div>
-          <div className="pollutionDataCard pm25Card">
-            <p>PM2.5:</p>
-            <span>
-              {getOpenAQC('pm25') !== null ? getOpenAQC('pm25') : pollution.pm25}
-              {' '}
-              µg/m³
-              {getOpenAQC('pm25') !== null && <span className="source-label"> (OpenAQ)</span>}
-            </span>
-          </div>
-          <div className="pollutionDataCard pm10Card">
-            <p>PM10:</p>
-            <span>
-              {getOpenAQC('pm10') !== null ? getOpenAQC('pm10') : pollution.pm10}
-              {' '}
-              µg/m³
-              {getOpenAQC('pm10') !== null && <span className="source-label"> (OpenAQ)</span>}
-            </span>
-          </div>
-          <div className="pollutionDataCard o3Card">
-            <p>O3:</p>
-            <span>
-              {getOpenAQC('o3') !== null ? getOpenAQC('o3') : pollution.o3}
-              {' '}
-              µg/m³
-              {getOpenAQC('o3') !== null && <span className="source-label"> (OpenAQ)</span>}
-            </span>
-          </div>
-          <div className="pollutionDataCard no2Card">
-            <p>NO2:</p>
-            <span>
-              {getOpenAQC('no2') !== null ? getOpenAQC('no2') : pollution.no2}
-              {' '}
-              µg/m³
-              {getOpenAQC('no2') !== null && <span className="source-label"> (OpenAQ)</span>}
-            </span>
-          </div>
-          <div className="pollutionDataCard so2Card">
-            <p>SO2:</p>
-            <span>
-              {getOpenAQC('so2') !== null ? getOpenAQC('so2') : pollution.so2}
-              {' '}
-              µg/m³
-              {getOpenAQC('so2') !== null && <span className="source-label"> (OpenAQ)</span>}
-            </span>
-          </div>
-          <div className="pollutionDataCard coCard">
-            <p>CO:</p>
-            <span>
-              {getOpenAQC('co') !== null ? getOpenAQC('co') : pollution.co}
-              {' '}
-              µg/m³
-              {getOpenAQC('co') !== null && <span className="source-label"> (OpenAQ)</span>}
-            </span>
-          </div>
+    <section className="pollutionContainer" aria-label="Pollution details">
+      <article key={pollutionToShow.id} className="card" aria-label={`Pollution card for ${pollutionToShow.city}`}>
+        <h3>{pollutionToShow.city}</h3>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+          <img src={pollutionToShow.flag} alt={`${pollutionToShow.city} flag`} style={{ width: 64, borderRadius: '50%' }} />
         </div>
-      ))}
-    </div>
+        <div style={{
+          display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 16,
+        }}
+        >
+          <button
+            type="button"
+            className="btn-primary"
+            aria-label={showWeather ? 'Hide Weather' : 'Show Weather'}
+            onClick={() => setShowWeather(!showWeather)}
+          >
+            {showWeather ? 'Hide Weather' : 'Show Weather'}
+          </button>
+          <button
+            type="button"
+            className="btn-primary"
+            aria-label={showChart ? 'Hide Chart' : 'Show Chart'}
+            onClick={() => setShowChart(!showChart)}
+          >
+            {showChart ? 'Hide Chart' : 'Show Chart'}
+          </button>
+        </div>
+        {showWeather && (
+          <Weather lat={lat} lng={lng} city={pollutionToShow.city} />
+        )}
+        {showChart && (
+          <PollutionChart pollutionData={pollutionToShow} />
+        )}
+        <div className="pollutionDataCard aqiCard">
+          <p>Air Quality Index:</p>
+          <span className={`aqi ${getAqiClass(pollutionToShow.aqi)}`}>
+            {getOpenAQC('pm25') !== null
+              ? (
+                <>
+                  {Math.round(getOpenAQC('pm25'))}
+                  {getOpenAQC('pm25') !== null && (
+                    <span className="source-label"> (OpenAQ)</span>
+                  )}
+                </>
+              )
+              : pollutionToShow.aqi}
+          </span>
+        </div>
+        <div className="pollutionDataCard pm25Card">
+          <p>PM2.5:</p>
+          <span>
+            {getOpenAQC('pm25') !== null
+              ? (
+                <>
+                  {getOpenAQC('pm25')}
+                  <br />
+                  µg/m³
+                  {getOpenAQC('pm25') !== null && (
+                    <span className="source-label"> (OpenAQ)</span>
+                  )}
+                </>
+              )
+              : (
+                <>
+                  {pollutionToShow.pm25}
+                  <br />
+                  µg/m³
+                </>
+              )}
+          </span>
+        </div>
+        <div className="pollutionDataCard pm10Card">
+          <p>PM10:</p>
+          <span>
+            {getOpenAQC('pm10') !== null
+              ? (
+                <>
+                  {getOpenAQC('pm10')}
+                  <br />
+                  µg/m³
+                  {getOpenAQC('pm10') !== null && (
+                    <span className="source-label"> (OpenAQ)</span>
+                  )}
+                </>
+              )
+              : (
+                <>
+                  {pollutionToShow.pm10}
+                  <br />
+                  µg/m³
+                </>
+              )}
+          </span>
+        </div>
+        <div className="pollutionDataCard o3Card">
+          <p>O3:</p>
+          <span>
+            {getOpenAQC('o3') !== null
+              ? (
+                <>
+                  {getOpenAQC('o3')}
+                  <br />
+                  µg/m³
+                  {getOpenAQC('o3') !== null && (
+                    <span className="source-label"> (OpenAQ)</span>
+                  )}
+                </>
+              )
+              : (
+                <>
+                  {pollutionToShow.o3}
+                  <br />
+                  µg/m³
+                </>
+              )}
+          </span>
+        </div>
+        <div className="pollutionDataCard no2Card">
+          <p>NO2:</p>
+          <span>
+            {getOpenAQC('no2') !== null
+              ? (
+                <>
+                  {getOpenAQC('no2')}
+                  <br />
+                  µg/m³
+                  {getOpenAQC('no2') !== null && (
+                    <span className="source-label"> (OpenAQ)</span>
+                  )}
+                </>
+              )
+              : (
+                <>
+                  {pollutionToShow.no2}
+                  <br />
+                  µg/m³
+                </>
+              )}
+          </span>
+        </div>
+        <div className="pollutionDataCard so2Card">
+          <p>SO2:</p>
+          <span>
+            {getOpenAQC('so2') !== null
+              ? (
+                <>
+                  {getOpenAQC('so2')}
+                  <br />
+                  µg/m³
+                  {getOpenAQC('so2') !== null && (
+                    <span className="source-label"> (OpenAQ)</span>
+                  )}
+                </>
+              )
+              : (
+                <>
+                  {pollutionToShow.so2}
+                  <br />
+                  µg/m³
+                </>
+              )}
+          </span>
+        </div>
+        <div className="pollutionDataCard coCard">
+          <p>CO:</p>
+          <span>
+            {getOpenAQC('co') !== null
+              ? (
+                <>
+                  {getOpenAQC('co')}
+                  <br />
+                  µg/m³
+                  {getOpenAQC('co') !== null && (
+                    <span className="source-label"> (OpenAQ)</span>
+                  )}
+                </>
+              )
+              : (
+                <>
+                  {pollutionToShow.co}
+                  <br />
+                  µg/m³
+                </>
+              )}
+          </span>
+        </div>
+      </article>
+    </section>
   );
 };
 

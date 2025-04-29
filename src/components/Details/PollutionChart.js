@@ -400,10 +400,14 @@ const PollutionChart = ({ pollutionData }) => {
   };
 
   return (
-    <div className="pollution-chart-container">
-      <h3 className="chart-title">Air Pollution Analysis</h3>
-
-      <div className="chart-controls">
+    <section className="card pollution-chart-container" aria-label="Air pollution trends chart" style={{ margin: '32px 0', background: 'var(--background-color)' }}>
+      <h3 className="chart-title" style={{ color: 'var(--primary-color)', marginBottom: 16 }}>Air Pollution Analysis</h3>
+      <div
+        className="chart-controls"
+        style={{
+          display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 24,
+        }}
+      >
         <div className="control-group">
           <label htmlFor="chart-type-select">Chart Type:</label>
           <Select
@@ -448,8 +452,7 @@ const PollutionChart = ({ pollutionData }) => {
           />
         </div>
       </div>
-
-      <div className="chart-legend">
+      <div className="chart-legend" style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
         <div className="legend-item">
           <span className="legend-color" style={{ backgroundColor: COLORS.good }} />
           <span>Good</span>
@@ -475,14 +478,12 @@ const PollutionChart = ({ pollutionData }) => {
           <span>Hazardous</span>
         </div>
       </div>
-
-      <div className="chart-wrapper">
-        <ResponsiveContainer width="100%" height={350}>
+      <div className="chart-wrapper" style={{ width: '100%', height: 350 }}>
+        <ResponsiveContainer width="100%" height="100%">
           {renderChart()}
         </ResponsiveContainer>
       </div>
-
-      <div className="chart-info">
+      <div className="chart-info" style={{ marginTop: 16, color: 'var(--text-color)' }}>
         <p>
           This chart displays air pollution data for the selected pollutants.
           The colors indicate the pollution level severity according to standard air quality indices.
@@ -493,7 +494,7 @@ const PollutionChart = ({ pollutionData }) => {
           CO values are scaled by a factor of 100 for better visualization.
         </p>
       </div>
-    </div>
+    </section>
   );
 };
 

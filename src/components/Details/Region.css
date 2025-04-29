@@ -2,22 +2,57 @@
   display: flex;
   flex-direction: column;
   gap: 1%;
+  /* Add background and border consistent with feature/benefit cards */
+  background-color: var(--eco-background-card, #F1F8E9); /* Fallback color */
+  border: 1px solid var(--eco-border-soft, #C8E6C9);
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center; /* Center content */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.regionDetails:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: var(--eco-secondary, #8BC34A);
 }
 
 .regionName {
-  padding-top: 26%;
-  display: flex;
-  justify-content: flex-end;
+  padding-top: 0; /* Remove excessive padding */
+  display: block; /* Change display */
+  margin-bottom: 10px; /* Add some space below name */
+  font-size: 1.1rem; /* Adjust font size */
+  font-weight: 600;
+  color: var(--eco-text-dark, #1B5E20); /* Use dark green text */
 }
 
 .regionBtn {
   border: none;
-  margin-left: 66%;
-  padding-top: 4%;
-  border-radius: 53%;
-  background-color: rgb(60, 99, 170);
+  margin: 10px auto 0 auto; /* Center button and add margin */
+  padding: 8px; /* Adjust padding */
+  border-radius: 50%; /* Keep circular */
+  background-color: var(--eco-primary, #4CAF50); /* Use primary green */
+  color: var(--eco-text-on-primary, white); /* White icon color */
+  display: inline-flex; /* Use flex to center icon */
+  align-items: center;
+  justify-content: center;
+  width: 36px; /* Fixed size */
+  height: 36px; /* Fixed size */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
+.regionBtn:hover {
+  background-color: var(--eco-primary-dark, #388E3C); /* Darker green on hover */
+}
+
+/* Remove .regionBorder if not used elsewhere */
 .regionBorder {
-  padding: 1%;
+  display: none; /* Hide if not needed */
+}
+
+/* Add style for the icon inside the button if needed */
+.regionBtn svg {
+  width: 16px;
+  height: 16px;
 }

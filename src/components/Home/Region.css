@@ -1,7 +1,25 @@
+/* General Eco Theme Variables (Adjusted for better contrast) */
+:root {
+  --eco-primary: #43A047; /* Slightly less bright Green */
+  --eco-primary-dark: #2E7D32; /* Darker Green */
+  --eco-secondary: #7CB342; /* Light Green */
+  --eco-secondary-light: #AED581;
+  --eco-background-light: #F1F8E9; /* Lighter green background */
+  --eco-background-card: #FAFAFA; /* Near white for cards for contrast */
+  --eco-text-dark: #1B5E20; /* Very Dark Green */
+  --eco-text-medium: #33691E; /* Dark Green */
+  --eco-text-light: #558B2F; /* Medium Green */
+  --eco-border-soft: #C8E6C9;
+  --eco-water: #E0F2F7; /* Keep Light Cyan for map water/base */
+  --eco-text-on-primary: #FFFFFF; /* White text on primary green */
+  --eco-text-general: #333333; /* Dark gray for general text for readability */
+}
+
 .home-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 80px 20px 20px 20px; /* Added top padding (e.g., 80px) */
+  padding: 80px 20px 20px 20px;
+  background-color: var(--eco-background-light); /* Use light green background */
 }
 
 .world-container {
@@ -11,7 +29,9 @@
   overflow: hidden;
   margin: 20px 0;
   border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  /* Use map's background color directly or keep container transparent */
+  /* background-color: var(--eco-water); */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Softer shadow */
 }
 
 .map-header-container {
@@ -20,39 +40,23 @@
 }
 
 .hero-title {
-  color: #333;
+  color: var(--eco-primary-dark); /* Dark green */
   margin: 0 0 10px 0;
   font-size: 2.5rem;
   font-weight: 700;
-  background: linear-gradient(90deg, #009688 0%, #26a69a 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: none;
+  /* Remove gradient, use solid color */
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: initial;
+  text-shadow: none; /* Remove shadow if background is light */
 }
 
 .hero-subtitle {
-  color: #666;
+  color: var(--eco-text-medium); /* Use a darker green */
   margin: 0;
   font-size: 1.2rem;
   max-width: 600px;
-  margin: 0 auto;
-}
-
-.app-intro {
-  background-color: #009688;
-  color: white;
-  padding: 25px;
-  border-radius: 8px;
-  margin: 30px 0 40px 0;
-  text-align: center;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.app-intro p {
-  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -64,7 +68,7 @@
 
 .features-section h2 {
   font-size: 2rem;
-  color: #333;
+  color: var(--eco-text-dark); /* Dark green heading */
   margin-bottom: 30px;
   position: relative;
   display: inline-block;
@@ -78,7 +82,7 @@
   transform: translateX(-50%);
   width: 80px;
   height: 3px;
-  background-color: #009688;
+  background-color: var(--eco-primary); /* Primary green underline */
   border-radius: 2px;
 }
 
@@ -90,7 +94,8 @@
 }
 
 .feature-card {
-  background-color: #f9f9f9;
+  background-color: var(--eco-background-card); /* Use near-white */
+  border: 1px solid var(--eco-border-soft); /* Soft green border */
   border-radius: 8px;
   padding: 30px 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
@@ -100,65 +105,40 @@
 .feature-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: var(--eco-secondary); /* Slightly darker border on hover */
 }
 
 .feature-icon {
   font-size: 2.5rem;
-  color: #009688;
+  color: var(--eco-primary); /* Primary green icon */
   margin-bottom: 15px;
 }
 
 .feature-card h3 {
   font-size: 1.3rem;
   margin: 15px 0;
-  color: #333;
+  color: var(--eco-text-dark); /* Dark green heading */
 }
 
 .feature-card p {
-  color: #666;
-  line-height: 1.5;
-}
-
-/* Regions Section */
-.regions-section {
-  margin: 40px 0;
-  text-align: center;
-}
-
-.regions-section h2 {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.regions-section > p {
-  color: #666;
-  margin-bottom: 30px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 25px;
-  margin-top: 20px;
+  color: var(--eco-text-general); /* Use dark gray for better readability */
+  line-height: 1.6; /* Slightly increase line height */
 }
 
 /* Search Section Styles */
 .search-section {
-  background-color: #f5f5f5;
+  background-color: #FFFFFF; /* White background for search section */
   padding: 30px 25px;
   border-radius: 10px;
   margin: 30px 0;
+  border: 1px solid var(--eco-border-soft); /* Soft border */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .search-section h2 {
-  font-size: 1.6rem;
-  color: #333;
-  margin-bottom: 20px;
+  font-size: 1.8rem;
+  color: var(--eco-text-dark); /* Dark green heading */
+  margin-bottom: 25px;
   text-align: center;
 }
 
@@ -186,22 +166,61 @@
   left: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: #666;
+  color: var(--eco-text-light); /* Lighter green icon */
 }
 
-.search-input {
-  width: 100%;
-  padding: 15px 15px 15px 45px;
-  border: 1px solid #ddd;
+/* Styling react-select */
+.country-select .react-select__control {
+  border: 1px solid var(--eco-border-soft);
   border-radius: 6px;
+  padding: 7px 7px 7px 35px; /* Adjust padding for icon */
   font-size: 1rem;
+  background-color: #fff;
+  box-shadow: none;
   transition: all 0.3s ease;
 }
 
-.search-input:focus {
-  border-color: #009688;
-  box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.2);
+.country-select .react-select__control--is-focused {
+  border-color: var(--eco-primary);
+  box-shadow: 0 0 0 2px rgba(67, 160, 71, 0.2); /* Adjusted focus ring color */
   outline: none;
+}
+
+.country-select .react-select__placeholder {
+  color: var(--eco-text-medium);
+  margin-left: 5px; /* Adjust placeholder position */
+}
+
+.country-select .react-select__indicator-separator {
+  background-color: var(--eco-border-soft);
+}
+
+.country-select .react-select__dropdown-indicator {
+  color: var(--eco-text-light);
+}
+
+.country-select .react-select__dropdown-indicator:hover {
+  color: var(--eco-primary);
+}
+
+.country-select .react-select__menu {
+  border: 1px solid var(--eco-border-soft);
+  border-radius: 6px;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.country-select .react-select__option {
+  color: var(--eco-text-dark);
+}
+
+.country-select .react-select__option--is-focused {
+  background-color: var(--eco-background-light); /* Use light green for focus */
+}
+
+.country-select .react-select__option--is-selected {
+  background-color: var(--eco-primary);
+  color: var(--eco-text-on-primary);
 }
 
 .select-field {
@@ -211,13 +230,14 @@
 .region-select {
   width: 100%;
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--eco-border-soft);
   border-radius: 6px;
   font-size: 1rem;
   background-color: #fff;
+  color: var(--eco-text-dark);
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23558B2F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); /* Darker Green arrow */
   background-repeat: no-repeat;
   background-position: right 15px center;
   background-size: 15px;
@@ -225,15 +245,15 @@
 }
 
 .region-select:focus {
-  border-color: #009688;
-  box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.2);
+  border-color: var(--eco-primary);
+  box-shadow: 0 0 0 2px rgba(67, 160, 71, 0.2); /* Adjusted focus ring color */
   outline: none;
 }
 
 .search-button {
   padding: 15px;
-  background-color: #009688;
-  color: white;
+  background-color: var(--eco-primary); /* Primary green */
+  color: var(--eco-text-on-primary);
   border: none;
   border-radius: 6px;
   font-size: 1rem;
@@ -242,10 +262,207 @@
   transition: all 0.3s ease;
 }
 
-.search-button:hover {
-  background-color: #00796b;
+.search-button:hover:not(:disabled) {
+  background-color: var(--eco-primary-dark); /* Darker green on hover */
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-button:disabled {
+  background-color: var(--eco-secondary-light); /* Lighter green when disabled */
+  color: var(--eco-text-medium);
+  cursor: not-allowed;
+}
+
+/* Benefits Section Styles (Similar to Features) */
+.benefits-section {
+  margin: 40px 0;
+  padding: 30px 20px;
+  background-color: var(--eco-secondary-light); /* Slightly different light green */
+  border-radius: 10px;
+  text-align: center;
+}
+
+.benefits-section h2 {
+  font-size: 2rem;
+  color: var(--eco-text-dark);
+  margin-bottom: 30px;
+  position: relative;
+  display: inline-block;
+}
+
+.benefits-section h2:after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: var(--eco-primary); /* Primary green underline */
+  border-radius: 2px;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.benefit-card {
+  background-color: #ffffff; /* Keep benefits cards white for contrast */
+  border: 1px solid var(--eco-border-soft);
+  border-radius: 8px;
+  padding: 30px 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.benefit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border-color: var(--eco-secondary);
+}
+
+.benefit-icon {
+  font-size: 2.5rem;
+  color: var(--eco-primary); /* Primary green icon */
+  margin-bottom: 15px;
+}
+
+.benefit-card h3 {
+  font-size: 1.3rem;
+  margin: 15px 0;
+  color: var(--eco-text-dark);
+}
+
+.benefit-card p {
+  color: var(--eco-text-general); /* Use dark gray for readability */
+  line-height: 1.6;
+}
+
+/* Floating Region Menu Trigger Button */
+.region-menu-trigger {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+  background-color: var(--eco-primary);
+  color: var(--eco-text-on-primary);
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  flex-direction: column; /* Stack icon and text */
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  font-size: 0.7rem; /* Smaller text */
+}
+
+.region-menu-trigger svg {
+  font-size: 1.5rem; /* Icon size */
+  margin-bottom: 2px; /* Space between icon and text */
+}
+
+.region-menu-trigger:hover {
+  background-color: var(--eco-primary-dark);
+  transform: scale(1.05);
+}
+
+.region-menu-trigger:focus {
+  outline: 2px solid var(--eco-primary-dark);
+  outline-offset: 2px;
+}
+
+/* Floating Region Menu */
+.floating-region-menu {
+  position: fixed;
+  bottom: 100px; /* Position above the trigger */
+  right: 30px;
+  z-index: 1010;
+  background-color: var(--eco-background-card);
+  border: 1px solid var(--eco-border-soft);
+  border-radius: 8px;
+  padding: 15px 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  width: 220px;
+  max-height: 300px;
+  overflow-y: auto;
+  /* Add animation (optional) */
+  animation: fadeInMenu 0.3s ease-out;
+}
+
+@keyframes fadeInMenu {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.close-region-menu {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--eco-text-light);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+  line-height: 1;
+}
+
+.close-region-menu:hover {
+  color: var(--eco-text-dark);
+}
+
+.floating-menu-title {
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  color: var(--eco-text-dark);
+  text-align: center;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--eco-border-soft);
+}
+
+.floating-region-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.floating-region-menu li {
+  margin-bottom: 5px;
+}
+
+.floating-region-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  color: var(--eco-text-medium);
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.floating-region-item:hover, 
+.floating-region-item:focus {
+  background-color: var(--eco-background-light);
+  color: var(--eco-text-dark);
+  outline: none;
 }
 
 /* Media queries for different screen sizes */
@@ -302,5 +519,21 @@
 
   .home-container {
     padding-top: 65px; /* Adjust padding for mobile screens */
+  }
+
+  .region-menu-trigger {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 20px;
+    font-size: 0.6rem;
+  }
+  .region-menu-trigger svg {
+    font-size: 1.2rem;
+  }
+  .floating-region-menu {
+    bottom: 80px; /* Adjust position relative to smaller trigger */
+    right: 20px;
+    width: 180px;
   }
 }

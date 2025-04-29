@@ -1,5 +1,31 @@
+:root {
+  /* AQI Scale Colors */
+  --aqi-good: #009966;
+  --aqi-moderate: #ffde33;
+  --aqi-unhealthy-sensitive: #ff9933;
+  --aqi-unhealthy: #cc0033;
+  --aqi-very-unhealthy: #660099;
+  --aqi-hazardous: #7e0023;
+
+  /* Eco Theme Colors */
+  --color-primary: #4caf50;
+  --color-secondary: #388e3c;
+  --color-accent: #2196f3;
+  --color-background: #f1f8e9;
+  --color-surface: #ffffff;
+  --color-error: #e53935;
+  --color-text: #222;
+  --color-muted: #888;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
 }

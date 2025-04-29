@@ -79,10 +79,9 @@ export const searchCountryByNameAPI = async (name) => {
 };
 
 const url = 'https://api.openweathermap.org/data/2.5/air_pollution?';
-const id = '6574f405463f1e3a64b32c567ddd4bc8';
+const id = '2e201239377589c1ce89446fd84f5b6d'; // Updated API key from user
 
 export const getPollutionInfor = async (lat, lon) => {
-  // Add caching to prevent duplicate API calls
   const cacheKey = `pollution-${lat}-${lon}`;
   const cachedData = sessionStorage.getItem(cacheKey);
 
@@ -90,10 +89,23 @@ export const getPollutionInfor = async (lat, lon) => {
     return JSON.parse(cachedData);
   }
 
+  // Fetch pollution data directly, let errors bubble up
   const res = await fetch(`${url}lat=${lat}&lon=${lon}&appid=${id}`);
-  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(`API responded with status: ${res.status}`);
+  }
 
-  // Cache the result
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error('Invalid JSON response from pollution API');
+  }
+  // Validate that the response contains the expected data structure
+  if (!data || !data.list || !data.list[0] || !data.list[0].components) {
+    throw new Error('Invalid data format received from pollution API');
+  }
+
   sessionStorage.setItem(cacheKey, JSON.stringify(data));
   return data;
 };

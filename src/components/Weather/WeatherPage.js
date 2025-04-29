@@ -46,15 +46,13 @@ const WeatherPage = () => {
   return (
     <div className="weather-page">
       <Navbar />
-
-      <div className="weather-page-content">
-        <div className="weather-header-section">
+      <main className="weather-page-content">
+        <section className="card" style={{ marginBottom: 32 }} aria-label="Weather and air quality search">
           <h1>Weather & Air Quality</h1>
           <p className="weather-subheading">
             Explore how weather conditions affect air quality around the world
           </p>
-
-          <form className="location-search-form" onSubmit={handleSearch}>
+          <form className="location-search-form" onSubmit={handleSearch} style={{ display: 'flex', gap: 12, margin: '16px 0' }}>
             <input
               type="text"
               placeholder="Search"
@@ -62,48 +60,49 @@ const WeatherPage = () => {
               onChange={(e) => setSearchLocation(e.target.value)}
               className="location-search-input"
               disabled={isSearching}
+              aria-label="Search for a location"
             />
             <button
               type="submit"
-              className="location-search-button"
+              className="btn-primary"
               disabled={isSearching}
+              aria-label="Search"
             >
               {isSearching ? 'Searching...' : 'Search'}
             </button>
           </form>
+          {error && <div className="search-error" role="alert">{error}</div>}
+        </section>
 
-          {error && <div className="search-error">{error}</div>}
-        </div>
-
-        <div className="weather-component-container">
+        <section className="card weather-component-container" aria-label="Weather results" style={{ marginBottom: 32 }}>
           <Weather latitude={location.latitude} longitude={location.longitude} />
-        </div>
+        </section>
 
-        <div className="weather-info-section">
+        <section className="weather-info-section" aria-label="Weather and air quality info">
           <h2>Understanding Weather & Air Quality</h2>
-          <div className="info-grid">
-            <div className="info-card">
+          <div className="info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24 }}>
+            <div className="card info-card">
               <h3>Temperature</h3>
               <p>
                 Higher temperatures accelerate reactions, increasing ground-level ozone formation.
                 Cold temperatures can increase visible pollutants from vehicle exhaust.
               </p>
             </div>
-            <div className="info-card">
+            <div className="card info-card">
               <h3>Wind</h3>
               <p>
                 Strong winds disperse pollutants, improving air quality. Calm conditions
                 trap pollutants, leading to stagnant air and poor quality.
               </p>
             </div>
-            <div className="info-card">
+            <div className="card info-card">
               <h3>Precipitation</h3>
               <p>
                 Rain and snow wash away particulate matter and water-soluble pollutants,
                 generally improving air quality during and after precipitation events.
               </p>
             </div>
-            <div className="info-card">
+            <div className="card info-card">
               <h3>Humidity</h3>
               <p>
                 High humidity can affect pollutant formation and collection, while high-pressure
@@ -111,8 +110,8 @@ const WeatherPage = () => {
               </p>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 };

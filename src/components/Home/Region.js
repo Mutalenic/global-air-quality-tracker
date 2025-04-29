@@ -6,11 +6,16 @@ import {
   faChartBar,
   faGlobeAmericas,
   faSearch,
+  faLungs,
+  faClock,
+  faExclamationTriangle,
+  faMapMarkedAlt,
+  faLayerGroup, // Icon for the trigger button
+  faTimes, // Icon to close the menu
 } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import Header from '../Navbar/Navbar';
-import Region from '../Details/Region';
 import InteractiveWorldMap from '../Maps/InteractiveMap/InteractiveWorldMap';
 import { fetchAllCountries } from '../../redux/apiFunctions';
 import './Region.css';
@@ -19,6 +24,7 @@ const Regions = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
   const [countryOptions, setCountryOptions] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(null);
+  const [isRegionMenuOpen, setIsRegionMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const regionList = [
@@ -77,6 +83,11 @@ const Regions = () => {
     }
   };
 
+  const handleRegionLinkClick = (regionName) => {
+    navigate(`/countries?region=${regionName}`);
+    setIsRegionMenuOpen(false); // Close menu on selection
+  };
+
   // Filter country options based on selected region
   const filteredCountryOptions = selectedRegion
     ? countryOptions.filter((option) => option.region === selectedRegion)
@@ -89,27 +100,46 @@ const Regions = () => {
       {/* Hero Section with Interactive World Map */}
       <div className="hero-section">
         <div className="map-header-container">
-          <h1 className="hero-title">Global Air Quality Tracker</h1>
-          <p className="hero-subtitle">Monitor air pollution data worldwide in real-time</p>
+          {/* Updated Title and Subtitle */}
+          <h1 className="hero-title">Breathe Easier, Know Your Air</h1>
+          <p className="hero-subtitle">Explore real-time air quality and weather conditions across the globe.</p>
         </div>
 
         <div className="world-container">
           <InteractiveWorldMap onRegionClick={handleRegionClick} />
         </div>
 
-        {/* App Introduction */}
-        <div className="app-intro">
-          <p>
-            Access up-to-date air quality information for countries around the world.
-            Make informed decisions about outdoor activities and understand environmental
-            impacts on health.
-          </p>
+        {/* Why Use This Tracker? Section (Replaces App Intro) */}
+        <div className="benefits-section">
+          <h2>Why Track Air Quality?</h2>
+          <div className="benefits-grid">
+            <div className="benefit-card">
+              <FontAwesomeIcon icon={faLungs} className="benefit-icon" />
+              <h3>Protect Your Health</h3>
+              <p>Understand pollution levels to make informed decisions for outdoor activities and reduce health risks.</p>
+            </div>
+            <div className="benefit-card">
+              <FontAwesomeIcon icon={faClock} className="benefit-icon" />
+              <h3>Real-Time Data</h3>
+              <p>Access up-to-the-minute air quality (AQI) and weather information from reliable sources.</p>
+            </div>
+            <div className="benefit-card">
+              <FontAwesomeIcon icon={faMapMarkedAlt} className="benefit-icon" />
+              <h3>Global & Local Insights</h3>
+              <p>Explore pollution trends worldwide or zoom in on specific countries and cities.</p>
+            </div>
+            <div className="benefit-card">
+              <FontAwesomeIcon icon={faExclamationTriangle} className="benefit-icon" />
+              <h3>Stay Aware</h3>
+              <p>Be informed about hazardous conditions and environmental changes affecting air quality.</p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Quick Search Section */}
       <div className="search-section">
-        <h2>Find Air Quality Data</h2>
+        <h2>Find Air Quality Data for a Specific Country</h2>
         <form onSubmit={handleSearch} className="search-form">
           <div className="search-inputs">
             <div className="search-field" style={{ flexGrow: 2 }}>
@@ -177,7 +207,8 @@ const Regions = () => {
         </div>
       </div>
 
-      {/* Region Selection Section */}
+      {/* Remove the old static regions section */}
+      {/*
       <div className="regions-section">
         <h2>Explore Air Quality by Region</h2>
         <p>Select a continent to view countries and their air quality data</p>
@@ -193,6 +224,49 @@ const Regions = () => {
           }
         </div>
       </div>
+      */}
+
+      {/* Floating Region Menu Trigger Button */}
+      <button
+        type="button"
+        className="region-menu-trigger"
+        onClick={() => setIsRegionMenuOpen(!isRegionMenuOpen)}
+        aria-haspopup="true"
+        aria-expanded={isRegionMenuOpen}
+        aria-label="Open regions menu"
+      >
+        <FontAwesomeIcon icon={faLayerGroup} />
+        <span>Regions</span>
+      </button>
+
+      {/* Floating Region Menu */}
+      {isRegionMenuOpen && (
+        <div className="floating-region-menu" role="menu">
+          <button
+            type="button"
+            className="close-region-menu"
+            onClick={() => setIsRegionMenuOpen(false)}
+            aria-label="Close regions menu"
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+          <h3 className="floating-menu-title">Explore by Region</h3>
+          <ul>
+            {regionList.map((item) => (
+              <li key={item.region}>
+                <button
+                  type="button"
+                  className="floating-region-item"
+                  onClick={() => handleRegionLinkClick(item.region)}
+                  role="menuitem"
+                >
+                  {item.region}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

@@ -7,15 +7,17 @@ import {
   faArrowLeft,
   faCloud,
   faGlobe,
-  faChartLine,
   faBars,
   faTimes,
+  faMoon,
+  faSun,
 } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = () => {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState('light');
   const isPollutionPage = location.pathname.includes('pollution');
 
   // Handle scroll effect for navbar
@@ -28,9 +30,17 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    document.body.setAttribute('data-theme', theme);
+  }, [theme]);
+
   // Toggle mobile menu
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
 
   return (
@@ -70,15 +80,22 @@ const Navbar = () => {
               <FontAwesomeIcon icon={faGlobe} className="nav-icon" />
               <span>Countries</span>
             </NavLink>
-            <NavLink to="/pollution" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              <FontAwesomeIcon icon={faChartLine} className="nav-icon" />
-              <span>Pollution</span>
-            </NavLink>
+            {/* Removed Pollution link from navbar */}
             <NavLink to="/weather" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
               <FontAwesomeIcon icon={faCloud} className="nav-icon" />
               <span>Weather</span>
             </NavLink>
           </div>
+
+          {/* Theme Toggle Button */}
+          <button
+            type="button"
+            className="theme-toggle-btn"
+            onClick={toggleTheme}
+            aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+          >
+            <FontAwesomeIcon icon={theme === 'light' ? faMoon : faSun} />
+          </button>
         </div>
       </nav>
     </div>

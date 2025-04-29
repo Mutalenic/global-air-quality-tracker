@@ -2,6 +2,7 @@ import './App.css';
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import LoadingSpinner from './components/utils/LoadingSpinner';
+import HomePage from './components/Home/HomePage';
 
 // Use React.lazy for code splitting
 const Regions = lazy(() => import('./components/Home/Region'));
@@ -15,7 +16,7 @@ function App() {
       <BrowserRouter>
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
-            <Route path="/" element={<Regions />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/countries" element={<Countries />} />
             <Route path="/pollution" element={<Pollutions />} />
             <Route path="/weather" element={<WeatherPage />} />

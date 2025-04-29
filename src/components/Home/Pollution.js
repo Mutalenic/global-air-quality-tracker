@@ -6,7 +6,7 @@ import Weather from '../Weather/Weather';
 import './Pollution.css';
 
 const Pollutions = () => {
-  const pollutions = useSelector((state) => state.pollutionReducer);
+  const { pollutionData, error } = useSelector((state) => state.pollutionReducer);
 
   return (
     <div className="pollution-page">
@@ -19,7 +19,14 @@ const Pollutions = () => {
           </p>
         </div>
 
-        {pollutions.map((pollution) => (
+        {error && (
+          <div className="error-container">
+            <h3>Error loading pollution data:</h3>
+            <p>{error}</p>
+          </div>
+        )}
+
+        {pollutionData && pollutionData.map((pollution) => (
           <div className="pollution-weather-container" key={pollution.id}>
             <Pollution
               id={pollution.id}
@@ -45,6 +52,12 @@ const Pollutions = () => {
             </div>
           </div>
         ))}
+
+        {pollutionData && pollutionData.length === 0 && !error && (
+          <div className="info-container">
+            <p>No pollution data available. Try selecting a country from the main page.</p>
+          </div>
+        )}
       </div>
     </div>
   );

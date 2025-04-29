@@ -1,4 +1,14 @@
 /* Interactive World Map Styles */
+:root {
+  --color-background: #E8F5E9; /* Very light green background */
+  --color-accent: #E0F7FA; /* Light cyan background for the map itself */
+  --color-primary: #4CAF50; /* Primary green for active */
+  --color-secondary: #388E3C; /* Dark green text */
+  --color-muted: rgba(0, 0, 0, 0.2); /* Muted color for borders */
+  --color-surface: #e8e8e8; /* Surface color for buttons */
+  --color-text: #333; /* Text color */
+}
+
 .interactive-map-container {
   position: relative;
   width: 100%;
@@ -6,15 +16,15 @@
   max-width: 100%;
   margin: 0 auto;
   overflow: hidden;
-  background-color: #f0f8ff;
+  background-color: var(--color-background); /* Eco theme background */
   border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Softer shadow */
 }
 
 .world-map-svg {
   width: 100%;
   height: 100%;
-  background-color: #f0f8ff;
+  background-color: var(--color-accent); /* Eco accent for map water/land */
 }
 
 /* Display mode toggle buttons */
@@ -25,40 +35,42 @@
   z-index: 500;
   display: flex;
   gap: 8px;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.85); /* Slightly more transparent */
   padding: 5px;
   border-radius: 8px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .display-option {
   padding: 6px 12px;
-  background-color: #f0f0f0;
-  border: none;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-secondary);
   border-radius: 5px;
   font-size: 12px;
   font-weight: 500;
-  color: #333;
+  color: var(--color-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .display-option:hover {
-  background-color: #e0e0e0;
+  background-color: #dcedc8; /* Slightly darker green on hover */
+  border-color: #a5d6a7;
 }
 
 .display-option.active {
-  background-color: #009688;
+  background-color: var(--color-primary);
   color: white;
+  border-color: var(--color-secondary);
 }
 
 /* Focus states for accessibility */
 .display-option:focus,
 .legend-btn:focus,
 .legend-collapse-btn:focus {
-  outline: 2px solid #005a4f; /* Teal outline */
+  outline: 2px solid var(--color-secondary); /* Dark Green outline */
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.3); /* Subtle glow */
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3); /* Subtle green glow */
 }
 
 /* Focus state for Geography (handled inline style in JS for react-simple-maps) */
@@ -86,7 +98,7 @@
 /* Map Tooltip */
 .map-tooltip {
   position: fixed;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(56, 142, 60, 0.85); /* Dark green, slightly transparent */
   color: #fff;
   padding: 8px 12px;
   border-radius: 6px;
@@ -97,163 +109,29 @@
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* Air Quality and Weather Legend */
-.map-legend {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-  font-size: 12px;
-  max-width: 280px;
-  z-index: 500;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.map-legend h4, .map-legend h5 {
-  margin: 10px 0 5px 0;
-  color: #333;
-  font-size: 13px; /* Slightly smaller heading */
-  font-weight: 600;
-  padding-bottom: 3px;
-  border-bottom: 1px solid #eee;
-}
-
-.legend-items {
-  display: grid;
-  /* Adjust minmax based on typical content width, allow wrapping */
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 5px; /* Adjust gap */
-  align-items: center; /* Center items vertically in grid cells */
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  font-size: 11px;
-  color: #555;
-}
-
-/* Remove button-like appearance, make it a clickable item */
-.legend-btn {
-  display: flex; /* Use flex for alignment within the item */
-  align-items: center;
-  padding: 4px 6px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s, border 0.2s, box-shadow 0.2s;
-  text-align: left;
-  background-color: transparent; /* Remove default background */
-  border: 1px solid transparent; /* Transparent border initially */
-  max-width: 100%;
-  white-space: normal;
-  line-height: 1.3;
-  font-size: 11px;
-  color: #444;
-}
-
-.legend-btn:hover {
-  background-color: #f0f0f0; /* Subtle hover background */
-  border-color: #ccc;
-}
-
-/* Style for selected state */
-.legend-btn.selected {
-  background-color: #e0eaf0; /* Light blue background for selected */
-  border: 1px solid #007bff; /* Blue border for selected */
-  color: #000;
-  font-weight: 500; /* Slightly bolder */
-  box-shadow: none; /* Remove inset shadow */
-}
-
-/* Ensure AQI color swatch is visible */
-.legend-btn .legend-color-swatch {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  margin-right: 6px;
-  border-radius: 3px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  flex-shrink: 0; /* Prevent swatch from shrinking */
-}
-
-/* Legend Collapse/Expand Button Styling & Positioning */
-.legend-collapse-btn {
-  position: absolute;
-  bottom: 20px; /* Align with legend's bottom */
-  right: 20px;  /* Align with legend's right */
-  z-index: 501; /* Ensure it's above the legend content */
-  padding: 6px 12px;
-  background-color: #f8f9fa;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 500;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  transition: background-color 0.2s;
-}
-
-.legend-collapse-btn:hover {
-  background-color: #e9ecef;
-}
-
-.legend-divider {
-  height: 1px;
-  background-color: #ddd;
-  margin: 12px 0;
-}
-
-.weather-legend {
-  /* Inherits grid from .legend-items */
-  /* grid-template-columns can be adjusted if needed */
-}
-
-.weather-legend .legend-btn {
-  /* Styles specific to weather buttons if needed */
-}
-
-.weather-icon {
-  font-size: 14px; /* Adjust icon size */
-  margin-right: 6px;
-  min-width: 16px; /* Ensure space for icon */
-  text-align: center;
-}
-
-/* Remove previous button-specific styles no longer needed */
-.legend-btn.selected {
-  /* font-weight: bold; */ /* Replaced with 500 */
-  /* box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2); */ /* Removed */
-}
-
-.weather-legend .legend-btn {
-  /* justify-self: start; */ /* No longer needed with grid auto-fit */
-}
-
+/* Legend has been removed; disable related styles */
+.map-legend,
+.legend-items,
+.legend-item,
+.legend-btn,
+.legend-divider,
+.legend-collapse-btn,
 .clear-filters-btn {
-  width: 100%;
-  margin-top: 10px;
-  padding: 5px 8px;
-  text-align: center;
-  background-color: #e8e8e8;
-  border: 1px solid #bbb;
-  border-radius: 4px;
-  font-size: 11px;
-  color: #333;
-}
-
-.clear-filters-btn:hover {
-  background-color: #d8d8d8;
-  border-color: #aaa;
+  display: none !important;
 }
 
 /* City markers */
 .city-marker {
   cursor: pointer;
   transition: all 200ms;
+  stroke: var(--color-surface);
+  filter: drop-shadow(0 2px 4px rgba(60, 60, 60, 0.12)); /* Subtle shadow for depth */
+}
+
+.city-marker.selected {
+  stroke: var(--color-accent);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 8px var(--color-accent)); /* Glow for selected marker */
 }
 
 .city-marker:hover {
@@ -271,14 +149,25 @@
   transform: scale(1.2);
 }
 
+/* Annotation card style */
+.annotation-card {
+  rx: 10;
+  fill: #fff;
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 2px 8px rgba(60, 60, 60, 0.15));
+}
+
 /* Annotation text */
 .annotation-text {
   font-weight: 500;
-  text-shadow: 0px 0px 2px rgba(255, 255, 255, 1);
+  fill: var(--color-secondary); /* Dark green text */
+  text-shadow: 0px 0px 2px rgba(255, 255, 255, 0.7); /* White text shadow for readability */
 }
 
 .city-name {
   font-weight: 700;
+  fill: var(--color-primary); /* Slightly darker green for city name */
 }
 
 /* Responsive adjustments */

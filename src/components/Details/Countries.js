@@ -246,7 +246,7 @@ const Countries = () => {
 
   if (isLoading) {
     return (
-      <div className="loading-container">
+      <div className="loading-container" role="status" aria-live="polite">
         <RotatingLines
           strokeColor="#4fa94d"
           strokeWidth="5"
@@ -362,37 +362,39 @@ const Countries = () => {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <div>
+      <main>
         <Navbar id="/" />
-        <div className="countryContainer">
-          <div className="region-header">
+        <section className="countryContainer" aria-label="Country list section">
+          <header className="region-header">
             <h3>{region}</h3>
             <Suspense fallback={<div>Loading...</div>}>
               <OptimizedImage
                 src={regionImage}
-                alt={region}
+                alt={`Map of ${region}`}
                 className="img1"
               />
             </Suspense>
-          </div>
+          </header>
 
-          <div className="search-filter-container">
+          <section className="search-filter-container" aria-label="Search and filter controls">
             <div className="search-container">
               <FontAwesomeIcon icon={faSearch} className="search-icon" />
               <input
                 type="text"
                 placeholder="Search country..."
                 className="searchCountry"
-                onChange={handleLocalSearchChange} // Use updated handler
+                onChange={handleLocalSearchChange}
                 value={search}
+                aria-label="Search country by name"
               />
             </div>
-            {/* Conditionally disable filters if in direct search mode? Or allow filtering direct results? Let's allow filtering for now */}
             <div className="filter-container">
               <button
                 type="button"
                 className={`filter-button ${activeFilter === 'name' ? 'active' : ''}`}
                 onClick={() => handleFilter('name')}
+                aria-pressed={activeFilter === 'name'}
+                aria-label="Sort by name"
               >
                 Name
                 {activeFilter === 'name' && (
@@ -401,11 +403,12 @@ const Countries = () => {
                     : <FontAwesomeIcon icon={faArrowDown} className="sort-icon" />
                 )}
               </button>
-
               <button
                 type="button"
                 className={`filter-button ${activeFilter === 'population' ? 'active' : ''}`}
                 onClick={() => handleFilter('population')}
+                aria-pressed={activeFilter === 'population'}
+                aria-label="Sort by population"
               >
                 Population
                 {activeFilter === 'population' && (
@@ -415,36 +418,40 @@ const Countries = () => {
                 )}
               </button>
             </div>
-          </div>
+          </section>
 
           {/* Display countries based on the determined list */}
           {displayCountries && displayCountries.length > 0 ? (
             <>
-              <div className="countriesGrid">
+              <section
+                className="countriesGrid"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                  gap: '24px',
+                  margin: '32px 0',
+                }}
+                aria-label="List of countries"
+              >
                 <Suspense fallback={<div className="loading-container">Loading countries...</div>}>
                   {displayCountries.map((country) => (
                     <Country
-                      // Ensure unique key, cca2 should be reliable
                       key={country.cca2 || country.name?.common}
                       id={country.cca2}
                       name={country.name.common}
-                      // Handle potential missing latlng
                       lat={country.latlng ? country.latlng[0] : 0}
                       lng={country.latlng ? country.latlng[1] : 0}
                       population={country.population}
                       region={country.region}
-                      // Handle potential missing flags or using flag emoji
                       flag={country.flags?.png || country.flag || ''}
                     />
                   ))}
                 </Suspense>
-              </div>
-
+              </section>
               {/* Only show pagination if NOT in direct search mode */}
               {!isDirectSearchMode && pagination.totalPages > 1 && (
                 <Pagination
                   currentPage={currentPage}
-                  // Use totalPages from Redux state for pagination
                   totalPages={pagination.totalPages}
                   onPageChange={handlePageChange}
                 />
@@ -455,8 +462,8 @@ const Countries = () => {
             // (and not handled by the specific 'no results' messages above)
             <div className="no-results">No countries to display.</div>
           )}
-        </div>
-      </div>
+        </section>
+      </main>
     </ErrorBoundary>
   );
 };
