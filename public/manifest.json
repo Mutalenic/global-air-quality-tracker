@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Zambia AQ Tracker",
+  "name": "Zambia Environmental Intelligence Platform",
+  "description": "Air quality and environmental data for Zambia's communities, farmers, and tourists",
   "icons": [
     {
       "src": "favicon.ico",
@@ -21,5 +22,10 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "categories": ["weather", "environment", "agriculture", "tourism"],
+  "lang": "en",
+  "scope": "/",
+  "screenshots": []
 }
