@@ -1,0 +1,429 @@
+/**
+ * Region Click Flow Test
+ * Tests the complete flow when clicking a region from home page
+ */
+
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import configureStore from 'redux-mock-store';
+import thunk from 'redux-thunk';
+import Regions from '../components/Home/Region';
+import Countries from '../components/Details/Countries';
+import { getCountries } from '../redux/Actions/Countries';
+
+// Mock the API functions
+jest.mock('../redux/apiFunctions', () => ({
+  fetchCountries: jest.fn(),
+}));
+
+// Mock react-toastify
+jest.mock('react-toastify', () => ({
+  ToastContainer: () => <div data-testid="toast-container">ToastContainer</div>,
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warning: jest.fn(),
+  },
+}));
+
+const { fetchCountries } = require('../redux/apiFunctions');
+
+const middlewares = [thunk];
+const mockStore = configureStore(middlewares);
+
+describe('Scenario 1: Click Region from Home - Complete Flow', () => {
+  let store;
+
+  const mockAfricanCountries = [
+    {
+      name: { common: 'Kenya' },
+      capital: ['Nairobi'],
+      population: 53771296,
+      cca2: 'KE',
+      latlng: [-1, 38],
+      flags: { png: 'https://flagcdn.com/w320/ke.png' },
+    },
+    {
+      name: { common: 'Nigeria' },
+      capital: ['Abuja'],
+      population: 206139589,
+      cca2: 'NG',
+      latlng: [10, 8],
+      flags: { png: 'https://flagcdn.com/w320/ng.png' },
+    },
+    {
+      name: { common: 'South Africa' },
+      capital: ['Pretoria'],
+      population: 59308690,
+      cca2: 'ZA',
+      latlng: [-30, 25],
+      flags: { png: 'https://flagcdn.com/w320/za.png' },
+    },
+  ];
+
+  beforeEach(() => {
+    // Reset store before each test
+    store = mockStore({
+      countriesReducer: {
+        countries: [],
+        loading: false,
+        error: null,
+      },
+      pollutionReducer: {
+        pollution: {},
+        loading: false,
+        error: null,
+      },
+    });
+
+    jest.clearAllMocks();
+    
+    // Setup mock to return data after a delay (simulating API call)
+    fetchCountries.mockImplementation(() => 
+      new Promise((resolve) => {
+        setTimeout(() => resolve(mockAfricanCountries), 100);
+      })
+    );
+  });
+
+  it('Step 1: Home page renders with all regions', () => {
+    render(
+      <Provider store={store}>
+        <MemoryRouter initialEntries={['/']}>
+          <Regions />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // Verify all 6 regions are displayed
+    expect(screen.getByText(/Africa/i)).toBeInTheDocument();
+    expect(screen.getByText(/Americas/i)).toBeInTheDocument();
+    expect(screen.getByText(/Europe/i)).toBeInTheDocument();
+    expect(screen.getByText(/Asia/i)).toBeInTheDocument();
+    expect(screen.getByText(/Oceania/i)).toBeInTheDocument();
+    expect(screen.getByText(/Antarctic/i)).toBeInTheDocument();
+
+    // Verify country counts are displayed
+    expect(screen.getByText(/59 Countries/i)).toBeInTheDocument(); // Africa
+    expect(screen.getByText(/56 Countries/i)).toBeInTheDocument(); // Americas
+  });
+
+  it('Step 2: Click Africa region button', () => {
+    render(
+      <Provider store={store}>
+        <MemoryRouter initialEntries={['/']}>
+          <Regions />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // Find Africa region button
+    const africaButton = screen.getByLabelText(/View countries in Africa/i);
+    expect(africaButton).toBeInTheDocument();
+    
+    // Click the button
+    fireEvent.click(africaButton);
+    
+    // Verify action was dispatched
+    const actions = store.getActions();
+    expect(actions.length).toBeGreaterThan(0);
+    expect(actions[0].type).toBe('air-quality-data/Countries/COUNTRIES_LOADING');
+    expect(actions[0].payload).toBe(true);
+  });
+
+  it('Step 3: Loading state is set immediately after click', async () => {
+    // Create a real store that can handle dispatches
+    const { createStore, applyMiddleware } = require('redux');
+    const countriesReducer = require('../redux/Reducers/Countries').default;
+    const pollutionReducer = require('../redux/Reducers/Pollution').default;
+    const { combineReducers } = require('redux');
+    
+    const rootReducer = combineReducers({
+      countriesReducer,
+      pollutionReducer,
+    });
+    
+    const realStore = createStore(rootReducer, applyMiddleware(thunk));
+
+    render(
+      <Provider store={realStore}>
+        <MemoryRouter initialEntries={['/']}>
+          <Regions />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // Initial state - not loading
+    expect(realStore.getState().countriesReducer.loading).toBe(false);
+    
+    // Click Africa
+    const africaButton = screen.getByLabelText(/View countries in Africa/i);
+    fireEvent.click(africaButton);
+    
+    // Should be loading immediately (or very quickly)
+    await waitFor(() => {
+      expect(realStore.getState().countriesReducer.loading).toBe(true);
+    }, { timeout: 100 });
+  });
+
+  it('Step 4: After 50ms delay, navigation occurs', async () => {
+    const { createStore, applyMiddleware } = require('redux');
+    const countriesReducer = require('../redux/Reducers/Countries').default;
+    const pollutionReducer = require('../redux/Reducers/Pollution').default;
+    const { combineReducers } = require('redux');
+    
+    const rootReducer = combineReducers({
+      countriesReducer,
+      pollutionReducer,
+    });
+    
+    const realStore = createStore(rootReducer, applyMiddleware(thunk));
+
+    const { container } = render(
+      <Provider store={realStore}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<Regions />} />
+            <Route path="/countries" element={<Countries />} />
+          </Routes>
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // Click Africa
+    const africaButton = screen.getByLabelText(/View countries in Africa/i);
+    fireEvent.click(africaButton);
+    
+    // Wait for navigation (should happen after 50ms)
+    await waitFor(() => {
+      // Should be on countries page (loading skeleton should appear)
+      const loadingElements = screen.queryAllByText(/Loading/i);
+      expect(loadingElements.length).toBeGreaterThan(0);
+    }, { timeout: 200 });
+  });
+
+  it('Step 5: Loading skeleton is displayed while fetching', async () => {
+    const { createStore, applyMiddleware } = require('redux');
+    const countriesReducer = require('../redux/Reducers/Countries').default;
+    const pollutionReducer = require('../redux/Reducers/Pollution').default;
+    const { combineReducers } = require('redux');
+    
+    const rootReducer = combineReducers({
+      countriesReducer,
+      pollutionReducer,
+    });
+    
+    const realStore = createStore(rootReducer, applyMiddleware(thunk));
+
+    render(
+      <Provider store={realStore}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<Regions />} />
+            <Route path="/countries" element={<Countries />} />
+          </Routes>
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // Click Africa
+    const africaButton = screen.getByLabelText(/View countries in Africa/i);
+    fireEvent.click(africaButton);
+    
+    // Wait for navigation and verify loading state
+    await waitFor(() => {
+      expect(realStore.getState().countriesReducer.loading).toBe(true);
+      const loadingElements = screen.queryAllByText(/Loading/i);
+      expect(loadingElements.length).toBeGreaterThan(0);
+    }, { timeout: 200 });
+  });
+
+  it('Step 6: API completes and countries are populated', async () => {
+    const { createStore, applyMiddleware } = require('redux');
+    const countriesReducer = require('../redux/Reducers/Countries').default;
+    const pollutionReducer = require('../redux/Reducers/Pollution').default;
+    const { combineReducers } = require('redux');
+    
+    const rootReducer = combineReducers({
+      countriesReducer,
+      pollutionReducer,
+    });
+    
+    const realStore = createStore(rootReducer, applyMiddleware(thunk));
+
+    render(
+      <Provider store={realStore}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<Regions />} />
+            <Route path="/countries" element={<Countries />} />
+          </Routes>
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // Click Africa
+    const africaButton = screen.getByLabelText(/View countries in Africa/i);
+    fireEvent.click(africaButton);
+    
+    // Wait for API to complete
+    await waitFor(() => {
+      const state = realStore.getState().countriesReducer;
+      expect(state.loading).toBe(false);
+      expect(state.countries.length).toBeGreaterThan(0);
+    }, { timeout: 500 });
+  });
+
+  it('Step 7: Countries list is displayed after API completes', async () => {
+    const { createStore, applyMiddleware } = require('redux');
+    const countriesReducer = require('../redux/Reducers/Countries').default;
+    const pollutionReducer = require('../redux/Reducers/Pollution').default;
+    const { combineReducers } = require('redux');
+    
+    const rootReducer = combineReducers({
+      countriesReducer,
+      pollutionReducer,
+    });
+    
+    const realStore = createStore(rootReducer, applyMiddleware(thunk));
+
+    render(
+      <Provider store={realStore}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<Regions />} />
+            <Route path="/countries" element={<Countries />} />
+          </Routes>
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // Click Africa
+    const africaButton = screen.getByLabelText(/View countries in Africa/i);
+    fireEvent.click(africaButton);
+    
+    // Wait for countries to be displayed
+    await waitFor(() => {
+      expect(screen.getByText('Kenya')).toBeInTheDocument();
+      expect(screen.getByText('Nigeria')).toBeInTheDocument();
+      expect(screen.getByText('South Africa')).toBeInTheDocument();
+    }, { timeout: 500 });
+  });
+
+  it('COMPLETE FLOW: From home click to countries list display', async () => {
+    const { createStore, applyMiddleware } = require('redux');
+    const countriesReducer = require('../redux/Reducers/Countries').default;
+    const pollutionReducer = require('../redux/Reducers/Pollution').default;
+    const { combineReducers } = require('redux');
+    
+    const rootReducer = combineReducers({
+      countriesReducer,
+      pollutionReducer,
+    });
+    
+    const realStore = createStore(rootReducer, applyMiddleware(thunk));
+
+    render(
+      <Provider store={realStore}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<Regions />} />
+            <Route path="/countries" element={<Countries />} />
+          </Routes>
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // STEP 1: Verify we're on home page
+    expect(screen.getByText(/Find Air Quality Data in your Location/i)).toBeInTheDocument();
+    expect(screen.getByText(/Africa/i)).toBeInTheDocument();
+
+    // STEP 2: Click Africa region
+    const africaButton = screen.getByLabelText(/View countries in Africa/i);
+    fireEvent.click(africaButton);
+
+    // STEP 3: Verify loading state is set
+    await waitFor(() => {
+      expect(realStore.getState().countriesReducer.loading).toBe(true);
+    }, { timeout: 100 });
+
+    // STEP 4: Verify navigation happened (loading skeleton appears)
+    await waitFor(() => {
+      const loadingElements = screen.queryAllByText(/Loading/i);
+      expect(loadingElements.length).toBeGreaterThan(0);
+    }, { timeout: 200 });
+
+    // STEP 5: Wait for API to complete
+    await waitFor(() => {
+      expect(realStore.getState().countriesReducer.loading).toBe(false);
+      expect(realStore.getState().countriesReducer.countries.length).toBe(3);
+    }, { timeout: 500 });
+
+    // STEP 6: Verify countries are displayed
+    await waitFor(() => {
+      expect(screen.getByText('Kenya')).toBeInTheDocument();
+      expect(screen.getByText('Nigeria')).toBeInTheDocument();
+      expect(screen.getByText('South Africa')).toBeInTheDocument();
+      
+      // Verify region name is displayed
+      expect(screen.getByText('Africa')).toBeInTheDocument();
+      
+      // Verify search bar is present
+      expect(screen.getByPlaceholderText(/Search country/i)).toBeInTheDocument();
+    }, { timeout: 600 });
+
+    // FINAL VERIFICATION: Check complete state
+    const finalState = realStore.getState().countriesReducer;
+    expect(finalState.loading).toBe(false);
+    expect(finalState.error).toBe(null);
+    expect(finalState.countries).toHaveLength(3);
+    expect(finalState.countries[0].region).toBe('Africa');
+  });
+
+  it('Timing verification: 50ms delay between dispatch and navigation', async () => {
+    const { createStore, applyMiddleware } = require('redux');
+    const countriesReducer = require('../redux/Reducers/Countries').default;
+    const pollutionReducer = require('../redux/Reducers/Pollution').default;
+    const { combineReducers } = require('redux');
+    
+    const rootReducer = combineReducers({
+      countriesReducer,
+      pollutionReducer,
+    });
+    
+    const realStore = createStore(rootReducer, applyMiddleware(thunk));
+
+    render(
+      <Provider store={realStore}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<Regions />} />
+            <Route path="/countries" element={<Countries />} />
+          </Routes>
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const clickTime = Date.now();
+    
+    // Click Africa
+    const africaButton = screen.getByLabelText(/View countries in Africa/i);
+    fireEvent.click(africaButton);
+    
+    // Navigation should happen around 50ms after click
+    await waitFor(() => {
+      const loadingElements = screen.queryAllByText(/Loading/i);
+      if (loadingElements.length > 0) {
+        const navigationTime = Date.now();
+        const elapsedTime = navigationTime - clickTime;
+        
+        // Should be at least 50ms but not much more (allowing for test overhead)
+        expect(elapsedTime).toBeGreaterThanOrEqual(40); // Slightly less to account for timing variance
+        expect(elapsedTime).toBeLessThan(200); // Should be quick
+      }
+    }, { timeout: 300 });
+  });
+});

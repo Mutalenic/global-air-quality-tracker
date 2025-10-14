@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import { faCircleArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch } from 'react-redux';
-import { NavLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Africa from '../Maps/Africa.png';
 import Antarctic from '../Maps/Antarctica.png';
 import Asia from '../Maps/Asia.png';
@@ -27,14 +27,19 @@ const regionImageMap = {
 const Region = React.memo((props) => {
   const { region, regionCountry } = props;
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Memoize the region image to avoid recalculation
   const regionImage = useMemo(() => regionImageMap[region] || Antarctic, [region]);
 
-  // Memoize the click handler
+  // Memoize the click handler - dispatch action then navigate after a brief delay
   const handleRegionClick = useCallback(() => {
     dispatch(getCountries(region));
-  }, [dispatch, region]);
+    // Small delay to ensure Redux state updates before navigation
+    setTimeout(() => {
+      navigate('/countries');
+    }, 50);
+  }, [dispatch, region, navigate]);
 
   return (
     <div className="regionBorder">
@@ -49,9 +54,7 @@ const Region = React.memo((props) => {
               onClick={handleRegionClick}
               aria-label={`View countries in ${region}`}
             >
-              <NavLink to="/countries" className="buttonLink">
-                <FontAwesomeIcon icon={faCircleArrowRight} className="icon" aria-hidden="true" />
-              </NavLink>
+              <FontAwesomeIcon icon={faCircleArrowRight} className="icon" aria-hidden="true" />
             </button>
             <p className="regionName">{region}</p>
             <p>{regionCountry} Countries</p>

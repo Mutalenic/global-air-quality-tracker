@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Africa from '../Maps/Africa.png';
 import Antarctic from '../Maps/Antarctica.png';
@@ -32,8 +32,26 @@ const regionImageMap = {
 
 const Countries = () => {
   const { countries, loading, error } = useSelector((state) => state.countriesReducer);
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [showMore, setShowMore] = useState(false);
+
+  // Redirect to home if accessing /countries directly without data
+  // Don't redirect if loading (data is being fetched)
+  useEffect(() => {
+    // Only redirect if we're not loading and have no countries
+    if (!loading && countries.length === 0) {
+      const timer = setTimeout(() => {
+        // Double-check after a brief delay in case data is loading
+        if (!loading && countries.length === 0) {
+          navigate('/', { replace: true });
+        }
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [loading, countries.length, navigate]);
 
   // Memoize the search handler
   const handleSearchChange = useCallback((e) => {
