@@ -14,23 +14,19 @@ export const fetchCountries = async (reg) => {
     return cachedData;
   }
 
-  try {
-    const response = await fetch('https://restcountries.com/v3.1/all');
+  // Use region-specific endpoint to avoid 400 error from /all endpoint
+  const response = await fetch(`https://restcountries.com/v3.1/region/${reg.toLowerCase()}`);
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const result = data.filter((country) => country.region === reg);
-
-    // Save to cache
-    saveToCache(cacheKey, result);
-
-    return result;
-  } catch (error) {
-    throw new Error(`Failed to fetch countries: ${error.message}`);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
+
+  const data = await response.json();
+
+  // Save to cache
+  saveToCache(cacheKey, data);
+
+  return data;
 };
 
 const url = 'https://api.openweathermap.org/data/2.5/air_pollution?';
