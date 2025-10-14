@@ -13,12 +13,7 @@ const getAqiClass = (aqi) => {
   return 'hazardous';
 };
 
-const Pollution = ({
-  lat,
-  lng,
-  flag,
-  name,
-}) => {
+const Pollution = ({ lat, lng, flag, name }) => {
   const dispatch = useDispatch();
   const pollutions = useSelector((state) => state.pollutionReducer);
   const [loading, setLoading] = useState(true);
@@ -69,57 +64,31 @@ const Pollution = ({
           </div>
           <div className="pollutionDataCard aqiCard">
             <p>Air Quality Index:</p>
-            <span className={`aqi ${getAqiClass(pollution.aqi)}`}>
-              {pollution.aqi}
-            </span>
+            <span className={`aqi ${getAqiClass(pollution.aqi)}`}>{pollution.aqi}</span>
           </div>
           <div className="pollutionDataCard pm25Card">
             <p>PM2.5:</p>
-            <span>
-              {pollution.pm25}
-              {' '}
-              µg/m³
-            </span>
+            <span>{pollution.pm25} µg/m³</span>
           </div>
           <div className="pollutionDataCard pm10Card">
             <p>PM10:</p>
-            <span>
-              {pollution.pm10}
-              {' '}
-              µg/m³
-            </span>
+            <span>{pollution.pm10} µg/m³</span>
           </div>
           <div className="pollutionDataCard o3Card">
             <p>O3:</p>
-            <span>
-              {pollution.o3}
-              {' '}
-              µg/m³
-            </span>
+            <span>{pollution.o3} µg/m³</span>
           </div>
           <div className="pollutionDataCard no2Card">
             <p>NO2:</p>
-            <span>
-              {pollution.no2}
-              {' '}
-              µg/m³
-            </span>
+            <span>{pollution.no2} µg/m³</span>
           </div>
           <div className="pollutionDataCard so2Card">
             <p>SO2:</p>
-            <span>
-              {pollution.so2}
-              {' '}
-              µg/m³
-            </span>
+            <span>{pollution.so2} µg/m³</span>
           </div>
           <div className="pollutionDataCard coCard">
             <p>CO:</p>
-            <span>
-              {pollution.co}
-              {' '}
-              µg/m³
-            </span>
+            <span>{pollution.co} µg/m³</span>
           </div>
         </div>
       ))}

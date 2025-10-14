@@ -1,0 +1,87 @@
+/* Loading, Error, and Empty State Styles */
+
+.loading-container,
+.error-container,
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loading-container p {
+  font-size: 1.2rem;
+  color: white;
+  margin: 1rem 0;
+}
+
+.error-container {
+  background: rgba(231, 76, 60, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 2rem;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.empty-container {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 2rem;
+}
+
+.empty-container p {
+  color: white;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.reloadText,
+.back-link {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  text-decoration: none;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+
+.reloadText:hover,
+.back-link:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.reloadText p,
+.back-link p {
+  margin: 0;
+}
+
+/* Loading Spinner Animation */
+.loading-container::before {
+  content: '';
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,18 +1,62 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { NavLink } from 'react-router-dom';
 import Header from '../Navbar/Navbar';
 import Pollution from '../Details/Pollution';
 import './Pollution.css';
+import '../common/States.css';
 
 const Pollutions = () => {
-  const pollutions = useSelector((state) => state.pollutionReducer);
+  const { data: pollutions, loading, error } = useSelector((state) => state.pollutionReducer);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div>
+        <Header id="/countries" />
+        <div className="loading-container">
+          <p>Loading pollution data, please wait...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div>
+        <Header id="/countries" />
+        <div className="error-container">
+          <p className="error-message">Error: {error}</p>
+          <NavLink to="/countries" className="back-link">
+            Go back to countries
+          </NavLink>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (!pollutions || pollutions.length === 0) {
+    return (
+      <div>
+        <Header id="/countries" />
+        <div className="empty-container">
+          <p>No pollution data available. Please select a country.</p>
+          <NavLink to="/countries" className="back-link">
+            Go back to countries
+          </NavLink>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
       <Header id="/countries" />
       {pollutions.map((pollution) => (
         <Pollution
-          key={pollution.id} // Ensure unique keys by using a unique identifier
+          key={pollution.id}
           id={pollution.id}
           lat={pollution.lat}
           lng={pollution.lng}

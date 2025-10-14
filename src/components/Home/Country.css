@@ -28,6 +28,41 @@
   display: flex;
   justify-content: center;
   justify-content: space-evenly;
+  position: relative;
+}
+
+.favorite-icon-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #bdc3c7;
+  transition: all 0.3s ease;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.favorite-icon-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.favorite-icon-button.favorited {
+  color: #e74c3c;
+  background: rgba(255, 255, 255, 1);
+}
+
+.favorite-icon-button:active {
+  transform: scale(0.95);
 }
 
 @media only screen and (min-width: 600px) {

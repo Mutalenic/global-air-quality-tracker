@@ -1,0 +1,150 @@
+/* Accessibility Improvements */
+
+/* Focus indicators for better keyboard navigation */
+button:focus,
+a:focus,
+input:focus {
+  outline: 3px solid #4a90e2;
+  outline-offset: 2px;
+}
+
+/* High contrast focus for better visibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid #4a90e2;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.2);
+}
+
+/* Skip to main content link for keyboard users */
+.skip-to-main {
+  position: absolute;
+  left: -9999px;
+  z-index: 999;
+  padding: 1rem 1.5rem;
+  background-color: #4a90e2;
+  color: white;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+}
+
+.skip-to-main:focus {
+  left: 0;
+  top: 0;
+}
+
+/* Improve button accessibility */
+button {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Improve link accessibility */
+a {
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Ensure sufficient color contrast */
+.text-light {
+  color: #ffffff !important;
+}
+
+.text-dark {
+  color: #333333 !important;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Improve form input accessibility */
+input[type='text'],
+input[type='search'] {
+  font-size: 16px; /* Prevent zoom on iOS */
+  padding: 0.75rem;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.2s ease;
+}
+
+input[type='text']:focus,
+input[type='search']:focus {
+  border-color: #4a90e2;
+}
+
+/* Improve touch targets for mobile */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Reduced motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  button,
+  a {
+    border: 2px solid currentColor;
+  }
+
+  input[type='text'],
+  input[type='search'] {
+    border-width: 3px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .loading-container p,
+  .empty-container p {
+    color: #f0f0f0;
+  }
+
+  input[type='text'],
+  input[type='search'] {
+    background-color: #2a2a2a;
+    color: #f0f0f0;
+    border-color: #555;
+  }
+}

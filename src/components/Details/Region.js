@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import { faCircleArrowRight } from '@fortawesome/free-solid-svg-icons';
@@ -13,50 +13,58 @@ import Oceania from '../Maps/Oceania.png';
 import { getCountries } from '../../redux/Actions/Countries';
 import './Region.css';
 
-const Region = (props) => {
+// Map region names to images for better performance
+const regionImageMap = {
+  Africa,
+  Asia,
+  Europe,
+  Oceania,
+  America,
+  Americas: America, // Handle both 'America' and 'Americas'
+  Antarctic,
+};
+
+const Region = React.memo((props) => {
   const { region, regionCountry } = props;
   const dispatch = useDispatch();
-  let region1;
-  if (region === 'Africa') region1 = Africa;
-  else if (region === 'Asia') region1 = Asia;
-  else if (region === 'Europe') region1 = Europe;
-  else if (region === 'Oceania') region1 = Oceania;
-  else if (region === 'America') region1 = America;
-  else region1 = Antarctic;
+
+  // Memoize the region image to avoid recalculation
+  const regionImage = useMemo(() => regionImageMap[region] || Antarctic, [region]);
+
+  // Memoize the click handler
+  const handleRegionClick = useCallback(() => {
+    dispatch(getCountries(region));
+  }, [dispatch, region]);
+
   return (
     <div className="regionBorder">
       <div className="region">
         <div className="flex-column">
-          <img src={region1} alt="" className="m-2 img" />
+          <img src={regionImage} alt={`${region} map`} className="m-2 img" loading="lazy" />
           <div className="regionDetails">
             <button
               key={region}
               type="button"
               className="regionBtn"
-              onClick={() => {
-                dispatch(getCountries(region));
-              }}
-              to="/countries"
+              onClick={handleRegionClick}
+              aria-label={`View countries in ${region}`}
             >
               <NavLink to="/countries" className="buttonLink">
-                <FontAwesomeIcon icon={faCircleArrowRight} className="icon" />
+                <FontAwesomeIcon icon={faCircleArrowRight} className="icon" aria-hidden="true" />
               </NavLink>
             </button>
-            <p className="regionName">
-              {region}
-            </p>
-            <p>
-              {regionCountry}
-              {' '}
-              Countries
-            </p>
+            <p className="regionName">{region}</p>
+            <p>{regionCountry} Countries</p>
           </div>
         </div>
         <div />
       </div>
     </div>
   );
-};
+});
+
+Region.displayName = 'Region';
+
 Region.propTypes = {
   region: PropTypes.string.isRequired,
   regionCountry: PropTypes.number.isRequired,

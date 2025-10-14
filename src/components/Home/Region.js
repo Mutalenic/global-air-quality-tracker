@@ -11,7 +11,8 @@ const Regions = () => {
     { region: 'Europe', country: 53 },
     { region: 'Asia', country: 50 },
     { region: 'Oceania', country: 27 },
-    { region: 'Antarctic', country: 5 }];
+    { region: 'Antarctic', country: 5 },
+  ];
   return (
     <div>
       <Header id="/" />
@@ -22,15 +23,9 @@ const Regions = () => {
         </div>
       </div>
       <div className="row">
-        {
-            regionList.map((element) => (
-              <Region
-                key={element.region}
-                region={element.region}
-                regionCountry={element.country}
-              />
-            ))
-        }
+        {regionList.map((element) => (
+          <Region key={element.region} region={element.region} regionCountry={element.country} />
+        ))}
       </div>
     </div>
   );
