@@ -11,7 +11,10 @@ export const fetchCountries = async (reg) => {
   const cachedData = getFromCache(cacheKey);
 
   if (cachedData) {
-    return cachedData;
+    const isArray = Array.isArray(cachedData);
+    if (!isArray || (isArray && cachedData.length > 0)) {
+      return cachedData;
+    }
   }
 
   // Use region-specific endpoint to avoid 400 error from /all endpoint
@@ -22,6 +25,10 @@ export const fetchCountries = async (reg) => {
   }
 
   const data = await response.json();
+
+  if (!Array.isArray(data) || data.length === 0) {
+    throw new Error(`No countries returned for region: ${reg}`);
+  }
 
   // Save to cache
   saveToCache(cacheKey, data);

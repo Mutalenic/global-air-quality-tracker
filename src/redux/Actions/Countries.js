@@ -32,19 +32,26 @@ export const getCountries = (reg) => async (dispatch) => {
       return;
     }
 
+    const processedCountries = countries.map((country) => ({
+      name: country.name,
+      region: reg,
+      latlng: country.latlng,
+      population: country.population,
+      code: country.cca2,
+      flags: country.flags,
+    }));
+
     dispatch({
       type: ADD_COUNTRIES,
-      payload: countries.map((country) => ({
-        name: country.name,
-        region: reg,
-        latlng: country.latlng,
-        population: country.population,
-        code: country.cca2,
-        flag: country.flags.png,
-      })),
+      payload: processedCountries,
     });
     dispatch(setCountriesError(null)); // Clear any previous errors
-    showSuccessToast(`Loaded ${countries.length} countries from ${reg}`);
+
+    try {
+      showSuccessToast(`Loaded ${countries.length} countries from ${reg}`);
+    } catch (toastError) {
+      // Silent catch to avoid interrupting flow if toast fails
+    }
   } catch (error) {
     const errorMsg = error.message || 'Failed to load countries';
     dispatch(setCountriesError(errorMsg));

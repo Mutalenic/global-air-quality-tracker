@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faTrash, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 import { NavLink } from 'react-router-dom';
@@ -8,15 +8,23 @@ import './Favorites.css';
 
 const Favorites = () => {
   const { favorites, removeFavorite, clearFavorites, hasFavorites } = useFavorites();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const handleRemove = (id) => {
     removeFavorite(id);
   };
 
   const handleClearAll = () => {
-    if (window.confirm('Are you sure you want to remove all favorites?')) {
-      clearFavorites();
-    }
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmClear = () => {
+    clearFavorites();
+    setShowConfirmDialog(false);
+  };
+
+  const handleCancelClear = () => {
+    setShowConfirmDialog(false);
   };
 
   return (
@@ -97,6 +105,64 @@ const Favorites = () => {
           </div>
         )}
       </div>
+
+      {/* Confirmation Dialog */}
+      {showConfirmDialog && (
+        <div
+          className="modal-overlay"
+          onClick={(e) => {
+            // Only close if clicking on the overlay itself, not on content
+            if (e.target === e.currentTarget) {
+              handleCancelClear();
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              handleCancelClear();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close confirmation dialog"
+        >
+          <div
+            className="modal-content"
+            role="dialog"
+            aria-labelledby="confirm-title"
+          >
+            <h3 id="confirm-title">Confirm Action</h3>
+            <p>Are you sure you want to remove all favorites? This action cannot be undone.</p>
+            <div className="modal-buttons">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleCancelClear}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleCancelClear();
+                  }
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={handleConfirmClear}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleConfirmClear();
+                  }
+                }}
+              >
+                Remove All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

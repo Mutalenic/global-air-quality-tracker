@@ -31,27 +31,49 @@ const regionImageMap = {
 };
 
 const Countries = () => {
-  const { countries, loading, error } = useSelector((state) => state.countriesReducer);
+  const countriesData = useSelector((state) => {
+    const data = state.countriesReducer;
+    // Ensure new object reference to trigger re-renders
+    return {
+      countries: data?.countries || [],
+      loading: data?.loading || false,
+      error: data?.error || null,
+    };
+  });
+
+  const { countries, loading, error } = countriesData;
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [showMore, setShowMore] = useState(false);
 
-  // Redirect to home if accessing /countries directly without data
-  // Don't redirect if loading (data is being fetched)
+  // Redirect to home if accessing /countries directly without data and not loading
   useEffect(() => {
-    // Only redirect if we're not loading and have no countries
-    if (!loading && countries.length === 0) {
+    // Don't redirect if we're currently loading data
+    if (loading) return;
+
+    // Only redirect if we have no countries and not loading
+    if (countries.length === 0) {
       const timer = setTimeout(() => {
-        // Double-check after a brief delay in case data is loading
-        if (!loading && countries.length === 0) {
+        // Double-check after delay in case data is still loading
+        if (countries.length === 0 && !loading) {
+          console.log('Redirecting to home - no countries loaded');
           navigate('/', { replace: true });
         }
-      }, 500);
+      }, 2000); // Increased delay to allow more time for data loading
 
       return () => clearTimeout(timer);
     }
-    return undefined;
   }, [loading, countries.length, navigate]);
+
+  // Debug logging for countries loading
+  useEffect(() => {
+    console.log('Countries state updated:', {
+      count: countries.length,
+      loading,
+      error,
+      hasCountries: countries.length > 0
+    });
+  }, [countries.length, loading, error]);
 
   // Memoize the search handler
   const handleSearchChange = useCallback((e) => {
@@ -73,7 +95,7 @@ const Countries = () => {
     return { searchedValue: filtered, displayedCountries: displayed };
   }, [countries, search, showMore]);
 
-  // Memoize region image
+  // Memoize region image - handle case where countries might be empty initially
   const regionImage = useMemo(() => {
     if (countries.length === 0) return null;
     return regionImageMap[countries[0].region] || Antarctic;
@@ -81,6 +103,7 @@ const Countries = () => {
 
   // Show loading state
   if (loading) {
+    console.log('Showing loading state');
     return (
       <div>
         <Navbar id="/" />
@@ -91,6 +114,7 @@ const Countries = () => {
 
   // Show error state
   if (error) {
+    console.log('Showing error state:', error);
     return (
       <div className="m-2">
         <Navbar id="/" />
@@ -105,8 +129,9 @@ const Countries = () => {
     );
   }
 
-  // Show empty state
-  if (!countries.length) {
+  // Show empty state - only if not loading and truly no countries
+  if (countries.length === 0) {
+    console.log('Showing empty state - no countries available');
     return (
       <div className="m-2">
         <Navbar id="/" />
@@ -121,11 +146,15 @@ const Countries = () => {
     );
   }
 
+  // Main render - we should have countries here
+  console.log('Rendering countries list with', countries.length, 'countries');
+  const currentRegion = countries.length > 0 ? countries[0].region : 'Unknown';
+
   return (
     <div>
       <Navbar id="/" />
       <div className="countryContainer">
-        <RegionHeader regionName={countries[0].region} regionImage={regionImage} />
+        <RegionHeader regionName={currentRegion} regionImage={regionImage} />
         <SearchBar value={search} onChange={handleSearchChange} placeholder="Search country" />
         <CountryList countries={displayedCountries} />
         {!showMore && searchedValue.length > 6 && (

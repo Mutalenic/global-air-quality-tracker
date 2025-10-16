@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Country from '../Home/Country';
 
 /**
@@ -33,5 +34,22 @@ const CountryList = React.memo(({ countries }) => {
 });
 
 CountryList.displayName = 'CountryList';
+
+CountryList.propTypes = {
+  countries: PropTypes.arrayOf(
+    PropTypes.shape({
+      code: PropTypes.string.isRequired,
+      name: PropTypes.shape({
+        common: PropTypes.string.isRequired,
+      }).isRequired,
+      latlng: PropTypes.arrayOf(PropTypes.number).isRequired,
+      population: PropTypes.number.isRequired,
+      region: PropTypes.string.isRequired,
+      flags: PropTypes.shape({
+        png: PropTypes.string.isRequired,
+      }).isRequired,
+    }),
+  ).isRequired,
+};
 
 export default CountryList;

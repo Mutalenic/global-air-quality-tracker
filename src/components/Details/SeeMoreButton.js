@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * SeeMoreButton component for showing more countries
@@ -19,5 +20,10 @@ const SeeMoreButton = React.memo(({ onClick, remainingCount }) => {
 });
 
 SeeMoreButton.displayName = 'SeeMoreButton';
+
+SeeMoreButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  remainingCount: PropTypes.number.isRequired,
+};
 
 export default SeeMoreButton;

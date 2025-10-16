@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './SearchBar.css';
 
 /**
@@ -23,5 +24,15 @@ const SearchBar = React.memo(({ value, onChange, placeholder = 'Search...' }) =>
 });
 
 SearchBar.displayName = 'SearchBar';
+
+SearchBar.propTypes = {
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string,
+};
+
+SearchBar.defaultProps = {
+  placeholder: 'Search...',
+};
 
 export default SearchBar;

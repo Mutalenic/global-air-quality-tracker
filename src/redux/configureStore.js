@@ -10,12 +10,25 @@ const rootReducer = combineReducers({
   pollutionReducer,
 });
 
+// Add debugging to track state changes
+const debugReducer = (state, action) => {
+  const newState = rootReducer(state, action);
+  if (action.type && action.type.includes('COUNTRIES')) {
+    console.log('Redux Store - After', action.type, ':', {
+      countriesLength: newState.countriesReducer?.countries?.length || 0,
+      loading: newState.countriesReducer?.loading,
+      error: newState.countriesReducer?.error,
+    });
+  }
+  return newState;
+};
+
 // Only enable redux-logger in development mode
 const middleware = [thunk];
 if (process.env.NODE_ENV === 'development') {
   middleware.push(logger);
 }
 
-const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(...middleware)));
+const store = createStore(debugReducer, composeWithDevTools(applyMiddleware(...middleware)));
 
 export default store;
