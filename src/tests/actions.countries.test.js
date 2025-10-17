@@ -74,7 +74,7 @@ describe('Countries Actions', () => {
               latlng: [0, 37],
               population: 47564296,
               code: 'KE',
-              flag: 'flag.png',
+              flags: { png: 'flag.png' },
             },
           ],
         },
