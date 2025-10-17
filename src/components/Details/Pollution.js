@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { useSelector, useDispatch } from 'react-redux';
-import { getPollutionData } from '../../redux/Actions/Pollution';
 import './Pollution.css';
 
 const getAqiClass = (aqi) => {
@@ -13,94 +11,59 @@ const getAqiClass = (aqi) => {
   return 'hazardous';
 };
 
-const Pollution = ({ lat, lng, flag, name }) => {
-  const dispatch = useDispatch();
-  const pollutions = useSelector((state) => state.pollutionReducer);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await dispatch(getPollutionData(lat, lng, flag, name));
-        setLoading(false);
-      } catch (err) {
-        setError(err);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [dispatch, lat, lng, flag, name]);
-
-  useEffect(() => {
-    // Removed console log statement
-  }, [flag]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return (
-      <div>
-        Error loading pollution data:
-        {error.message}
-      </div>
-    );
-  }
-
-  if (!Array.isArray(pollutions) || pollutions.length === 0) {
-    return <div>No pollution data available.</div>;
-  }
+const Pollution = ({ pollution }) => {
+  const { city, flag, aqi, pm25, pm10, o3, no2, so2, co } = pollution;
 
   return (
-    <div className="pollutionContainer">
-      {pollutions.map((pollution) => (
-        <div key={pollution.id} className="pollutionCard">
-          <h3>{pollution.city}</h3>
-          <div className="pollutionFlagCard">
-            <img src={flag} alt={`${pollution.city} flag`} className="pollutionFlag" />
-          </div>
-          <div className="pollutionDataCard aqiCard">
-            <p>Air Quality Index:</p>
-            <span className={`aqi ${getAqiClass(pollution.aqi)}`}>{pollution.aqi}</span>
-          </div>
-          <div className="pollutionDataCard pm25Card">
-            <p>PM2.5:</p>
-            <span>{pollution.pm25} µg/m³</span>
-          </div>
-          <div className="pollutionDataCard pm10Card">
-            <p>PM10:</p>
-            <span>{pollution.pm10} µg/m³</span>
-          </div>
-          <div className="pollutionDataCard o3Card">
-            <p>O3:</p>
-            <span>{pollution.o3} µg/m³</span>
-          </div>
-          <div className="pollutionDataCard no2Card">
-            <p>NO2:</p>
-            <span>{pollution.no2} µg/m³</span>
-          </div>
-          <div className="pollutionDataCard so2Card">
-            <p>SO2:</p>
-            <span>{pollution.so2} µg/m³</span>
-          </div>
-          <div className="pollutionDataCard coCard">
-            <p>CO:</p>
-            <span>{pollution.co} µg/m³</span>
-          </div>
-        </div>
-      ))}
+    <div className="pollutionCard">
+      <h3>{city}</h3>
+      <div className="pollutionFlagCard">
+        <img src={flag} alt={`${city} flag`} className="pollutionFlag" />
+      </div>
+      <div className="pollutionDataCard aqiCard">
+        <p>Air Quality Index:</p>
+        <span className={`aqi ${getAqiClass(aqi)}`}>{aqi}</span>
+      </div>
+      <div className="pollutionDataCard pm25Card">
+        <p>PM2.5:</p>
+        <span>{pm25} µg/m³</span>
+      </div>
+      <div className="pollutionDataCard pm10Card">
+        <p>PM10:</p>
+        <span>{pm10} µg/m³</span>
+      </div>
+      <div className="pollutionDataCard o3Card">
+        <p>O3:</p>
+        <span>{o3} µg/m³</span>
+      </div>
+      <div className="pollutionDataCard no2Card">
+        <p>NO2:</p>
+        <span>{no2} µg/m³</span>
+      </div>
+      <div className="pollutionDataCard so2Card">
+        <p>SO2:</p>
+        <span>{so2} µg/m³</span>
+      </div>
+      <div className="pollutionDataCard coCard">
+        <p>CO:</p>
+        <span>{co} µg/m³</span>
+      </div>
     </div>
   );
 };
 
 Pollution.propTypes = {
-  lat: PropTypes.number.isRequired,
-  lng: PropTypes.number.isRequired,
-  flag: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
+  pollution: PropTypes.shape({
+    city: PropTypes.string.isRequired,
+    flag: PropTypes.string.isRequired,
+    aqi: PropTypes.number.isRequired,
+    pm25: PropTypes.number.isRequired,
+    pm10: PropTypes.number.isRequired,
+    o3: PropTypes.number.isRequired,
+    no2: PropTypes.number.isRequired,
+    so2: PropTypes.number.isRequired,
+    co: PropTypes.number.isRequired,
+  }).isRequired,
 };
 
 export default Pollution;

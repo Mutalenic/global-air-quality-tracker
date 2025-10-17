@@ -9,7 +9,6 @@ import '../common/States.css';
 const Pollutions = () => {
   const { data: pollutions, loading, error } = useSelector((state) => state.pollutionReducer);
 
-  // Show loading state
   if (loading) {
     return (
       <div>
@@ -21,7 +20,6 @@ const Pollutions = () => {
     );
   }
 
-  // Show error state
   if (error) {
     return (
       <div>
@@ -36,7 +34,6 @@ const Pollutions = () => {
     );
   }
 
-  // Show empty state
   if (!pollutions || pollutions.length === 0) {
     return (
       <div>
@@ -54,19 +51,11 @@ const Pollutions = () => {
   return (
     <div>
       <Header id="/countries" />
-      {pollutions.map((pollution) => (
-        <Pollution
-          key={pollution.id}
-          id={pollution.id}
-          lat={pollution.lat}
-          lng={pollution.lng}
-          co={pollution.co}
-          no={pollution.no}
-          no2={pollution.no2}
-          flag={pollution.flag}
-          name={pollution.city}
-        />
-      ))}
+      <div className="pollutionContainer">
+        {pollutions.map((pollution) => (
+          <Pollution key={pollution.id} pollution={pollution} />
+        ))}
+      </div>
     </div>
   );
 };
