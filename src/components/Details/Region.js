@@ -34,11 +34,9 @@ const Region = React.memo((props) => {
 
   // Memoize the click handler - dispatch action then navigate after a brief delay
   const handleRegionClick = useCallback(() => {
-    console.log('Region clicked, dispatching getCountries for:', region);
     dispatch(getCountries(region));
     // Increased delay to ensure Redux state updates before navigation
     setTimeout(() => {
-      console.log('Navigating to countries page');
       navigate('/countries');
     }, 100); // Increased from 50ms to 100ms for better reliability
   }, [dispatch, region, navigate]);

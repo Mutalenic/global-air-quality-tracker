@@ -11,17 +11,7 @@ const rootReducer = combineReducers({
 });
 
 // Add debugging to track state changes
-const debugReducer = (state, action) => {
-  const newState = rootReducer(state, action);
-  if (action.type && action.type.includes('COUNTRIES')) {
-    console.log('Redux Store - After', action.type, ':', {
-      countriesLength: newState.countriesReducer?.countries?.length || 0,
-      loading: newState.countriesReducer?.loading,
-      error: newState.countriesReducer?.error,
-    });
-  }
-  return newState;
-};
+const debugReducer = (state, action) => rootReducer(state, action);
 
 // Only enable redux-logger in development mode
 const middleware = [thunk];

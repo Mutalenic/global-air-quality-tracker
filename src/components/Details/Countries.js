@@ -48,32 +48,22 @@ const Countries = () => {
 
   // Redirect to home if accessing /countries directly without data and not loading
   useEffect(() => {
-    // Don't redirect if we're currently loading data
-    if (loading) return;
+    let timer;
 
-    // Only redirect if we have no countries and not loading
-    if (countries.length === 0) {
-      const timer = setTimeout(() => {
-        // Double-check after delay in case data is still loading
+    if (!loading && countries.length === 0) {
+      timer = setTimeout(() => {
         if (countries.length === 0 && !loading) {
-          console.log('Redirecting to home - no countries loaded');
           navigate('/', { replace: true });
         }
-      }, 2000); // Increased delay to allow more time for data loading
-
-      return () => clearTimeout(timer);
+      }, 2000);
     }
-  }, [loading, countries.length, navigate]);
 
-  // Debug logging for countries loading
-  useEffect(() => {
-    console.log('Countries state updated:', {
-      count: countries.length,
-      loading,
-      error,
-      hasCountries: countries.length > 0
-    });
-  }, [countries.length, loading, error]);
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [loading, countries.length, navigate]);
 
   // Memoize the search handler
   const handleSearchChange = useCallback((e) => {
@@ -92,7 +82,10 @@ const Countries = () => {
       country.name.common.toLowerCase().includes(search.toLowerCase()),
     );
     const displayed = showMore ? filtered : filtered.slice(0, 6);
-    return { searchedValue: filtered, displayedCountries: displayed };
+    return {
+      searchedValue: filtered,
+      displayedCountries: displayed,
+    };
   }, [countries, search, showMore]);
 
   // Memoize region image - handle case where countries might be empty initially
@@ -103,7 +96,6 @@ const Countries = () => {
 
   // Show loading state
   if (loading) {
-    console.log('Showing loading state');
     return (
       <div>
         <Navbar id="/" />
@@ -114,7 +106,6 @@ const Countries = () => {
 
   // Show error state
   if (error) {
-    console.log('Showing error state:', error);
     return (
       <div className="m-2">
         <Navbar id="/" />
@@ -131,7 +122,6 @@ const Countries = () => {
 
   // Show empty state - only if not loading and truly no countries
   if (countries.length === 0) {
-    console.log('Showing empty state - no countries available');
     return (
       <div className="m-2">
         <Navbar id="/" />
@@ -147,7 +137,6 @@ const Countries = () => {
   }
 
   // Main render - we should have countries here
-  console.log('Rendering countries list with', countries.length, 'countries');
   const currentRegion = countries.length > 0 ? countries[0].region : 'Unknown';
 
   return (
