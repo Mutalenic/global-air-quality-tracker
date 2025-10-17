@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Africa from '../Maps/Africa.png';
 import Antarctic from '../Maps/Antarctica.png';
@@ -10,73 +10,144 @@ import Europe from '../Maps/Europe.png';
 import Oceania from '../Maps/Oceania.png';
 import Navbar from '../Navbar/Navbar';
 import America from '../Maps/America.png';
-import Country from '../Home/Country';
+import { CountrySkeleton } from '../common/SkeletonLoaders';
+import SearchBar from './SearchBar';
+import RegionHeader from './RegionHeader';
+import CountryList from './CountryList';
+import SeeMoreButton from './SeeMoreButton';
 import './Countries.css';
+import './SearchBar.css';
+import '../common/States.css';
+
+// Map for region images
+const regionImageMap = {
+  Africa,
+  Asia,
+  Europe,
+  Oceania,
+  America,
+  Americas: America,
+  Antarctic,
+};
 
 const Countries = () => {
-  const countries = useSelector((state) => state.countriesReducer);
+  const countriesData = useSelector((state) => {
+    const data = state.countriesReducer;
+    // Ensure new object reference to trigger re-renders
+    return {
+      countries: data?.countries || [],
+      loading: data?.loading || false,
+      error: data?.error || null,
+    };
+  });
+
+  const { countries, loading, error } = countriesData;
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [showMore, setShowMore] = useState(false);
 
-  const handleSeeMore = () => {
+  // Redirect to home if accessing /countries directly without data and not loading
+  useEffect(() => {
+    let timer;
+
+    if (!loading && countries.length === 0) {
+      timer = setTimeout(() => {
+        if (countries.length === 0 && !loading) {
+          navigate('/', { replace: true });
+        }
+      }, 2000);
+    }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [loading, countries.length, navigate]);
+
+  // Memoize the search handler
+  const handleSearchChange = useCallback((e) => {
+    setSearch(e.target.value);
+    setShowMore(false); // Reset show more when searching
+  }, []);
+
+  // Memoize the see more handler
+  const handleSeeMore = useCallback(() => {
     setShowMore(true);
-  };
+  }, []);
 
-  // eslint-disable-next-line max-len
-  const searchedValue = countries.filter((country) => country.name.common.toLowerCase().includes(search.toLowerCase()));
-  const displayedCountries = showMore ? searchedValue : searchedValue.slice(0, 6);
+  // Memoize filtered and displayed countries
+  const { searchedValue, displayedCountries } = useMemo(() => {
+    const filtered = countries.filter((country) =>
+      country.name.common.toLowerCase().includes(search.toLowerCase()),
+    );
+    const displayed = showMore ? filtered : filtered.slice(0, 6);
+    return {
+      searchedValue: filtered,
+      displayedCountries: displayed,
+    };
+  }, [countries, search, showMore]);
 
-  if (!countries.length) {
+  // Memoize region image - handle case where countries might be empty initially
+  const regionImage = useMemo(() => {
+    if (countries.length === 0) return null;
+    return regionImageMap[countries[0].region] || Antarctic;
+  }, [countries]);
+
+  // Show loading state
+  if (loading) {
     return (
-      <div className="m-2">
-        <p>Loading please wait!</p>
-        <NavLink to="/" className="reloadText">
-          <p>Click to reload</p>
-          <FontAwesomeIcon icon={faRefresh} className="icon" text="reload" />
-        </NavLink>
+      <div>
+        <Navbar id="/" />
+        <CountrySkeleton />
       </div>
     );
   }
 
-  let region1 = countries[0].region;
-  if (region1 === 'Africa') region1 = Africa;
-  else if (region1 === 'Asia') region1 = Asia;
-  else if (region1 === 'Europe') region1 = Europe;
-  else if (region1 === 'Oceania') region1 = Oceania;
-  else if (region1 === 'America') region1 = America;
-  else region1 = Antarctic;
+  // Show error state
+  if (error) {
+    return (
+      <div className="m-2">
+        <Navbar id="/" />
+        <div className="error-container">
+          <p className="error-message">Error: {error}</p>
+          <NavLink to="/" className="reloadText">
+            <p>Click to go back and try again</p>
+            <FontAwesomeIcon icon={faRefresh} className="icon" text="reload" />
+          </NavLink>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state - only if not loading and truly no countries
+  if (countries.length === 0) {
+    return (
+      <div className="m-2">
+        <Navbar id="/" />
+        <div className="empty-container">
+          <p>No countries available. Please select a region.</p>
+          <NavLink to="/" className="reloadText">
+            <p>Go back to regions</p>
+            <FontAwesomeIcon icon={faRefresh} className="icon" />
+          </NavLink>
+        </div>
+      </div>
+    );
+  }
+
+  // Main render - we should have countries here
+  const currentRegion = countries.length > 0 ? countries[0].region : 'Unknown';
 
   return (
     <div>
       <Navbar id="/" />
       <div className="countryContainer">
-        <div>
-          <h3>{countries[0].region}</h3>
-          <img src={region1} alt="Europe" className="img1" />
-        </div>
-        <div>
-          <input type="text" placeholder="search country" className="searchCountry" onChange={(e) => setSearch(e.target.value)} />
-        </div>
-        <div className="countriesGrid">
-          {
-            displayedCountries.map((country) => (
-              <Country
-                key={country.code}
-                id={country.code}
-                name={country.name.common}
-                lat={country.latlng[0]}
-                lng={country.latlng[1]}
-                population={country.population}
-                region={country.region}
-                flag={country.flag}
-              />
-            ))
-          }
-        </div>
-        {!showMore && (
-          <button type="button" className="seeMoreButton" onClick={handleSeeMore}>
-            See More
-          </button>
+        <RegionHeader regionName={currentRegion} regionImage={regionImage} />
+        <SearchBar value={search} onChange={handleSearchChange} placeholder="Search country" />
+        <CountryList countries={displayedCountries} />
+        {!showMore && searchedValue.length > 6 && (
+          <SeeMoreButton onClick={handleSeeMore} remainingCount={searchedValue.length - 6} />
         )}
       </div>
     </div>

@@ -1,0 +1,678 @@
+/**
+ * End-to-End Flow Test
+ * Tests the complete user journey through the application
+ */
+
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import configureStore from 'redux-mock-store';
+import thunk from 'redux-thunk';
+import Regions from '../components/Home/Region';
+import Countries from '../components/Details/Countries';
+import Pollutions from '../components/Home/Pollution';
+import Favorites from '../components/Favorites/Favorites';
+
+// Mock the API functions
+jest.mock('../redux/apiFunctions', () => ({
+  fetchCountries: jest.fn(),
+  getPollutionInfor: jest.fn(),
+  fetchPollution: jest.fn(),
+}));
+
+// Mock react-toastify
+jest.mock('react-toastify', () => ({
+  ToastContainer: () => <div data-testid="toast-container">ToastContainer</div>,
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warning: jest.fn(),
+  },
+}));
+
+const middlewares = [thunk];
+const mockStore = configureStore(middlewares);
+
+// Helper function to render with providers
+const renderWithProviders = (component, initialState = {}) => {
+  const defaultState = {
+    countriesReducer: {
+      countries: [],
+      loading: false,
+      error: null,
+    },
+    pollutionReducer: {
+      pollution: {
+        region: '',
+        country: '',
+        countryCode: '',
+        capital: '',
+        population: 0,
+        aqi: 0,
+        components: {},
+      },
+      loading: false,
+      error: null,
+    },
+    ...initialState,
+  };
+
+  const store = mockStore(defaultState);
+  
+  return {
+    ...render(
+      <Provider store={store}>
+        <MemoryRouter>
+          {component}
+        </MemoryRouter>
+      </Provider>
+    ),
+    store,
+  };
+};
+
+
+describe('End-to-End Application Flow', () => {
+  beforeEach(() => {
+    // Clear localStorage before each test
+    localStorage.clear();
+    jest.clearAllMocks();
+  });
+
+  describe('1. Home Page / Region Display', () => {
+    it('should render home page with all regions', () => {
+      renderWithProviders(<Regions />);
+
+      // Check if regions are displayed
+      expect(screen.getByText(/Africa/i)).toBeInTheDocument();
+      expect(screen.getByText(/Americas/i)).toBeInTheDocument();
+      expect(screen.getByText(/Europe/i)).toBeInTheDocument();
+      expect(screen.getByText(/Asia/i)).toBeInTheDocument();
+      expect(screen.getByText(/Oceania/i)).toBeInTheDocument();
+      expect(screen.getByText(/Antarctic/i)).toBeInTheDocument();
+
+      // Check for country counts
+      expect(screen.getByText(/59 Countries/i)).toBeInTheDocument();
+      expect(screen.getByText(/56 Countries/i)).toBeInTheDocument();
+      expect(screen.getByText(/53 Countries/i)).toBeInTheDocument();
+    });
+
+    it('should have header text', () => {
+      renderWithProviders(<Regions />);
+      
+      expect(screen.getByText(/Find Air Quality Data in your Location/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('2. Countries Page Flow', () => {
+    test('should redirect to home when accessing /countries directly without data', async () => {
+      const { container } = render(
+        <Provider store={store}>
+          <BrowserRouter initialEntries={['/countries']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Should redirect back to home (check for world map)
+      await waitFor(() => {
+        expect(screen.queryByAltText('world map')).toBeInTheDocument();
+      });
+    });
+
+    test('should display countries after region selection', () => {
+      // Create store with country data
+      const storeWithCountries = mockStore({
+        countriesReducer: {
+          countries: [
+            {
+              name: { common: 'Kenya' },
+              region: 'Africa',
+              capital: ['Nairobi'],
+              population: 53771300,
+              latlng: [1.0, 38.0],
+              flags: { png: 'kenya-flag.png' },
+              cca2: 'KE',
+            },
+            {
+              name: { common: 'Nigeria' },
+              region: 'Africa',
+              capital: ['Abuja'],
+              population: 206139587,
+              latlng: [10.0, 8.0],
+              flags: { png: 'nigeria-flag.png' },
+              cca2: 'NG',
+            },
+          ],
+          loading: false,
+          error: null,
+        },
+        pollutionReducer: {
+          pollution: {
+            region: '',
+            name: '',
+            location: { lat: 0, lon: 0 },
+            aqi: 0,
+            components: {},
+          },
+          loading: false,
+          error: null,
+        },
+      });
+
+      render(
+        <Provider store={storeWithCountries}>
+          <BrowserRouter initialEntries={['/countries']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Check if countries are displayed
+      expect(screen.getByText('Kenya')).toBeInTheDocument();
+      expect(screen.getByText('Nigeria')).toBeInTheDocument();
+      expect(screen.getByText('Africa')).toBeInTheDocument();
+    });
+
+    test('should display loading state while fetching countries', () => {
+      const loadingStore = mockStore({
+        countriesReducer: {
+          countries: [],
+          loading: true,
+          error: null,
+        },
+        pollutionReducer: {
+          pollution: {
+            region: '',
+            name: '',
+            location: { lat: 0, lon: 0 },
+            aqi: 0,
+            components: {},
+          },
+          loading: false,
+          error: null,
+        },
+      });
+
+      render(
+        <Provider store={loadingStore}>
+          <BrowserRouter initialEntries={['/countries']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Should show loading skeletons
+      const skeletons = screen.getAllByTestId(/skeleton/i);
+      expect(skeletons.length).toBeGreaterThan(0);
+    });
+
+    test('should display error state when fetch fails', () => {
+      const errorStore = mockStore({
+        countriesReducer: {
+          countries: [],
+          loading: false,
+          error: 'Failed to load countries',
+        },
+        pollutionReducer: {
+          pollution: {
+            region: '',
+            name: '',
+            location: { lat: 0, lon: 0 },
+            aqi: 0,
+            components: {},
+          },
+          loading: false,
+          error: null,
+        },
+      });
+
+      render(
+        <Provider store={errorStore}>
+          <BrowserRouter initialEntries={['/countries']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Should show error message
+      expect(screen.getByText(/Error: Failed to load countries/i)).toBeInTheDocument();
+      expect(screen.getByText(/Click to go back and try again/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('3. Search Functionality', () => {
+    test('should filter countries based on search input', () => {
+      const storeWithCountries = mockStore({
+        countriesReducer: {
+          countries: [
+            {
+              name: { common: 'Kenya' },
+              region: 'Africa',
+              capital: ['Nairobi'],
+              population: 53771300,
+              latlng: [1.0, 38.0],
+              flags: { png: 'kenya-flag.png' },
+              cca2: 'KE',
+            },
+            {
+              name: { common: 'Nigeria' },
+              region: 'Africa',
+              capital: ['Abuja'],
+              population: 206139587,
+              latlng: [10.0, 8.0],
+              flags: { png: 'nigeria-flag.png' },
+              cca2: 'NG',
+            },
+            {
+              name: { common: 'South Africa' },
+              region: 'Africa',
+              capital: ['Pretoria'],
+              population: 59308690,
+              latlng: [-29.0, 24.0],
+              flags: { png: 'sa-flag.png' },
+              cca2: 'ZA',
+            },
+          ],
+          loading: false,
+          error: null,
+        },
+        pollutionReducer: {
+          pollution: {
+            region: '',
+            name: '',
+            location: { lat: 0, lon: 0 },
+            aqi: 0,
+            components: {},
+          },
+          loading: false,
+          error: null,
+        },
+      });
+
+      render(
+        <Provider store={storeWithCountries}>
+          <BrowserRouter initialEntries={['/countries']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // All countries should be visible initially
+      expect(screen.getByText('Kenya')).toBeInTheDocument();
+      expect(screen.getByText('Nigeria')).toBeInTheDocument();
+      expect(screen.getByText('South Africa')).toBeInTheDocument();
+
+      // Search for "Kenya"
+      const searchInput = screen.getByPlaceholderText(/Search country/i);
+      fireEvent.change(searchInput, { target: { value: 'Kenya' } });
+
+      // Only Kenya should be visible
+      expect(screen.getByText('Kenya')).toBeInTheDocument();
+      expect(screen.queryByText('Nigeria')).not.toBeInTheDocument();
+      expect(screen.queryByText('South Africa')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('4. Pollution Data Flow', () => {
+    test('should display pollution data when loaded', () => {
+      const storeWithPollution = mockStore({
+        countriesReducer: {
+          countries: [],
+          loading: false,
+          error: null,
+        },
+        pollutionReducer: {
+          pollution: {
+            region: 'Africa',
+            name: 'Kenya',
+            location: { lat: 1.0, lon: 38.0 },
+            aqi: 75,
+            components: {
+              pm2_5: 25.5,
+              pm10: 45.2,
+              o3: 60.1,
+              no2: 15.3,
+              so2: 5.2,
+              co: 300.5,
+            },
+          },
+          loading: false,
+          error: null,
+        },
+      });
+
+      render(
+        <Provider store={storeWithPollution}>
+          <BrowserRouter initialEntries={['/pollution']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Check if pollution data is displayed
+      expect(screen.getByText('Kenya')).toBeInTheDocument();
+      expect(screen.getByText(/AQI: 75/i)).toBeInTheDocument();
+    });
+
+    test('should display loading state for pollution data', () => {
+      const loadingPollutionStore = mockStore({
+        countriesReducer: {
+          countries: [],
+          loading: false,
+          error: null,
+        },
+        pollutionReducer: {
+          pollution: {
+            region: '',
+            name: '',
+            location: { lat: 0, lon: 0 },
+            aqi: 0,
+            components: {},
+          },
+          loading: true,
+          error: null,
+        },
+      });
+
+      render(
+        <Provider store={loadingPollutionStore}>
+          <BrowserRouter initialEntries={['/pollution']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Should show loading indicator
+      const skeletons = screen.getAllByTestId(/skeleton/i);
+      expect(skeletons.length).toBeGreaterThan(0);
+    });
+
+    test('should display error state for pollution data', () => {
+      const errorPollutionStore = mockStore({
+        countriesReducer: {
+          countries: [],
+          loading: false,
+          error: null,
+        },
+        pollutionReducer: {
+          pollution: {
+            region: '',
+            name: '',
+            location: { lat: 0, lon: 0 },
+            aqi: 0,
+            components: {},
+          },
+          loading: false,
+          error: 'Failed to load pollution data',
+        },
+      });
+
+      render(
+        <Provider store={errorPollutionStore}>
+          <BrowserRouter initialEntries={['/pollution']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Should show error message
+      expect(screen.getByText(/Error: Failed to load pollution data/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('5. Favorites Flow', () => {
+    test('should display empty favorites page initially', () => {
+      render(
+        <Provider store={store}>
+          <BrowserRouter initialEntries={['/favorites']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Should show empty state
+      expect(screen.getByText(/No favorite locations yet/i)).toBeInTheDocument();
+      expect(screen.getByText(/Start exploring and save your favorite locations!/i)).toBeInTheDocument();
+    });
+
+    test('should display favorites from localStorage', () => {
+      // Set favorites in localStorage
+      const favorites = [
+        {
+          name: 'Kenya',
+          region: 'Africa',
+          population: 53771300,
+          lat: 1.0,
+          lon: 38.0,
+          flag: 'kenya-flag.png',
+          code: 'KE',
+        },
+      ];
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+
+      render(
+        <Provider store={store}>
+          <BrowserRouter initialEntries={['/favorites']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Should display the favorite
+      expect(screen.getByText('Kenya')).toBeInTheDocument();
+      expect(screen.getByText('Africa')).toBeInTheDocument();
+    });
+  });
+
+  describe('6. Navigation Flow', () => {
+    test('should navigate between pages correctly', () => {
+      render(
+        <Provider store={store}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Start at home page
+      expect(screen.getByAltText('world map')).toBeInTheDocument();
+
+      // Navigate to favorites
+      const favoritesLink = screen.getByLabelText(/favorites/i);
+      fireEvent.click(favoritesLink);
+
+      // Should be on favorites page
+      expect(screen.getByText(/No favorite locations yet/i)).toBeInTheDocument();
+
+      // Navigate back home
+      const homeLink = screen.getByLabelText(/home/i);
+      fireEvent.click(homeLink);
+
+      // Should be back at home
+      expect(screen.getByAltText('world map')).toBeInTheDocument();
+    });
+  });
+
+  describe('7. Error Boundary', () => {
+    test('should catch and display errors', () => {
+      // Suppress console.error for this test
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const ThrowError = () => {
+        throw new Error('Test error');
+      };
+
+      const ErrorApp = () => (
+        <Provider store={store}>
+          <BrowserRouter>
+            <ThrowError />
+          </BrowserRouter>
+        </Provider>
+      );
+
+      render(<ErrorApp />);
+
+      // Error boundary should catch the error
+      // Note: This test needs the ErrorBoundary to be properly set up
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('8. Accessibility', () => {
+    test('should have skip to main content link', () => {
+      render(
+        <Provider store={store}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      const skipLink = screen.getByText('Skip to main content');
+      expect(skipLink).toBeInTheDocument();
+      expect(skipLink).toHaveAttribute('href', '#main-content');
+    });
+
+    test('should have proper ARIA labels', () => {
+      render(
+        <Provider store={store}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Check for proper ARIA labels in navigation
+      const homeButton = screen.getByLabelText(/home/i);
+      expect(homeButton).toBeInTheDocument();
+
+      const favoritesButton = screen.getByLabelText(/favorites/i);
+      expect(favoritesButton).toBeInTheDocument();
+    });
+  });
+
+  describe('9. Toast Notifications', () => {
+    test('should display toast container', () => {
+      render(
+        <Provider store={store}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // Toast container should be rendered
+      expect(screen.getByTestId('toast-container')).toBeInTheDocument();
+    });
+  });
+
+  describe('10. Complete User Journey', () => {
+    test('should complete full user journey: Home -> Region -> Country -> Pollution', async () => {
+      const { rerender } = render(
+        <Provider store={store}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // 1. User is on home page
+      expect(screen.getByAltText('world map')).toBeInTheDocument();
+      expect(screen.getByText('Africa')).toBeInTheDocument();
+
+      // 2. User clicks on a region (simulated by updating store)
+      const storeWithCountries = mockStore({
+        countriesReducer: {
+          countries: [
+            {
+              name: { common: 'Kenya' },
+              region: 'Africa',
+              capital: ['Nairobi'],
+              population: 53771300,
+              latlng: [1.0, 38.0],
+              flags: { png: 'kenya-flag.png' },
+              cca2: 'KE',
+            },
+          ],
+          loading: false,
+          error: null,
+        },
+        pollutionReducer: {
+          pollution: {
+            region: '',
+            name: '',
+            location: { lat: 0, lon: 0 },
+            aqi: 0,
+            components: {},
+          },
+          loading: false,
+          error: null,
+        },
+      });
+
+      rerender(
+        <Provider store={storeWithCountries}>
+          <BrowserRouter initialEntries={['/countries']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // 3. Countries page is displayed
+      expect(screen.getByText('Kenya')).toBeInTheDocument();
+      expect(screen.getByText('Africa')).toBeInTheDocument();
+
+      // 4. User clicks on a country (simulated by updating store)
+      const storeWithPollution = mockStore({
+        countriesReducer: {
+          countries: [
+            {
+              name: { common: 'Kenya' },
+              region: 'Africa',
+              capital: ['Nairobi'],
+              population: 53771300,
+              latlng: [1.0, 38.0],
+              flags: { png: 'kenya-flag.png' },
+              cca2: 'KE',
+            },
+          ],
+          loading: false,
+          error: null,
+        },
+        pollutionReducer: {
+          pollution: {
+            region: 'Africa',
+            name: 'Kenya',
+            location: { lat: 1.0, lon: 38.0 },
+            aqi: 75,
+            components: {
+              pm2_5: 25.5,
+              pm10: 45.2,
+              o3: 60.1,
+              no2: 15.3,
+              so2: 5.2,
+              co: 300.5,
+            },
+          },
+          loading: false,
+          error: null,
+        },
+      });
+
+      rerender(
+        <Provider store={storeWithPollution}>
+          <BrowserRouter initialEntries={['/pollution']}>
+            <App />
+          </BrowserRouter>
+        </Provider>,
+      );
+
+      // 5. Pollution data is displayed
+      expect(screen.getByText('Kenya')).toBeInTheDocument();
+      expect(screen.getByText(/AQI: 75/i)).toBeInTheDocument();
+    });
+  });
+});

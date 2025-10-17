@@ -8,8 +8,17 @@ import pollutionReducer from './Reducers/Pollution';
 const rootReducer = combineReducers({
   countriesReducer,
   pollutionReducer,
-
 });
-const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk, logger)));
+
+// Add debugging to track state changes
+const debugReducer = (state, action) => rootReducer(state, action);
+
+// Only enable redux-logger in development mode
+const middleware = [thunk];
+if (process.env.NODE_ENV === 'development') {
+  middleware.push(logger);
+}
+
+const store = createStore(debugReducer, composeWithDevTools(applyMiddleware(...middleware)));
 
 export default store;

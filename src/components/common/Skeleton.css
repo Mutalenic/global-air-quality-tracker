@@ -1,0 +1,157 @@
+/* Loading Skeleton Styles */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Country card skeleton */
+.country-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.country-skeleton-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.country-skeleton-flag {
+  width: 150px;
+  height: 100px;
+  border-radius: 8px;
+}
+
+.country-skeleton-name {
+  width: 80%;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.country-skeleton-population {
+  width: 60%;
+  height: 18px;
+  border-radius: 4px;
+}
+
+.country-skeleton-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-top: 0.5rem;
+}
+
+/* Region skeleton */
+.region-skeleton {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.region-skeleton-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.region-skeleton-map {
+  width: 200px;
+  height: 150px;
+  border-radius: 8px;
+}
+
+.region-skeleton-name {
+  width: 70%;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.region-skeleton-count {
+  width: 50%;
+  height: 18px;
+  border-radius: 4px;
+}
+
+/* Pollution data skeleton */
+.pollution-skeleton {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.pollution-skeleton-title {
+  width: 60%;
+  height: 32px;
+  border-radius: 4px;
+  margin-bottom: 2rem;
+}
+
+.pollution-skeleton-data {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.pollution-skeleton-item {
+  height: 60px;
+  border-radius: 8px;
+}
+
+/* Text skeleton */
+.skeleton-text {
+  width: 100%;
+  height: 1rem;
+  margin: 0.5rem 0;
+  border-radius: 4px;
+}
+
+.skeleton-text.short {
+  width: 60%;
+}
+
+.skeleton-text.medium {
+  width: 80%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .country-skeleton,
+  .region-skeleton {
+    grid-template-columns: 1fr;
+  }
+
+  .pollution-skeleton-data {
+    grid-template-columns: 1fr;
+  }
+}
