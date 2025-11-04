@@ -1,0 +1,125 @@
+/* CSS Variables for Light and Dark Themes */
+
+:root[data-theme='light'] {
+  /* Primary Colors */
+  --primary-bg: rgb(60, 99, 170);
+  --secondary-bg: #ffffff;
+  --tertiary-bg: #f5f5f5;
+  
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #333333;
+  --text-tertiary: #666666;
+  
+  /* Card Colors */
+  --card-bg: #ffffff;
+  --card-border: #e0e0e0;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  
+  /* Navigation */
+  --nav-bg: rgb(60, 99, 170);
+  --nav-text: #ffffff;
+  --nav-hover: rgba(255, 255, 255, 0.1);
+  
+  /* Buttons */
+  --btn-bg: #3c63aa;
+  --btn-hover: #2d4d85;
+  --btn-text: #ffffff;
+  
+  /* Links */
+  --link-color: rgb(32, 32, 246);
+  --link-hover: rgb(20, 20, 200);
+  
+  /* Favorites */
+  --favorite-color: #e74c3c;
+  --favorite-hover: #c0392b;
+  
+  /* Input Fields */
+  --input-bg: #ffffff;
+  --input-border: #cccccc;
+  --input-text: #333333;
+  --input-focus: #3c63aa;
+  
+  /* Toast Notifications */
+  --toast-bg: #ffffff;
+  --toast-text: #333333;
+  
+  /* Skeleton Loaders */
+  --skeleton-bg: #e0e0e0;
+  --skeleton-highlight: #f0f0f0;
+  
+  /* Air Quality Index Colors (same for both themes) */
+  --aqi-good: #00e400;
+  --aqi-moderate: #ffff00;
+  --aqi-unhealthy-sensitive: #ff7e00;
+  --aqi-unhealthy: #ff0000;
+  --aqi-very-unhealthy: #8f3f97;
+  --aqi-hazardous: #7e0023;
+}
+
+:root[data-theme='dark'] {
+  /* Primary Colors */
+  --primary-bg: #1a1a2e;
+  --secondary-bg: #16213e;
+  --tertiary-bg: #0f3460;
+  
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+  --text-tertiary: #b0b0b0;
+  
+  /* Card Colors */
+  --card-bg: #16213e;
+  --card-border: #0f3460;
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  
+  /* Navigation */
+  --nav-bg: #0f3460;
+  --nav-text: #ffffff;
+  --nav-hover: rgba(255, 255, 255, 0.15);
+  
+  /* Buttons */
+  --btn-bg: #0f3460;
+  --btn-hover: #1a4d7a;
+  --btn-text: #ffffff;
+  
+  /* Links */
+  --link-color: #4da6ff;
+  --link-hover: #66b3ff;
+  
+  /* Favorites */
+  --favorite-color: #ff6b6b;
+  --favorite-hover: #ff5252;
+  
+  /* Input Fields */
+  --input-bg: #0f3460;
+  --input-border: #1a4d7a;
+  --input-text: #ffffff;
+  --input-focus: #4da6ff;
+  
+  /* Toast Notifications */
+  --toast-bg: #16213e;
+  --toast-text: #ffffff;
+  
+  /* Skeleton Loaders */
+  --skeleton-bg: #0f3460;
+  --skeleton-highlight: #1a4d7a;
+  
+  /* Air Quality Index Colors (same for both themes) */
+  --aqi-good: #00e400;
+  --aqi-moderate: #ffff00;
+  --aqi-unhealthy-sensitive: #ff7e00;
+  --aqi-unhealthy: #ff0000;
+  --aqi-very-unhealthy: #8f3f97;
+  --aqi-hazardous: #7e0023;
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Prevent transition on page load */
+.no-transition * {
+  transition: none !important;
+}

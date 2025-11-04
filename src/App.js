@@ -8,8 +8,12 @@ import Countries from './components/Details/Countries';
 import Pollutions from './components/Home/Pollution';
 import Favorites from './components/Favorites/Favorites';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import { useKeyboardNavigation } from './hooks';
 
 function App() {
+  // Enable keyboard navigation detection
+  useKeyboardNavigation();
+
   return (
     <div className="app">
       <a href="#main-content" className="skip-to-main">
@@ -37,7 +41,7 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme={document.documentElement.getAttribute('data-theme') || 'light'}
       />
     </div>
   );

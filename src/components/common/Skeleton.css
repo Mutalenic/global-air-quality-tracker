@@ -1,23 +1,42 @@
-/* Loading Skeleton Styles */
+/* Loading Skeleton Styles with Enhanced Shimmer Effect */
 
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.1) 25%,
-    rgba(255, 255, 255, 0.2) 50%,
-    rgba(255, 255, 255, 0.1) 75%
+    var(--skeleton-bg) 0%,
+    var(--skeleton-highlight) 20%,
+    var(--skeleton-bg) 40%,
+    var(--skeleton-bg) 100%
   );
   background-size: 200% 100%;
-  animation: skeleton-loading 1.5s ease-in-out infinite;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
   border-radius: 4px;
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes skeleton-loading {
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
   0% {
-    background-position: 200% 0;
+    background-position: -200% 0;
   }
   100% {
-    background-position: -200% 0;
+    background-position: 200% 0;
   }
 }
 
@@ -144,14 +163,100 @@
   width: 80%;
 }
 
+/* New Enhanced Skeleton Components */
+.skeleton-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px var(--card-shadow);
+}
+
+.skeleton-image {
+  width: 100%;
+  height: 150px;
+  margin-bottom: 1rem;
+}
+
+.skeleton-title {
+  width: 70%;
+  height: 24px;
+  margin-bottom: 0.75rem;
+}
+
+.skeleton-text {
+  width: 100%;
+  height: 16px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-text-short {
+  width: 50%;
+  height: 16px;
+}
+
+.skeleton-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+/* Pollution Skeleton */
+.skeleton-pollution {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--card-shadow);
+}
+
+.skeleton-header {
+  width: 60%;
+  height: 32px;
+  margin: 0 auto 2rem;
+}
+
+.skeleton-metric-large {
+  width: 80%;
+  height: 60px;
+  margin: 0 auto 2rem;
+  border-radius: 8px;
+}
+
+.skeleton-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.skeleton-metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-metric-label {
+  width: 80%;
+  height: 14px;
+}
+
+.skeleton-metric-value {
+  width: 60%;
+  height: 20px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .country-skeleton,
-  .region-skeleton {
+  .region-skeleton,
+  .skeleton-list {
     grid-template-columns: 1fr;
   }
 
-  .pollution-skeleton-data {
+  .pollution-skeleton-data,
+  .skeleton-metrics-grid {
     grid-template-columns: 1fr;
   }
 }
