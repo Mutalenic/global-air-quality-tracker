@@ -91,3 +91,10 @@
   transform: scale(1.1);
   transition: all 0.3s ease;
 }
+
+.nav-right-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}

@@ -4,6 +4,7 @@ import './Navbar.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faArrowLeft, faHeart } from '@fortawesome/free-solid-svg-icons';
 import { useFavorites } from '../../hooks';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
 
 const Navbar = () => {
   const location = useLocation();
@@ -27,12 +28,15 @@ const Navbar = () => {
             </NavLink>
           </button>
           <h1 className="header">Air Quality</h1>
-          <button type="button" className="btn favorites-btn">
-            <NavLink to="/favorites" className="link text-light favorites-link">
-              <FontAwesomeIcon icon={faHeart} className="icon" />
-              {favoritesCount > 0 && <span className="favorites-badge">{favoritesCount}</span>}
-            </NavLink>
-          </button>
+          <div className="nav-right-controls">
+            <ThemeToggle />
+            <button type="button" className="btn favorites-btn">
+              <NavLink to="/favorites" className="link text-light favorites-link">
+                <FontAwesomeIcon icon={faHeart} className="icon" />
+                {favoritesCount > 0 && <span className="favorites-badge">{favoritesCount}</span>}
+              </NavLink>
+            </button>
+          </div>
         </div>
       </nav>
     </div>

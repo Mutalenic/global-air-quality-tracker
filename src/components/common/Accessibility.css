@@ -3,16 +3,20 @@
 /* Focus indicators for better keyboard navigation */
 button:focus,
 a:focus,
-input:focus {
-  outline: 3px solid #4a90e2;
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 3px solid var(--input-focus, #4a90e2);
   outline-offset: 2px;
 }
 
 /* High contrast focus for better visibility */
 button:focus-visible,
 a:focus-visible,
-input:focus-visible {
-  outline: 3px solid #4a90e2;
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--input-focus, #4a90e2);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.2);
 }
@@ -134,17 +138,133 @@ input[type='search']:focus {
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .loading-container p,
-  .empty-container p {
-    color: #f0f0f0;
+/* Dark mode is now handled by theme.css using data-theme attribute */
+
+/* ARIA live region announcements */
+.aria-live-region {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Improve interactive element states */
+button[aria-pressed='true'],
+button[aria-selected='true'] {
+  background-color: var(--btn-hover);
+  font-weight: bold;
+}
+
+/* Loading state accessibility */
+[aria-busy='true'] {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+/* Error state accessibility */
+[aria-invalid='true'] {
+  border-color: #d32f2f !important;
+  border-width: 2px;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Success state */
+.success-message {
+  color: #388e3c;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Ensure minimum contrast ratios (WCAG AA) */
+.text-contrast-low {
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+}
+
+/* Keyboard navigation indicators */
+.keyboard-user *:focus {
+  outline: 3px solid var(--input-focus) !important;
+  outline-offset: 2px;
+}
+
+/* Improve table accessibility */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th {
+  text-align: left;
+  font-weight: bold;
+  padding: 0.75rem;
+  background-color: var(--tertiary-bg);
+}
+
+td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+/* Tooltip accessibility */
+.tooltip {
+  position: relative;
+}
+
+.tooltip-content {
+  visibility: hidden;
+  position: absolute;
+  z-index: 1000;
+  background-color: var(--card-bg);
+  color: var(--text-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 2px 8px var(--card-shadow);
+  white-space: nowrap;
+}
+
+.tooltip:hover .tooltip-content,
+.tooltip:focus .tooltip-content {
+  visibility: visible;
+}
+
+/* Ensure images have alt text reminder */
+img:not([alt]) {
+  border: 3px solid red;
+}
+
+/* Language support */
+[lang] {
+  font-family: inherit;
+}
+
+/* Print styles for accessibility */
+@media print {
+  .no-print,
+  nav,
+  button,
+  .skip-to-main {
+    display: none !important;
   }
 
-  input[type='text'],
-  input[type='search'] {
-    background-color: #2a2a2a;
-    color: #f0f0f0;
-    border-color: #555;
+  a[href]:after {
+    content: ' (' attr(href) ')';
+  }
+
+  body {
+    background: white;
+    color: black;
   }
 }

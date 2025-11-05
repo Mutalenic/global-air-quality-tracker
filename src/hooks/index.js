@@ -4,3 +4,4 @@ export { default as usePollution } from './usePollution';
 export { default as useSearch } from './useSearch';
 export { default as useLocalStorage } from './useLocalStorage';
 export { default as useFavorites } from './useFavorites';
+export { useKeyboardNavigation, useAriaAnnounce, useFocusTrap } from './useAccessibility';
