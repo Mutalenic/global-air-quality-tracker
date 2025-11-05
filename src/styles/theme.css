@@ -114,12 +114,13 @@
   --aqi-hazardous: #7e0023;
 }
 
-/* Smooth transitions for theme changes */
-* {
+/* Smooth transitions for theme changes - applied to specific elements for performance */
+body,
+.card,
+.btn,
+nav,
+input,
+select,
+textarea {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-/* Prevent transition on page load */
-.no-transition * {
-  transition: none !important;
 }

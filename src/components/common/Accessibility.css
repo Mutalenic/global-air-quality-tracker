@@ -138,20 +138,7 @@ input[type='search']:focus {
   }
 }
 
-/* Dark mode support - now handled by theme.css */
-@media (prefers-color-scheme: dark) {
-  .loading-container p,
-  .empty-container p {
-    color: var(--text-secondary);
-  }
-
-  input[type='text'],
-  input[type='search'] {
-    background-color: var(--input-bg);
-    color: var(--input-text);
-    border-color: var(--input-border);
-  }
-}
+/* Dark mode is now handled by theme.css using data-theme attribute */
 
 /* ARIA live region announcements */
 .aria-live-region {

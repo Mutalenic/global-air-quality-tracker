@@ -23,6 +23,7 @@
   font-size: 1.3rem;
   color: var(--nav-text);
   transition: transform 0.3s ease, color 0.3s ease;
+  animation: fadeIn 0.3s ease;
 }
 
 .theme-toggle-btn:hover .theme-toggle-icon {
@@ -39,8 +40,4 @@
     opacity: 1;
     transform: scale(1);
   }
-}
-
-.theme-toggle-icon {
-  animation: fadeIn 0.3s ease;
 }

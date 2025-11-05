@@ -11,10 +11,6 @@ export const SkeletonCard = () => (
   </div>
 );
 
-SkeletonCard.propTypes = {
-  // No props for this component
-};
-
 export const SkeletonList = ({ count = 6 }) => (
   <div className="skeleton-list">
     {Array.from({ length: count }, (_, index) => (
@@ -45,10 +41,6 @@ export const SkeletonPollution = () => (
     </div>
   </div>
 );
-
-SkeletonPollution.propTypes = {
-  // No props for this component
-};
 
 export const SkeletonText = ({ width = '100%', height = '20px' }) => (
   <div className="skeleton" style={{ width, height }} />

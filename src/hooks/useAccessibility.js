@@ -87,7 +87,7 @@ export const useFocusTrap = (isActive, containerRef) => {
     const lastElement = focusableElements[focusableElements.length - 1];
 
     const handleTabKey = (e) => {
-      if (e.key !== 'Tab') return;
+      if (e.key !== 'Tab' || focusableElements.length === 0) return;
 
       if (e.shiftKey) {
         if (document.activeElement === firstElement) {
