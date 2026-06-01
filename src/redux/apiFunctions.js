@@ -48,7 +48,7 @@ if (!apiKey && process.env.NODE_ENV === 'development') {
 export const getPollutionInfor = async (lat, lon) => {
   if (!apiKey) {
     throw new Error(
-      'OpenWeather API key is not configured. Please add REACT_APP_OPENWEATHER_API_KEY to your .env file',
+      'OpenWeather API key is not configured. Please add REACT_APP_OPENWEATHER_API_KEY to your .env file'
     );
   }
 

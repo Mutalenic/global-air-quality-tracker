@@ -125,11 +125,7 @@ const Favorites = () => {
           tabIndex={0}
           aria-label="Close confirmation dialog"
         >
-          <div
-            className="modal-content"
-            role="dialog"
-            aria-labelledby="confirm-title"
-          >
+          <div className="modal-content" role="dialog" aria-labelledby="confirm-title">
             <h3 id="confirm-title">Confirm Action</h3>
             <p>Are you sure you want to remove all favorites? This action cannot be undone.</p>
             <div className="modal-buttons">

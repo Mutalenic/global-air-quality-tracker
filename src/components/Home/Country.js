@@ -28,10 +28,10 @@ const Country = React.memo((props) => {
       toggleFavorite(location);
       showSuccessToast(
         isFavorite(id) ? `Removed ${name} from favorites` : `Added ${name} to favorites`,
-        { autoClose: 2000 },
+        { autoClose: 2000 }
       );
     },
-    [id, name, lat, lng, population, flag, region, toggleFavorite, isFavorite],
+    [id, name, lat, lng, population, flag, region, toggleFavorite, isFavorite]
   );
 
   // Format population with commas for better readability

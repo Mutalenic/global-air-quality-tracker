@@ -25,7 +25,7 @@ describe('countries list ', () => {
         <Router>
           <Countries />
         </Router>
-      </Provider>,
+      </Provider>
     );
     expect(countries).toMatchSnapshot();
   });

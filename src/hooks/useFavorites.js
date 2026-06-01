@@ -18,7 +18,7 @@ const useFavorites = () => {
         return [...prev, { ...location, favoritedAt: Date.now() }];
       });
     },
-    [setFavorites],
+    [setFavorites]
   );
 
   // Remove a location from favorites
@@ -26,7 +26,7 @@ const useFavorites = () => {
     (locationId) => {
       setFavorites((prev) => prev.filter((fav) => fav.id !== locationId));
     },
-    [setFavorites],
+    [setFavorites]
   );
 
   // Toggle favorite status
@@ -39,7 +39,7 @@ const useFavorites = () => {
         addFavorite(location);
       }
     },
-    [favorites, addFavorite, removeFavorite],
+    [favorites, addFavorite, removeFavorite]
   );
 
   // Check if a location is favorited
@@ -47,7 +47,7 @@ const useFavorites = () => {
     (locationId) => {
       return favorites.some((fav) => fav.id === locationId);
     },
-    [favorites],
+    [favorites]
   );
 
   // Clear all favorites

@@ -79,7 +79,7 @@ const Countries = () => {
   // Memoize filtered and displayed countries
   const { searchedValue, displayedCountries } = useMemo(() => {
     const filtered = countries.filter((country) =>
-      country.name.common.toLowerCase().includes(search.toLowerCase()),
+      country.name.common.toLowerCase().includes(search.toLowerCase())
     );
     const displayed = showMore ? filtered : filtered.slice(0, 6);
     return {
