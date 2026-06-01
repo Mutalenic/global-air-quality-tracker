@@ -45,6 +45,22 @@ export interface FavoriteLocation {
   lng: number;
 }
 
+export interface WeatherData {
+  temperature: number;
+  feelsLike: number;
+  humidity: number;
+  pressure: number;
+  windSpeed: number;
+  windDirection: number;
+  visibility: number;
+  clouds: number;
+  description: string;
+  icon: string;
+  sunrise: number;
+  sunset: number;
+  timestamp: number;
+}
+
 // Store interfaces
 interface CountriesState {
   countries: Country[];
@@ -62,6 +78,16 @@ interface PollutionState {
   error: string | null;
   fetchPollution: (lat: number, lon: number, city: string, flag: string) => Promise<void>;
   clearPollution: () => void;
+}
+
+interface WeatherState {
+  weatherData: WeatherData | null;
+  forecast: any[];
+  loading: boolean;
+  error: string | null;
+  fetchWeather: (lat: number, lon: number) => Promise<void>;
+  fetchForecast: (lat: number, lon: number, days?: number) => Promise<void>;
+  clearWeather: () => void;
 }
 
 interface FavoritesState {
@@ -208,6 +234,47 @@ export const usePollutionStore = create<PollutionState>()(
       clearPollution: () => set({ pollutionData: [], error: null }),
     }),
     { name: 'pollution-store' }
+  )
+);
+
+// Weather Store
+export const useWeatherStore = create<WeatherState>()(
+  devtools(
+    (set, get) => ({
+      weatherData: null,
+      forecast: [],
+      loading: false,
+      error: null,
+
+      fetchWeather: async (lat: number, lon: number) => {
+        set({ loading: true, error: null });
+        
+        try {
+          const weatherService = (await import('../services/weatherService')).default;
+          const data = await weatherService.getCurrentWeather(lat, lon);
+          
+          set({ weatherData: data, loading: false });
+        } catch (error) {
+          set({ error: error instanceof Error ? error.message : 'Unknown error', loading: false });
+        }
+      },
+
+      fetchForecast: async (lat: number, lon: number, days: number = 5) => {
+        set({ loading: true, error: null });
+        
+        try {
+          const weatherService = (await import('../services/weatherService')).default;
+          const data = await weatherService.getWeatherForecast(lat, lon, days);
+          
+          set({ forecast: data, loading: false });
+        } catch (error) {
+          set({ error: error instanceof Error ? error.message : 'Unknown error', loading: false });
+        }
+      },
+
+      clearWeather: () => set({ weatherData: null, forecast: [], error: null }),
+    }),
+    { name: 'weather-store' }
   )
 );
 
