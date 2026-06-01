@@ -35,7 +35,7 @@ const useLocalStorage = (key, initialValue) => {
         // Silent fail
       }
     },
-    [key, storedValue]
+    [key, storedValue],
   );
 
   // Remove value from localStorage

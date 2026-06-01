@@ -48,7 +48,7 @@ CountryList.propTypes = {
       flags: PropTypes.shape({
         png: PropTypes.string.isRequired,
       }).isRequired,
-    })
+    }),
   ).isRequired,
 };
 

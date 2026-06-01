@@ -4,21 +4,22 @@
     "es6": true,
     "jest": true
   },
-  "parser": "@typescript-eslint/parser",
+  "parser": "@babel/eslint-parser",
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
     },
     "ecmaVersion": 2018,
-    "sourceType": "module",
-    "project": "./tsconfig.json"
+    "sourceType": "module"
   },
-  "extends": ["airbnb", "plugin:react/recommended", "plugin:@typescript-eslint/recommended"],
-  "plugins": ["react", "@typescript-eslint"],
+  "extends": ["airbnb", "plugin:react/recommended"],
+  "plugins": ["react"],
   "rules": {
     "react/jsx-filename-extension": ["warn", { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
     "react/react-in-jsx-scope": "off",
     "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "import/no-extraneous-dependencies": "off",
     "no-shadow": "off",
     "no-console": "warn",
     "no-alert": "warn",

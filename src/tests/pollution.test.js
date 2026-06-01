@@ -25,7 +25,7 @@ describe('Pollution list ', () => {
         <Router>
           <Pollutions />
         </Router>
-      </Provider>
+      </Provider>,
     );
     expect(pollution).toMatchSnapshot();
   });

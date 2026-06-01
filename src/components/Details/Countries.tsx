@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useCountriesStore } from '../../store/useAppStore';
 import Africa from '../Maps/Africa.png';
 import Antarctic from '../Maps/Antarctica.png';
 import Asia from '../Maps/Asia.png';
@@ -20,7 +20,7 @@ import './SearchBar.css';
 import '../common/States.css';
 
 // Map for region images
-const regionImageMap = {
+const regionImageMap: Record<string, string> = {
   Africa,
   Asia,
   Europe,
@@ -30,18 +30,8 @@ const regionImageMap = {
   Antarctic,
 };
 
-const Countries = () => {
-  const countriesData = useSelector((state) => {
-    const data = state.countriesReducer;
-    // Ensure new object reference to trigger re-renders
-    return {
-      countries: data?.countries || [],
-      loading: data?.loading || false,
-      error: data?.error || null,
-    };
-  });
-
-  const { countries, loading, error } = countriesData;
+const Countries: React.FC = () => {
+  const { countries, loading, error, selectedRegion } = useCountriesStore();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [showMore, setShowMore] = useState(false);
@@ -79,7 +69,7 @@ const Countries = () => {
   // Memoize filtered and displayed countries
   const { searchedValue, displayedCountries } = useMemo(() => {
     const filtered = countries.filter((country) =>
-      country.name.common.toLowerCase().includes(search.toLowerCase())
+      country.name.common.toLowerCase().includes(search.toLowerCase()),
     );
     const displayed = showMore ? filtered : filtered.slice(0, 6);
     return {
@@ -136,8 +126,8 @@ const Countries = () => {
     );
   }
 
-  // Main render - we should have countries here
-  const currentRegion = countries.length > 0 ? countries[0].region : 'Unknown';
+  // Main render - use selectedRegion from store or fallback to country data
+  const currentRegion = selectedRegion || (countries.length > 0 ? countries[0].region : 'Unknown');
 
   return (
     <div>
