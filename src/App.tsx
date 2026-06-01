@@ -9,7 +9,7 @@ import Pollutions from './components/Home/Pollution';
 import Favorites from './components/Favorites/Favorites';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 
-function App() {
+const App: React.FC = () => {
   return (
     <div className="app">
       <a href="#main-content" className="skip-to-main">

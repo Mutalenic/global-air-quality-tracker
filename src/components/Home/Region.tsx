@@ -4,8 +4,13 @@ import Region from '../Details/Region';
 import World from '../Maps/img/worldmap.jpg';
 import './Region.css';
 
-const Regions = () => {
-  const regionList = [
+interface RegionData {
+  region: string;
+  country: number;
+}
+
+const Regions: React.FC = () => {
+  const regionList: RegionData[] = [
     { region: 'Africa', country: 59 },
     { region: 'Americas', country: 56 },
     { region: 'Europe', country: 53 },

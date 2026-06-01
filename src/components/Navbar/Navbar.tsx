@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faArrowLeft, faHeart } from '@fortawesome/free-solid-svg-icons';
 import { useFavorites } from '../../hooks';
 
-const Navbar = () => {
+const Navbar: React.FC = () => {
   const location = useLocation();
   const { favoritesCount } = useFavorites();
   const isPollutionPage = location.pathname.includes('pollution');
