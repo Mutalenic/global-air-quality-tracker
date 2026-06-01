@@ -1,8 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { PollutionData } from '../../store/useAppStore';
 import './Pollution.css';
 
-const getAqiClass = (aqi) => {
+interface PollutionProps {
+  pollution: PollutionData;
+}
+
+const getAqiClass = (aqi: number): string => {
   if (aqi <= 50) return 'good';
   if (aqi <= 100) return 'moderate';
   if (aqi <= 150) return 'unhealthy-sensitive';
@@ -11,7 +15,7 @@ const getAqiClass = (aqi) => {
   return 'hazardous';
 };
 
-const Pollution = ({ pollution }) => {
+const Pollution: React.FC<PollutionProps> = ({ pollution }) => {
   const { city, flag, aqi, pm25, pm10, o3, no2, so2, co } = pollution;
 
   return (
@@ -52,18 +56,5 @@ const Pollution = ({ pollution }) => {
   );
 };
 
-Pollution.propTypes = {
-  pollution: PropTypes.shape({
-    city: PropTypes.string.isRequired,
-    flag: PropTypes.string.isRequired,
-    aqi: PropTypes.number.isRequired,
-    pm25: PropTypes.number.isRequired,
-    pm10: PropTypes.number.isRequired,
-    o3: PropTypes.number.isRequired,
-    no2: PropTypes.number.isRequired,
-    so2: PropTypes.number.isRequired,
-    co: PropTypes.number.isRequired,
-  }).isRequired,
-};
 
 export default Pollution;

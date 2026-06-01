@@ -1,13 +1,13 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 import Header from '../Navbar/Navbar';
 import Pollution from '../Details/Pollution';
+import { usePollutionStore } from '../../store/useAppStore';
 import './Pollution.css';
 import '../common/States.css';
 
-const Pollutions = () => {
-  const { data: pollutions, loading, error } = useSelector((state) => state.pollutionReducer);
+const Pollutions: React.FC = () => {
+  const { pollutionData: pollutions, loading, error } = usePollutionStore();
 
   if (loading) {
     return (
