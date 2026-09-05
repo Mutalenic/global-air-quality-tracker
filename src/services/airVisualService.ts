@@ -1,4 +1,5 @@
 import { PollutionData } from '../store/useAppStore';
+import { getFromCache, saveToCache } from '../utils/cacheUtils';
 
 interface AirVisualResponse {
   status: string;
@@ -42,7 +43,7 @@ class AirVisualService {
   private baseUrl = 'https://api.airvisual.com/v2';
 
   constructor() {
-    this.apiKey = process.env.REACT_APP_AIRVISUAL_API_KEY || '';
+    this.apiKey = import.meta.env.VITE_AIRVISUAL_API_KEY || '';
   }
 
   async getNearestCityData(lat: number, lon: number): Promise<PollutionData> {
@@ -51,14 +52,14 @@ class AirVisualService {
     }
 
     const cacheKey = `airvisual_${lat}_${lon}`;
-    const cachedData = this.getFromCache(cacheKey);
-    
+    const cachedData = this.getFromCacheLocal(cacheKey);
+
     if (cachedData) {
       return cachedData;
     }
 
     const response = await fetch(
-      `${this.baseUrl}/nearest_city?lat=${lat}&lon=${lon}&key=${this.apiKey}`
+      `${this.baseUrl}/nearest_city?lat=${lat}&lon=${lon}&key=${this.apiKey}`,
     );
 
     if (!response.ok) {
@@ -92,7 +93,7 @@ class AirVisualService {
       lon,
     };
 
-    this.saveToCache(cacheKey, pollutionData);
+    this.saveToCacheLocal(cacheKey, pollutionData);
     return pollutionData;
   }
 
@@ -102,8 +103,8 @@ class AirVisualService {
     }
 
     const cacheKey = `airvisual_city_${city}_${state}_${country}`;
-    const cachedData = this.getFromCache(cacheKey);
-    
+    const cachedData = this.getFromCacheLocal(cacheKey);
+
     if (cachedData) {
       return cachedData;
     }
@@ -140,18 +141,18 @@ class AirVisualService {
       lon: data.data.location.coordinates[0],
     };
 
-    this.saveToCache(cacheKey, pollutionData);
+    this.saveToCacheLocal(cacheKey, pollutionData);
     return pollutionData;
   }
 
-  async getCountries(): Promise<Array<{ name: string; code: string; aqi: number }>> {
+  async getCountries(): Promise<Array<{ name: string; code: string }>> {
     if (!this.apiKey) {
       throw new Error('AirVisual API key is not configured');
     }
 
     const cacheKey = 'airvisual_countries';
-    const cachedData = this.getFromCache(cacheKey);
-    
+    const cachedData = this.getFromCacheLocal(cacheKey);
+
     if (cachedData) {
       return cachedData;
     }
@@ -168,40 +169,23 @@ class AirVisualService {
       throw new Error('API request failed');
     }
 
+    // The AirVisual /countries endpoint returns only { name, code } per country;
+    // it does not include pollution data. AQI must be fetched per-city separately.
     const countries = data.data.countries.map((country: any) => ({
       name: country.name,
       code: country.code,
-      aqi: country.current?.pollution?.aqius || 0,
     }));
 
-    this.saveToCache(cacheKey, countries);
+    this.saveToCacheLocal(cacheKey, countries);
     return countries;
   }
 
-  private getFromCache(key: string): any | null {
-    try {
-      const cached = localStorage.getItem(key);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed.timestamp && Date.now() - parsed.timestamp < 30 * 60 * 1000) {
-          return parsed.data;
-        }
-      }
-    } catch (error) {
-      console.warn('Cache read error:', error);
-    }
-    return null;
+  private getFromCacheLocal(key: string): any | null {
+    return getFromCache(key);
   }
 
-  private saveToCache(key: string, data: any): void {
-    try {
-      localStorage.setItem(key, JSON.stringify({
-        data,
-        timestamp: Date.now()
-      }));
-    } catch (error) {
-      console.warn('Cache write error:', error);
-    }
+  private saveToCacheLocal(key: string, data: any): void {
+    saveToCache(key, data);
   }
 }
 

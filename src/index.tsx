@@ -9,3 +9,5 @@ if (!container) {
 
 const root = createRoot(container);
 root.render(<App />);
+
+// Service worker registration is handled by the useServiceWorker hook.

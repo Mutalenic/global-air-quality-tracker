@@ -53,7 +53,7 @@ const Grid: React.FC<GridProps> = ({
     responsiveClasses.md,
     responsiveClasses.lg,
     responsiveClasses.xl,
-    className
+    className,
   );
 
   return <div className={gridClasses}>{children}</div>;

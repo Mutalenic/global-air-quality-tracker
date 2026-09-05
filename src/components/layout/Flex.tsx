@@ -92,7 +92,7 @@ const Flex: React.FC<FlexProps> = ({
     responsiveClasses.md,
     responsiveClasses.lg,
     responsiveClasses.xl,
-    className
+    className,
   );
 
   return <div className={flexClasses}>{children}</div>;

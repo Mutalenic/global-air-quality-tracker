@@ -11,7 +11,7 @@ const useFavorites = () => {
     removeFavorite,
     clearFavorites,
     isFavorite,
-    favoritesCount,
+    getFavoritesCount,
   } = useFavoritesStore();
 
   const toggleFavorite = (location: any) => {
@@ -31,7 +31,7 @@ const useFavorites = () => {
     isFavorite,
     clearFavorites,
     hasFavorites: favorites.length > 0,
-    favoritesCount,
+    favoritesCount: getFavoritesCount(),
   };
 };
 

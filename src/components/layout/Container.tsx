@@ -33,7 +33,7 @@ const Container: React.FC<ContainerProps> = ({
     'mx-auto w-full',
     sizeClasses[size],
     paddingClasses[padding],
-    className
+    className,
   );
 
   return <div className={containerClasses}>{children}</div>;

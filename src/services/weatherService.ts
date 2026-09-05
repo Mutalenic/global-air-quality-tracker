@@ -1,4 +1,5 @@
-import { WeatherData } from '../store/useAppStore';
+import { WeatherData, ForecastData } from '../store/useAppStore';
+import { getFromCache, saveToCache } from '../utils/cacheUtils';
 
 interface WeatherResponse {
   coord: {
@@ -50,7 +51,7 @@ class WeatherService {
   private baseUrl = 'https://api.openweathermap.org/data/2.5';
 
   constructor() {
-    this.apiKey = process.env.REACT_APP_OPENWEATHER_API_KEY || '';
+    this.apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY || '';
   }
 
   async getCurrentWeather(lat: number, lon: number): Promise<WeatherData> {
@@ -59,14 +60,14 @@ class WeatherService {
     }
 
     const cacheKey = `weather_${lat}_${lon}`;
-    const cachedData = this.getFromCache(cacheKey);
-    
+    const cachedData = this.getFromCacheLocal(cacheKey);
+
     if (cachedData) {
       return cachedData;
     }
 
     const response = await fetch(
-      `${this.baseUrl}/weather?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric`
+      `${this.baseUrl}/weather?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric`,
     );
 
     if (!response.ok) {
@@ -97,24 +98,24 @@ class WeatherService {
       timestamp: data.dt,
     };
 
-    this.saveToCache(cacheKey, weatherData);
+    this.saveToCacheLocal(cacheKey, weatherData);
     return weatherData;
   }
 
-  async getWeatherForecast(lat: number, lon: number, days: number = 5): Promise<any[]> {
+  async getWeatherForecast(lat: number, lon: number, days: number = 5): Promise<ForecastData[]> {
     if (!this.apiKey) {
       throw new Error('OpenWeather API key is not configured');
     }
 
     const cacheKey = `forecast_${lat}_${lon}_${days}`;
-    const cachedData = this.getFromCache(cacheKey);
-    
+    const cachedData = this.getFromCacheLocal(cacheKey);
+
     if (cachedData) {
       return cachedData;
     }
 
     const response = await fetch(
-      `${this.baseUrl}/forecast?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric&cnt=${days * 8}`
+      `${this.baseUrl}/forecast?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric&cnt=${days * 8}`,
     );
 
     if (!response.ok) {
@@ -122,8 +123,8 @@ class WeatherService {
     }
 
     const data = await response.json();
-    
-    const forecast = data.list.map((item: any) => ({
+
+    const forecast: ForecastData[] = data.list.map((item: any) => ({
       timestamp: item.dt,
       temperature: item.main.temp,
       feelsLike: item.main.feels_like,
@@ -136,34 +137,16 @@ class WeatherService {
       icon: item.weather[0].icon,
     }));
 
-    this.saveToCache(cacheKey, forecast);
+    this.saveToCacheLocal(cacheKey, forecast);
     return forecast;
   }
 
-  private getFromCache(key: string): any | null {
-    try {
-      const cached = localStorage.getItem(key);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed.timestamp && Date.now() - parsed.timestamp < 30 * 60 * 1000) {
-          return parsed.data;
-        }
-      }
-    } catch (error) {
-      console.warn('Cache read error:', error);
-    }
-    return null;
+  private getFromCacheLocal(key: string): any | null {
+    return getFromCache(key);
   }
 
-  private saveToCache(key: string, data: any): void {
-    try {
-      localStorage.setItem(key, JSON.stringify({
-        data,
-        timestamp: Date.now()
-      }));
-    } catch (error) {
-      console.warn('Cache write error:', error);
-    }
+  private saveToCacheLocal(key: string, data: any): void {
+    saveToCache(key, data);
   }
 }
 

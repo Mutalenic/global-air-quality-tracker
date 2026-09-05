@@ -10,7 +10,7 @@ interface LoadingSpinnerProps {
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'md',
   color = 'primary',
-  className
+  className,
 }) => {
   const sizeClasses = {
     sm: 'h-4 w-4',
@@ -28,7 +28,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     'animate-spin',
     sizeClasses[size],
     colorClasses[color],
-    className
+    className,
   );
 
   return (

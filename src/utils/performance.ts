@@ -5,9 +5,9 @@
  */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
+  let timeout: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -19,7 +19,7 @@ export function debounce<T extends (...args: any[]) => any>(
  */
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean;
   return (...args: Parameters<T>) => {
@@ -36,17 +36,17 @@ export function throttle<T extends (...args: any[]) => any>(
  */
 export function memoize<T extends (...args: any[]) => any>(
   func: T,
-  keyGenerator?: (...args: Parameters<T>) => string
+  keyGenerator?: (...args: Parameters<T>) => string,
 ): T {
   const cache = new Map<string, ReturnType<T>>();
-  
+
   return ((...args: Parameters<T>) => {
     const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(args);
-    
+
     if (cache.has(key)) {
       return cache.get(key);
     }
-    
+
     const result = func(...args);
     cache.set(key, result);
     return result;
@@ -71,9 +71,9 @@ export function lazyLoadImage(img: HTMLImageElement, src: string): void {
     {
       rootMargin: '50px 0px',
       threshold: 0.01,
-    }
+    },
   );
-  
+
   img.classList.add('lazy');
   observer.observe(img);
 }
@@ -152,11 +152,11 @@ export class VirtualScroller<T> {
     const startIndex = Math.floor(this.scrollTop / this.itemHeight);
     const endIndex = Math.min(
       startIndex + Math.ceil(this.containerHeight / this.itemHeight) + 1,
-      this.items.length - 1
+      this.items.length - 1,
     );
 
     const visibleItems: { item: T; index: number; top: number }[] = [];
-    
+
     for (let i = startIndex; i <= endIndex; i++) {
       visibleItems.push({
         item: this.items[i],

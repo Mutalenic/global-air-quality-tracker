@@ -35,28 +35,17 @@ const Countries: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [showMore, setShowMore] = useState(false);
+  const [selectedSubregion, setSelectedSubregion] = useState<string | null>(null);
 
-  // Redirect to home if accessing /countries directly without data and not loading
+  // Redirect to home if accessing /countries directly without a selected region
   useEffect(() => {
-    let timer;
-
-    if (!loading && countries.length === 0) {
-      timer = setTimeout(() => {
-        if (countries.length === 0 && !loading) {
-          navigate('/', { replace: true });
-        }
-      }, 2000);
+    if (!loading && !selectedRegion && countries.length === 0) {
+      navigate('/', { replace: true });
     }
-
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [loading, countries.length, navigate]);
+  }, [loading, selectedRegion, countries.length, navigate]);
 
   // Memoize the search handler
-  const handleSearchChange = useCallback((e) => {
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
     setShowMore(false); // Reset show more when searching
   }, []);
@@ -68,15 +57,26 @@ const Countries: React.FC = () => {
 
   // Memoize filtered and displayed countries
   const { searchedValue, displayedCountries } = useMemo(() => {
-    const filtered = countries.filter((country) =>
-      country.name.common.toLowerCase().includes(search.toLowerCase()),
-    );
+    let filtered = countries;
+
+    // Filter by subregion if one is selected
+    if (selectedSubregion) {
+      filtered = filtered.filter((c) => (c.subregion || 'Other') === selectedSubregion);
+    }
+
+    // Filter by search text
+    if (search) {
+      filtered = filtered.filter((country) =>
+        country.name.common.toLowerCase().includes(search.toLowerCase()),
+      );
+    }
+
     const displayed = showMore ? filtered : filtered.slice(0, 6);
     return {
       searchedValue: filtered,
       displayedCountries: displayed,
     };
-  }, [countries, search, showMore]);
+  }, [countries, search, showMore, selectedSubregion]);
 
   // Memoize region image - handle case where countries might be empty initially
   const regionImage = useMemo(() => {
@@ -88,7 +88,7 @@ const Countries: React.FC = () => {
   if (loading) {
     return (
       <div>
-        <Navbar id="/" />
+        <Navbar />
         <CountrySkeleton />
       </div>
     );
@@ -98,12 +98,12 @@ const Countries: React.FC = () => {
   if (error) {
     return (
       <div className="m-2">
-        <Navbar id="/" />
+        <Navbar />
         <div className="error-container">
           <p className="error-message">Error: {error}</p>
           <NavLink to="/" className="reloadText">
             <p>Click to go back and try again</p>
-            <FontAwesomeIcon icon={faRefresh} className="icon" text="reload" />
+            <FontAwesomeIcon icon={faRefresh} className="icon" />
           </NavLink>
         </div>
       </div>
@@ -114,7 +114,7 @@ const Countries: React.FC = () => {
   if (countries.length === 0) {
     return (
       <div className="m-2">
-        <Navbar id="/" />
+        <Navbar />
         <div className="empty-container">
           <p>No countries available. Please select a region.</p>
           <NavLink to="/" className="reloadText">
@@ -131,9 +131,15 @@ const Countries: React.FC = () => {
 
   return (
     <div>
-      <Navbar id="/" />
+      <Navbar />
       <div className="countryContainer">
-        <RegionHeader regionName={currentRegion} regionImage={regionImage} />
+        <RegionHeader
+          regionName={currentRegion}
+          regionImage={regionImage}
+          countries={countries}
+          selectedSubregion={selectedSubregion}
+          onSelectSubregion={setSelectedSubregion}
+        />
         <SearchBar value={search} onChange={handleSearchChange} placeholder="Search country" />
         <CountryList countries={displayedCountries} />
         {!showMore && searchedValue.length > 6 && (
