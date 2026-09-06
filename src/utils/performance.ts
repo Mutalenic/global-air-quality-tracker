@@ -7,9 +7,9 @@ export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number,
 ): (...args: Parameters<T>) => void {
-  let timeout: ReturnType<typeof setTimeout>;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
   return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
+    if (timeout !== undefined) clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
 }
@@ -21,7 +21,7 @@ export function throttle<T extends (...args: any[]) => any>(
   func: T,
   wait: number,
 ): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
+  let inThrottle = false;
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args);
@@ -44,7 +44,7 @@ export function memoize<T extends (...args: any[]) => any>(
     const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(args);
 
     if (cache.has(key)) {
-      return cache.get(key);
+      return cache.get(key)!;
     }
 
     const result = func(...args);
@@ -99,7 +99,7 @@ export class PerformanceMonitor {
 
   measure(name: string, startMark: string): void {
     const start = this.marks.get(startMark);
-    if (start) {
+    if (start !== undefined) {
       const duration = performance.now() - start;
       this.measures.set(name, duration);
       console.log(`Performance: ${name} took ${duration.toFixed(2)}ms`);
@@ -125,7 +125,7 @@ export class PerformanceMonitor {
  */
 export function batchDOMUpdates(updates: (() => void)[]): void {
   requestAnimationFrame(() => {
-    updates.forEach(update => update());
+    updates.forEach((update) => update());
   });
 }
 
@@ -180,7 +180,8 @@ export class Cache<T> {
   private cache: Map<string, { value: T; timestamp: number }> = new Map();
   private ttl: number;
 
-  constructor(ttl: number = 5 * 60 * 1000) { // 5 minutes default
+  constructor(ttl: number = 5 * 60 * 1000) {
+    // 5 minutes default
     this.ttl = ttl;
   }
 

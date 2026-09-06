@@ -14,9 +14,12 @@ const Favorites: React.FC = () => {
   const navigate = useNavigate();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  const handleRemove = useCallback((id: string) => {
-    removeFavorite(id);
-  }, [removeFavorite]);
+  const handleRemove = useCallback(
+    (id: string) => {
+      removeFavorite(id);
+    },
+    [removeFavorite],
+  );
 
   const handleClearAll = useCallback(() => {
     setShowConfirmDialog(true);
@@ -32,10 +35,15 @@ const Favorites: React.FC = () => {
   }, []);
 
   const handleViewAirQuality = useCallback(
-    async (e: React.MouseEvent<HTMLAnchorElement>, location: typeof favorites[number]) => {
+    async (e: React.MouseEvent<HTMLAnchorElement>, location: (typeof favorites)[number]) => {
       e.preventDefault();
       try {
         await fetchPollution(location.lat, location.lng, location.name, location.flag);
+
+        if (usePollutionStore.getState().error) {
+          throw new Error(usePollutionStore.getState().error ?? 'Failed to load air quality data');
+        }
+
         navigate('/pollution');
       } catch {
         showErrorToast('Failed to load air quality data');

@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { getFromCache, saveToCache, getCountriesCacheKey, getPollutionCacheKey } from '../utils/cacheUtils';
+import {
+  getFromCache,
+  saveToCache,
+  getCountriesCacheKey,
+  getPollutionCacheKey,
+} from '../utils/cacheUtils';
 
 // Types
 export interface Country {
@@ -322,14 +327,25 @@ export const useFavoritesStore = create<FavoritesState>()(
     (set, get) => {
       // Load favorites from localStorage on initialization
       const storedFavorites = localStorage.getItem('favorites');
-      const initialFavorites = storedFavorites ? JSON.parse(storedFavorites) : [];
+      let initialFavorites: FavoriteLocation[] = [];
+
+      if (storedFavorites) {
+        try {
+          const parsedFavorites: unknown = JSON.parse(storedFavorites);
+          if (Array.isArray(parsedFavorites)) {
+            initialFavorites = parsedFavorites as FavoriteLocation[];
+          }
+        } catch {
+          initialFavorites = [];
+        }
+      }
 
       return {
         favorites: initialFavorites,
 
         addFavorite: (location: FavoriteLocation) => {
           const { favorites } = get();
-          const exists = favorites.some(fav => fav.id === location.id);
+          const exists = favorites.some((fav) => fav.id === location.id);
 
           if (!exists) {
             const newFavorites = [...favorites, location];
@@ -340,7 +356,7 @@ export const useFavoritesStore = create<FavoritesState>()(
 
         removeFavorite: (id: string) => {
           const { favorites } = get();
-          const newFavorites = favorites.filter(fav => fav.id !== id);
+          const newFavorites = favorites.filter((fav) => fav.id !== id);
           set({ favorites: newFavorites });
           localStorage.setItem('favorites', JSON.stringify(newFavorites));
         },
@@ -352,7 +368,7 @@ export const useFavoritesStore = create<FavoritesState>()(
 
         isFavorite: (id: string) => {
           const { favorites } = get();
-          return favorites.some(fav => fav.id === id);
+          return favorites.some((fav) => fav.id === id);
         },
 
         getFavoritesCount: () => {

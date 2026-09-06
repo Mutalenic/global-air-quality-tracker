@@ -4,11 +4,12 @@ export { default as Card } from './Card';
 export { default as LoadingSpinner } from './LoadingSpinner';
 
 // Import components for type exports
+import type { ComponentProps } from 'react';
 import Button from './Button';
 import Card from './Card';
 import LoadingSpinner from './LoadingSpinner';
 
 // Re-export types for TypeScript users
-export type ButtonProps = React.ComponentProps<typeof Button>;
-export type CardProps = React.ComponentProps<typeof Card>;
-export type LoadingSpinnerProps = React.ComponentProps<typeof LoadingSpinner>;
+export type ButtonProps = ComponentProps<typeof Button>;
+export type CardProps = ComponentProps<typeof Card>;
+export type LoadingSpinnerProps = ComponentProps<typeof LoadingSpinner>;

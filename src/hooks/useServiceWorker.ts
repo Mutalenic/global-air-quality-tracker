@@ -36,7 +36,13 @@ export const useServiceWorker = () => {
 
   // Register service worker
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
+    if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+      const handleMessage = (event: MessageEvent) => {
+        if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+          setState((prev) => ({ ...prev, updateAvailable: true }));
+        }
+      };
+
       navigator.serviceWorker
         .register('/service-worker.js')
         .then((registration) => {
@@ -66,12 +72,14 @@ export const useServiceWorker = () => {
         });
 
       // Listen for messages from service worker
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
-          setState((prev) => ({ ...prev, updateAvailable: true }));
-        }
-      });
+      navigator.serviceWorker.addEventListener('message', handleMessage);
+
+      return () => {
+        navigator.serviceWorker.removeEventListener('message', handleMessage);
+      };
     }
+
+    return undefined;
   }, []);
 
   const updateServiceWorker = useCallback(() => {
