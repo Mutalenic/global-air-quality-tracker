@@ -1,32 +1,40 @@
 import { render, cleanup } from '@testing-library/react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import thunk from 'redux-thunk';
-import { composeWithDevTools } from 'redux-devtools-extension';
-import { legacy_createStore as createStore, combineReducers, applyMiddleware } from 'redux';
-import { Provider } from 'react-redux';
-import pollutionReducer from '../redux/Reducers/Pollution';
-import countriesReducer from '../redux/Reducers/Countries';
+import { ThemeProvider } from '../contexts/ThemeContext';
 import Countries from '../components/Details/Countries';
 
-const rootReducer = combineReducers({
-  countriesReducer,
-  pollutionReducer,
-});
-
-// Only use thunk in tests, no logger
-const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk)));
+// Mock the Zustand stores with all stores used by rendered components
+jest.mock('../store/useAppStore', () => ({
+  useCountriesStore: () => ({
+    countries: [],
+    loading: false,
+    error: null,
+    selectedRegion: null,
+    fetchCountries: jest.fn(),
+    clearCountries: jest.fn(),
+    setSelectedRegion: jest.fn(),
+  }),
+  useFavoritesStore: () => ({
+    favorites: [],
+    addFavorite: jest.fn(),
+    removeFavorite: jest.fn(),
+    clearFavorites: jest.fn(),
+    isFavorite: jest.fn(() => false),
+    getFavoritesCount: jest.fn(() => 0),
+  }),
+}));
 
 afterEach(cleanup);
 
-describe('countries list ', () => {
-  test('Countries renders correctly', () => {
-    const countries = render(
-      <Provider store={store}>
+describe('Countries list ', () => {
+  test('Countries renders empty state correctly', () => {
+    const { getByText } = render(
+      <ThemeProvider>
         <Router>
           <Countries />
         </Router>
-      </Provider>,
+      </ThemeProvider>,
     );
-    expect(countries).toMatchSnapshot();
+    expect(getByText(/No countries available/i)).toBeInTheDocument();
   });
 });

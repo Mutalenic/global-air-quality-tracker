@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 font-sans antialiased;
+  }
+
+  * {
+    @apply border-gray-200;
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-air;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-air border border-gray-200 p-6 transition-all duration-200 hover:shadow-air-lg;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+  }
+
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  /* Air Quality specific components */
+  .aqi-indicator {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .aqi-good {
+    @apply bg-air-good text-white;
+  }
+
+  .aqi-moderate {
+    @apply bg-air-moderate text-gray-900;
+  }
+
+  .aqi-unhealthy-sensitive {
+    @apply bg-air-unhealthy-sensitive text-white;
+  }
+
+  .aqi-unhealthy {
+    @apply bg-air-unhealthy text-white;
+  }
+
+  .aqi-very-unhealthy {
+    @apply bg-air-very-unhealthy text-white;
+  }
+
+  .aqi-hazardous {
+    @apply bg-air-hazardous text-white;
+  }
+
+  .region-card {
+    @apply card cursor-pointer transform hover:scale-105 transition-transform duration-200;
+  }
+
+  .country-card {
+    @apply card hover:shadow-air-lg transform hover:-translate-y-1 transition-all duration-200;
+  }
+
+  .pollution-card {
+    @apply card border-l-4;
+  }
+
+  .pollution-card.good {
+    @apply border-l-air-good;
+  }
+
+  .pollution-card.moderate {
+    @apply border-l-air-moderate;
+  }
+
+  .pollution-card.unhealthy-sensitive {
+    @apply border-l-air-unhealthy-sensitive;
+  }
+
+  .pollution-card.unhealthy {
+    @apply border-l-air-unhealthy;
+  }
+
+  .pollution-card.very-unhealthy {
+    @apply border-l-air-very-unhealthy;
+  }
+
+  .pollution-card.hazardous {
+    @apply border-l-air-hazardous;
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+  }
+
+  .safe-top {
+    /* stylelint-disable-next-line csstree/validator */
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    /* stylelint-disable-next-line csstree/validator */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

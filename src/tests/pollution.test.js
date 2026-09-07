@@ -1,32 +1,38 @@
 import { render, cleanup } from '@testing-library/react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import thunk from 'redux-thunk';
-import { composeWithDevTools } from 'redux-devtools-extension';
-import { legacy_createStore as createStore, combineReducers, applyMiddleware } from 'redux';
-import { Provider } from 'react-redux';
-import pollutionReducer from '../redux/Reducers/Pollution';
-import countriesReducer from '../redux/Reducers/Countries';
+import { ThemeProvider } from '../contexts/ThemeContext';
 import Pollutions from '../components/Home/Pollution';
 
-const rootReducer = combineReducers({
-  countriesReducer,
-  pollutionReducer,
-});
-
-// Only use thunk in tests, no logger
-const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk)));
+// Mock the Zustand stores with all stores used by rendered components
+jest.mock('../store/useAppStore', () => ({
+  usePollutionStore: () => ({
+    pollutionData: [],
+    loading: false,
+    error: null,
+    fetchPollution: jest.fn(),
+    clearPollution: jest.fn(),
+  }),
+  useFavoritesStore: () => ({
+    favorites: [],
+    addFavorite: jest.fn(),
+    removeFavorite: jest.fn(),
+    clearFavorites: jest.fn(),
+    isFavorite: jest.fn(() => false),
+    getFavoritesCount: jest.fn(() => 0),
+  }),
+}));
 
 afterEach(cleanup);
 
 describe('Pollution list ', () => {
-  test('Pollution list renders correctly', () => {
-    const pollution = render(
-      <Provider store={store}>
+  test('Pollution list renders empty state correctly', () => {
+    const { getByText } = render(
+      <ThemeProvider>
         <Router>
           <Pollutions />
         </Router>
-      </Provider>,
+      </ThemeProvider>,
     );
-    expect(pollution).toMatchSnapshot();
+    expect(getByText(/No pollution data available/i)).toBeInTheDocument();
   });
 });

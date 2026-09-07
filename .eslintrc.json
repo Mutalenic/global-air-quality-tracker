@@ -4,7 +4,7 @@
     "es6": true,
     "jest": true
   },
-  "parser": "@babel/eslint-parser",
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
@@ -12,16 +12,28 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "extends": ["airbnb", "plugin:react/recommended"],
-  "plugins": ["react"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "plugins": ["react", "@typescript-eslint"],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
   "rules": {
-    "react/jsx-filename-extension": ["warn", { "extensions": [".js", ".jsx"] }],
+    "react/jsx-filename-extension": ["warn", { "extensions": [".tsx"] }],
     "react/react-in-jsx-scope": "off",
     "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "import/no-extraneous-dependencies": "off",
     "no-shadow": "off",
     "no-console": "warn",
     "no-alert": "warn",
-    "react/prop-types": "warn",
+    "react/prop-types": "off",
     "react/jsx-one-expression-per-line": "off",
     "arrow-body-style": "off",
     "react/destructuring-assignment": "warn",
@@ -30,13 +42,30 @@
     "implicit-arrow-linebreak": "off",
     "function-paren-newline": "off",
     "object-curly-newline": "off",
-    "no-use-before-define": ["error", { "functions": false }],
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-use-before-define": ["error", { "functions": false }],
     "max-len": ["warn", { "code": 120, "ignoreStrings": true, "ignoreTemplateLiterals": true }],
     "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 0 }],
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/ban-ts-comment": "warn"
   },
-  "ignorePatterns": [
-    "dist/",
-    "build/"
+  "overrides": [
+    {
+      "files": ["*.js"],
+      "parser": "@babel/eslint-parser",
+      "rules": {
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/no-use-before-define": "off"
+      }
+    },
+    {
+      "files": ["src/tests/fileTransform.js", "src/setupTests.js", "jest.config.js", "tailwind.config.js", "postcss.config.js"],
+      "env": { "node": true },
+      "rules": {
+        "no-undef": "off"
+      }
+    }
   ]
 }

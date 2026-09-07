@@ -1,3 +1,6 @@
+@import './styles/tailwind.css';
+
+/* Legacy styles for gradual migration */
 * {
   margin: 0;
   padding: 0;
