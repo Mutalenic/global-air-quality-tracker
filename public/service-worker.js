@@ -1,4 +1,4 @@
-const CACHE_NAME = 'air-quality-v1';
+const CACHE_NAME = 'air-quality-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -98,7 +98,40 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Strategy for static assets: Cache first, then network
+  // Strategy for navigation requests (HTML): Network first, then cache.
+  // This ensures users always get the latest HTML with up-to-date asset
+  // hashes after a deploy, instead of a stale cached page referencing
+  // old (now-nonexistent) bundle hashes.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const responseClone = response.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseClone);
+          });
+
+          return response;
+        })
+        .catch(() => {
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              console.log('[Service Worker] Serving navigation from cache:', url.pathname);
+              return cachedResponse;
+            }
+
+            return caches.match('/index.html');
+          });
+        })
+    );
+    return;
+  }
+
+  // Strategy for static assets: Cache first, then network.
+  // Hashed assets (e.g. /assets/index-*.js) are immutable, so cache-first
+  // is safe and fast. Unhashed assets fall through here too and get
+  // refreshed in the background.
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -113,30 +146,25 @@ self.addEventListener('fetch', (event) => {
           .catch(() => {
             // Network failed, but we have cached version
           });
-        
+
         return cachedResponse;
       }
-      
+
       // Not in cache, fetch from network
       return fetch(request)
         .then((response) => {
           const responseClone = response.clone();
-          
+
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(request, responseClone);
           });
-          
+
           return response;
         })
         .catch(() => {
           // Network failed and not in cache
           console.log('[Service Worker] Network failed, no cache:', url.pathname);
-          
-          // Return offline page for navigation requests
-          if (request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
-          
+
           return new Response('Offline', { status: 503 });
         });
     })
