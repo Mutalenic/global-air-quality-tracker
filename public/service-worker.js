@@ -1,4 +1,4 @@
-const CACHE_NAME = 'air-quality-v2';
+const CACHE_NAME = 'air-quality-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -8,166 +8,132 @@ const STATIC_ASSETS = [
   '/logo512.png',
 ];
 
-// Install event - cache static assets
+// Install event - cache static assets and take control immediately
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Installing...');
-  
+
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Caching static assets');
-      return cache.addAll(STATIC_ASSETS);
-    }).catch((err) => {
-      console.error('[Service Worker] Cache failed:', err);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .catch((err) => console.error('[Service Worker] Cache failed:', err))
+      .then(() => self.skipWaiting()),
   );
-  
-  self.skipWaiting();
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and claim all clients
 self.addEventListener('activate', (event) => {
   console.log('[Service Worker] Activating...');
-  
+
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    caches.keys()
+      .then((cacheNames) => Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME)
           .map((name) => {
             console.log('[Service Worker] Deleting old cache:', name);
             return caches.delete(name);
-          })
-      );
-    })
+          }),
+      ))
+      .then(() => self.clients.claim()),
   );
-  
-  self.clients.claim();
+});
+
+// Listen for SKIP_WAITING from the app UI to activate a waiting worker immediately
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[Service Worker] Skip waiting message received');
+    self.skipWaiting();
+  }
 });
 
 // Fetch event - serve from cache or network
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-  
+
   // Skip non-GET requests
   if (request.method !== 'GET') {
     return;
   }
-  
-  // Skip chrome-extension requests
-  if (url.protocol === 'chrome-extension:') {
+
+  // Skip chrome-extension requests and unsupported schemes
+  if (url.protocol === 'chrome-extension:' || !url.protocol.startsWith('http')) {
     return;
   }
-  
+
   // Strategy for API calls: Network first, then cache
-  if (url.hostname.includes('openweathermap.org') || 
+  if (url.hostname.includes('openweathermap.org') ||
       url.hostname.includes('restcountries.com')) {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Clone the response before caching
           const responseClone = response.clone();
-          
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
           return response;
         })
-        .catch(() => {
-          // Return cached version if network fails
-          return caches.match(request).then((cachedResponse) => {
-            if (cachedResponse) {
-              console.log('[Service Worker] Serving API from cache:', url.pathname);
-              return cachedResponse;
-            }
-            
-            // Return offline fallback for API
-            return new Response(
-              JSON.stringify({
-                error: 'Offline',
-                message: 'You are currently offline. Some data may be unavailable.',
-              }),
-              {
-                headers: { 'Content-Type': 'application/json' },
-              }
-            );
-          });
-        })
+        .catch(() => caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            console.log('[Service Worker] Serving API from cache:', url.pathname);
+            return cachedResponse;
+          }
+
+          return new Response(
+            JSON.stringify({
+              error: 'Offline',
+              message: 'You are currently offline. Some data may be unavailable.',
+            }),
+            { headers: { 'Content-Type': 'application/json' } },
+          );
+        })),
     );
     return;
   }
-  
+
   // Strategy for navigation requests (HTML): Network first, then cache.
-  // This ensures users always get the latest HTML with up-to-date asset
-  // hashes after a deploy, instead of a stale cached page referencing
-  // old (now-nonexistent) bundle hashes.
+  // This ensures users always get the latest HTML with current asset hashes
+  // after a deploy, instead of stale cached HTML referencing old bundles.
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then((response) => {
           const responseClone = response.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
-
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
           return response;
         })
-        .catch(() => {
-          return caches.match(request).then((cachedResponse) => {
-            if (cachedResponse) {
-              console.log('[Service Worker] Serving navigation from cache:', url.pathname);
-              return cachedResponse;
-            }
-
-            return caches.match('/index.html');
-          });
-        })
+        .catch(() => caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            console.log('[Service Worker] Serving navigation from cache:', url.pathname);
+            return cachedResponse;
+          }
+          return caches.match('/index.html');
+        })),
     );
     return;
   }
 
-  // Strategy for static assets: Cache first, then network.
-  // Hashed assets (e.g. /assets/index-*.js) are immutable, so cache-first
-  // is safe and fast. Unhashed assets fall through here too and get
-  // refreshed in the background.
+  // Strategy for static assets: Stale-while-revalidate.
+  // Return cached version immediately (fast), then update cache in background.
+  // Hashed JS/CSS assets are immutable, so cache-first is safe. Unhashed assets
+  // (e.g. images) get refreshed in the background without blocking the UI.
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Return cached version immediately
-        // Then update cache in background
-        fetch(request)
-          .then((response) => {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, response);
-            });
-          })
-          .catch(() => {
-            // Network failed, but we have cached version
-          });
-
-        return cachedResponse;
-      }
-
-      // Not in cache, fetch from network
-      return fetch(request)
+      const networkFetch = fetch(request)
         .then((response) => {
           const responseClone = response.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
-
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
           return response;
         })
         .catch(() => {
-          // Network failed and not in cache
           console.log('[Service Worker] Network failed, no cache:', url.pathname);
-
-          return new Response('Offline', { status: 503 });
         });
-    })
+
+      return cachedResponse || networkFetch.then((response) => {
+        if (response) {
+          return response;
+        }
+        return new Response('Offline', { status: 503 });
+      });
+    }),
   );
 });
 
@@ -180,8 +146,6 @@ self.addEventListener('sync', (event) => {
 });
 
 async function syncFavorites() {
-  // Get favorites from IndexedDB and sync when back online
-  // This is a placeholder - actual implementation would use IndexedDB
   console.log('[Service Worker] Syncing favorites...');
 }
 
@@ -189,7 +153,7 @@ async function syncFavorites() {
 self.addEventListener('push', (event) => {
   if (event.data) {
     const data = event.data.json();
-    
+
     const options = {
       body: data.body || 'Air quality alert',
       icon: '/logo192.png',
@@ -197,32 +161,24 @@ self.addEventListener('push', (event) => {
       tag: data.tag || 'aqi-alert',
       requireInteraction: true,
       actions: [
-        {
-          action: 'open',
-          title: 'View Details',
-        },
-        {
-          action: 'dismiss',
-          title: 'Dismiss',
-        },
+        { action: 'open', title: 'View Details' },
+        { action: 'dismiss', title: 'Dismiss' },
       ],
     };
-    
+
     event.waitUntil(
       self.registration.showNotification(
         data.title || 'Air Quality Alert',
-        options
-      )
+        options,
+      ),
     );
   }
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  
+
   if (event.action === 'open') {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
+    event.waitUntil(clients.openWindow('/'));
   }
 });
